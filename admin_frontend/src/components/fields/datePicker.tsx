@@ -33,7 +33,7 @@ export const AppDatePicker: FC<AppDatePickerProps> = ({
   const itinContext = useItineraryContext();
   const sectionContext = useSectionContext();
   useEffect(() => {
-    setState({ inputString: fieldValue?.value, value: fieldValue });
+    setState({ inputString: fieldValue?.value??"", value: fieldValue });
   }, [fieldValue]);
 
   const createUpdateValue = async (val: string) => {

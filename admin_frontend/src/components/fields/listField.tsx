@@ -78,6 +78,60 @@ export const ListField: FC<ListProps> = ({
     setLength(Number.parseInt(fieldValue?.value ?? (preview ? "1" : "0")));
   }, [fieldValue, preview]);
 
+  
+  const addEntry = async (entryCount?: number, reset?: boolean) => {
+    const value = entryCount ?? length + 1;
+    let value_properties = state?.value_properties;
+
+    if (reset) {
+      if (!value_properties) {
+        value_properties = { deleted: [] };
+      } else {
+        value_properties.deleted = [];
+      }
+    }
+
+    if (itinContext.selected && sectionContext.selectedSection) {
+      const res = await Value.createValueOrUpdate([
+        {
+          section: sectionContext.selectedSection.id,
+          itinerary: itinContext.selected.id,
+          field: field.field.id,
+          value: value.toString(),
+          list_index: index,
+          id: state?.id,
+          value_properties: value_properties,
+        },
+      ]);
+      if ((res as IValue).id) {
+        setState(res as IValue);
+        setLength(value);
+      } else {
+        setLength(value);
+      }
+    }
+  };
+
+  
+  const wsDataToValues = (fields: ISortedField[], data: any[]) => {
+    const values: IValueCreate[] = [];
+    data.forEach((el, i) => {
+      fields.forEach((f) => {
+        if (itinContext.selected && sectionContext.selectedSection) {
+          values.push({
+            section: sectionContext.selectedSection.id,
+            itinerary: itinContext.selected.id,
+            field: f.field.id,
+            value: getValueFromExcelImport(el, f.field),
+            list_index: index + "." + i.toString(),
+          });
+        }
+      });
+    });
+
+    return values;
+  };
+
   const onDrop = useCallback(async (acceptedFiles) => {
     const data = await acceptedFiles[0].arrayBuffer();
     const workbook = XLSX.read(data);
@@ -92,7 +146,7 @@ export const ListField: FC<ListProps> = ({
     Value.createValueOrUpdate(values).then((res) => {
       valueContext.updateValues();
     });
-  }, []);
+  }, [addEntry,field.children,valueContext,wsDataToValues]);
 
   const fillFields = () => {
     const listElements: JSX.Element[] = [];
@@ -185,24 +239,6 @@ export const ListField: FC<ListProps> = ({
     return ws_data;
   };
 
-  const wsDataToValues = (fields: ISortedField[], data: any[]) => {
-    const values: IValueCreate[] = [];
-    data.forEach((el, i) => {
-      fields.forEach((f) => {
-        if (itinContext.selected && sectionContext.selectedSection) {
-          values.push({
-            section: sectionContext.selectedSection.id,
-            itinerary: itinContext.selected.id,
-            field: f.field.id,
-            value: getValueFromExcelImport(el, f.field),
-            list_index: index + "." + i.toString(),
-          });
-        }
-      });
-    });
-
-    return values;
-  };
 
   const generateUploadTemplate = () => {
     var workBook = XLSX.utils.book_new();
@@ -218,38 +254,6 @@ export const ListField: FC<ListProps> = ({
     XLSX.writeFile(workBook, "out.xlsb");
   };
 
-  const addEntry = async (entryCount?: number, reset?: boolean) => {
-    const value = entryCount ?? length + 1;
-    let value_properties = state?.value_properties;
-
-    if (reset) {
-      if (!value_properties) {
-        value_properties = { deleted: [] };
-      } else {
-        value_properties.deleted = [];
-      }
-    }
-
-    if (itinContext.selected && sectionContext.selectedSection) {
-      const res = await Value.createValueOrUpdate([
-        {
-          section: sectionContext.selectedSection.id,
-          itinerary: itinContext.selected.id,
-          field: field.field.id,
-          value: value.toString(),
-          list_index: index,
-          id: state?.id,
-          value_properties: value_properties,
-        },
-      ]);
-      if ((res as IValue).id) {
-        setState(res as IValue);
-        setLength(value);
-      } else {
-        setLength(value);
-      }
-    }
-  };
 
   return (
     <div>

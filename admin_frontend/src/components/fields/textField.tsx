@@ -44,7 +44,7 @@ export const AppTextField: FC<AppTextFieldProps> = ({
   const sectionContext = useSectionContext();
   const dataSourceContext = useDataSourceContext();
   useEffect(() => {
-    setState({ inputString: fieldValue?.value, value: fieldValue });
+    setState({ inputString: fieldValue?.value?? "", value: fieldValue });
     setOptions(
       dataSourceContext.resolveDataSource(
         field.type_properties?.data_source ?? "",

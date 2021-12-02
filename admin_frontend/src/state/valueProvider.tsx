@@ -29,6 +29,7 @@ export const ValueProvider = (props: { children: React.ReactNode }) => {
     }
   }
   useEffect(() => {
+    
     fetchData();
   }, [sectionContext.selectedSection, itineraryContext.selected]);
 
