@@ -313,10 +313,12 @@ export const ValueProvider = (props: { children: React.ReactNode }) => {
     let value = values;
 
     parentKeys.reverse().forEach((key, i) => {
-      if (Array.isArray(value[key])) {
-        value = value[key][indexes[i]];
-      } else {
-        value = value[key];
+      if (value?.hasOwnProperty(key)) {
+        if (Array.isArray(value[key])) {
+          value = value[key][indexes[i]];
+        } else {
+          value = value[key];
+        }
       }
     });
 
@@ -357,10 +359,12 @@ export const ValueProvider = (props: { children: React.ReactNode }) => {
     let value = values;
     const indexes = index?.split(".").slice(1) ?? [];
     parentKeys.reverse().forEach((key, i) => {
-      if (Array.isArray(value[key])) {
-        value = value[key][indexes[i]];
-      } else {
-        value = value[key];
+      if (value?.hasOwnProperty(key)) {
+        if (Array.isArray(value[key])) {
+          value = value[key][indexes[i]];
+        } else {
+          value = value[key];
+        }
       }
     });
     if (value?.hasOwnProperty(key)) {
@@ -424,10 +428,12 @@ export const getValue = (
   let value = sectionValues;
 
   parentKeys.reverse().forEach((key, i) => {
-    if (Array.isArray(value[key])) {
-      value = value[key][indexes[i]];
-    } else {
-      value = value[key];
+    if (value?.hasOwnProperty(key)) {
+      if (Array.isArray(value[key])) {
+        value = value[key][indexes[i]];
+      } else {
+        value = value[key];
+      }
     }
   });
 
