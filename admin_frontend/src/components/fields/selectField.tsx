@@ -1,18 +1,17 @@
 import MultiSelect from "@antlerengineering/multiselect";
 import { Button, FormControl, makeStyles } from "@material-ui/core";
 import { FC, useContext, useEffect, useState } from "react";
-import { Field, IField, IValue, Value } from "../../api/api";
+import { Field, IField, } from "../../api/api";
 import {
   IDataSourceOptions,
   useDataSourceContext,
 } from "../../state/dataSourceProvider";
-import { useItineraryContext } from "../../state/itineraryProvider";
 import { ModalContext } from "../../state/modals";
 import { useSectionContext } from "../../state/sectionProvider";
+import { useValueContext } from "../../state/valueProvider";
 
 type AppSelectFieldProps = {
   field: IField;
-  fieldValue: IValue | undefined;
   preview: boolean;
   index: string | undefined;
 };
@@ -21,26 +20,24 @@ const useStyles = makeStyles((theme) => ({
 }));
 export const AppSelectField: FC<AppSelectFieldProps> = ({
   field,
-  fieldValue,
   index,
   preview,
 }) => {
   const [state, setState] = useState<string[]>([]);
-  const [value, setvalue] = useState<IValue | undefined>(fieldValue);
   const [options, setOptions] = useState<IDataSourceOptions | null>(null);
   const { dispatch } = useContext(ModalContext);
-  const itinContext = useItineraryContext();
   const sectionContext = useSectionContext();
+  const valueContext = useValueContext();
   const dataSourceContext = useDataSourceContext();
   const classes = useStyles();
   useEffect(() => {
     let state;
-    setvalue(fieldValue);
-    if (fieldValue?.value) {
+    const val = valueContext.getValue(field, index);
+    if (val) {
       try {
-        state = JSON.parse(fieldValue.value);
+        state = JSON.parse(val);
       } catch (error) {
-        state = [];
+        state = val;
       }
       setState(state);
     }
@@ -55,29 +52,11 @@ export const AppSelectField: FC<AppSelectFieldProps> = ({
     }
     fetchData();
   }, [
-    fieldValue,
-    field.type_properties?.data_source,
     index,
-    field.type_properties?.data_source_properties,
+    field,
     dataSourceContext,
+    valueContext
   ]);
-
-  const createUpdateValue = async () => {
-    if (itinContext.selected && sectionContext.selectedSection) {
-      const res = await Value.createValueOrUpdate([{
-        section: sectionContext.selectedSection.id,
-        itinerary: itinContext.selected.id,
-        field: field.id,
-        value: JSON.stringify(state),
-        list_index: index,
-        id: value?.id,
-      }]);
-      if ((res as IValue).id) {
-        setvalue(res as IValue);
-      } else {
-      }
-    }
-  };
 
   return (
     <div className={classes.appSelectFieldField}>
@@ -88,7 +67,13 @@ export const AppSelectField: FC<AppSelectFieldProps> = ({
           options={options?.options ?? []}
           labelPlural={options?.labelPlural}
           label={options?.label}
-          onClose={createUpdateValue}
+          onClose={() => {
+            valueContext.updateValues({
+              field:field,
+              value: JSON.stringify(state),
+              index: index,
+            });
+          }}
         />
       </FormControl>
       {preview && (

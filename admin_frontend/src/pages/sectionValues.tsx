@@ -1,6 +1,5 @@
 import { Button, makeStyles, Typography } from "@material-ui/core";
 import { FC, useContext } from "react";
-import ReactJson from "react-json-view";
 import { IField, Field, Value, User, requestsMoodle } from "../api/api";
 import { FieldWrapper } from "../components/fieldWrapper";
 import { ItinerarySelection } from "../components/itinerarySelection";
@@ -45,7 +44,6 @@ export const SectionValuesPage: FC = () => {
       <FieldWrapper
         key={field.field.id}
         field={field}
-        values={valueContext.values}
       ></FieldWrapper>
     );
   };
@@ -57,17 +55,6 @@ export const SectionValuesPage: FC = () => {
     return jsxPosFields;
   };
 
-  const renderJsonData = () => {
-    if (sectionContext.selectedSection) {
-      return buildJsonForSection(
-        sectionContext.selectedSection,
-        sortFields(fieldContext.fields, false),
-        valueContext.values
-      );
-    }
-    return {};
-  };
-
   const updateValues = async () => {
     dispatch({
       type: "open",
@@ -77,14 +64,13 @@ export const SectionValuesPage: FC = () => {
     let json: LooseObject = {};
     for (let i = 0; i < sectionContext.sections.length; i++) {
       const s = sectionContext.sections[i];
-      const f = sortFields(await Field.getFields(s.id), false);
+      const fields = await Field.getFields(s.id);
 
       const val = await Value.getValues(s.id, itinContext.selected.id);
-      const sectObj = buildJsonForSection(s, f, val);
+      const sectObj = buildJsonForSection(s, fields, val);
       json[Object.keys(sectObj)[0]] = sectObj[Object.keys(sectObj)[0]];
     }
     let userswp = await User.getUsers();
-    console.log(userswp);
 
     const users = userswp.map((u) => {
       const dep = u.meta.department === undefined ? "" : u.meta.department[0];
@@ -105,9 +91,9 @@ export const SectionValuesPage: FC = () => {
     json["updatedAt"] = today;
     json["macrosVersion"] = "0.1.0";
     console.log(json);
+    
 
     requestsMoodle.updateApp(JSON.stringify(json)).then((res) => {
-      console.log(res);
       dispatch({
         type: "close",
       });
@@ -117,6 +103,8 @@ export const SectionValuesPage: FC = () => {
         modalData: { text: res },
       });
     });
+
+     
   };
 
   const copyValuesFromLastItin = () => {
@@ -138,7 +126,7 @@ export const SectionValuesPage: FC = () => {
       <Typography variant="h6" component="h2">
         Json data will look like this:
       </Typography>
-      <ReactJson collapsed={true} name={false} src={renderJsonData()} />
+      {/* <ReactJson collapsed={true} name={false} src={renderJsonData()} /> */}
 
       <Button
         style={{ marginLeft: "10px" }}

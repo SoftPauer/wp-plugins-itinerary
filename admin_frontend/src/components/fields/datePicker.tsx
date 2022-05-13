@@ -1,19 +1,17 @@
 import { Button, makeStyles, TextField } from "@material-ui/core";
 import { FC, useContext, useEffect, useState } from "react";
-import { Field, IField, IValue, Value } from "../../api/api";
-import { useItineraryContext } from "../../state/itineraryProvider";
+import { Field, IField } from "../../api/api";
 import { useSectionContext } from "../../state/sectionProvider";
 import { ModalContext } from "../../state/modals";
+import { useValueContext } from "../../state/valueProvider";
 
 type AppDatePickerProps = {
   field: IField;
-  fieldValue: IValue | undefined;
   index: string | undefined;
   preview: boolean;
   type: "time" | "date" | "datetime-local";
 };
 interface IAppDatePickerState {
-  value?: IValue;
   inputString?: string;
 }
 const useStyles = makeStyles((theme) => ({
@@ -22,36 +20,21 @@ const useStyles = makeStyles((theme) => ({
 
 export const AppDatePicker: FC<AppDatePickerProps> = ({
   field,
-  fieldValue,
-  index,
   preview,
   type,
+  index,
 }) => {
   const [state, setState] = useState<IAppDatePickerState>();
   const { dispatch } = useContext(ModalContext);
   const classes = useStyles();
-  const itinContext = useItineraryContext();
   const sectionContext = useSectionContext();
+  const valueContext = useValueContext();
+  
   useEffect(() => {
-    setState({ inputString: fieldValue?.value??"", value: fieldValue });
-  }, [fieldValue]);
+    setState({ inputString: valueContext.getValue(field,index) });
+  }, [valueContext,field,index]);
 
-  const createUpdateValue = async (val: string) => {
-    if (itinContext.selected && sectionContext.selectedSection) {
-      const res = await Value.createValueOrUpdate([{
-        section: sectionContext.selectedSection.id,
-        itinerary: itinContext.selected.id,
-        field: field.id,
-        value: val,
-        list_index: index,
-        id: state?.value?.id,
-      }]);
-      if ((res as IValue).id) {
-        setState({ ...state, value: res as IValue });
-      } else {
-      }
-    }
-  };
+
   return (
     <div className={classes.appDateField}>
       <TextField
@@ -64,7 +47,13 @@ export const AppDatePicker: FC<AppDatePickerProps> = ({
           setState({ ...state, inputString: val.target.value })
         }
         value={state?.inputString}
-        onBlur={(e) => createUpdateValue(e.target.value)}
+        onBlur={() => {
+          valueContext.updateValues({
+            index: index,
+            field: field,
+            value: state?.inputString ?? "",
+          });
+        }}
       />
       {preview && (
         <div>

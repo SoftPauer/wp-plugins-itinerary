@@ -26,9 +26,7 @@ export const SectionsPage: FC<{}> = () => {
     fieldContext.loadFields(e.target.value as number);
   };
 
-  const renderJsonData = () => {
-    return "comming soon";
-  };
+
 
   const fillFields = (field: ISortedField) => {
 
@@ -39,7 +37,6 @@ export const SectionsPage: FC<{}> = () => {
     return (
       <FieldWrapper
         field={field}
-        values={[]}
         preview={true}
       ></FieldWrapper>
     );
@@ -90,11 +87,6 @@ export const SectionsPage: FC<{}> = () => {
         Section fields will look like this:
       </Typography>
       {sortFields(fieldContext.fields).map((f) => fillFields(f))}
-
-      <Typography variant="h6" component="h2">
-        Json data will look like this:
-      </Typography>
-      {renderJsonData()}
     </div>
   );
 };

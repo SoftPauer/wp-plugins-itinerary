@@ -13,7 +13,6 @@ export interface IModalAction {
 }
 
 export const reducer = (state: IModalState, action: IModalAction) => {
-  console.log(action);
 
   switch (action.type) {
     case "open":

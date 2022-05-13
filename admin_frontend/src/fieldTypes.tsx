@@ -1,5 +1,5 @@
 import { Typography } from "@material-ui/core";
-import { IField, IValue } from "./api/api";
+import { IField } from "./api/api";
 import { AppDatePicker } from "./components/fields/datePicker";
 import { GroupField } from "./components/fields/group";
 import { ListField } from "./components/fields/listField";
@@ -21,19 +21,24 @@ export const FieldTypesList: {
   value: string;
 }[] = Object.entries(FieldTypes).map(([key, value]) => ({ key, value }));
 
+export enum ExcelDisplayTypes {
+  table = "table",
+  linnear = "linnear",
+}
+
+export const ExcelDisplayTypesList: {
+  key: string;
+  value: string;
+}[] = Object.entries(ExcelDisplayTypes).map(([key, value]) => ({ key, value }));
+
 export const renderField = (
   field: ISortedField,
-  // selectedSection: ISection,
-  values: IValue[],
   index: string = "0",
   preview: boolean = false
 ) => {
   if (field.field.field_type === FieldTypes.text) {
     return (
       <AppTextField
-        fieldValue={values.find(
-          (v) => v.field === field.field.id && v.list_index === index
-        )}
         field={field.field}
         index={index}
         preview={preview}
@@ -44,9 +49,6 @@ export const renderField = (
   if (field.field.field_type === FieldTypes.select) {
     return (
       <AppSelectField
-        fieldValue={values.find(
-          (v) => v.field === field.field.id && v.list_index === index
-        )}
         field={field.field}
         index={index}
         preview={preview}
@@ -58,9 +60,6 @@ export const renderField = (
   if (field.field.field_type === FieldTypes.date) {
     return (
       <AppDatePicker
-        fieldValue={values.find(
-          (v) => v.field === field.field.id && v.list_index === index
-        )}
         field={field.field}
         index={index}
         preview={preview}
@@ -72,9 +71,6 @@ export const renderField = (
   if (field.field.field_type === FieldTypes.time) {
     return (
       <AppDatePicker
-        fieldValue={values.find(
-          (v) => v.field === field.field.id && v.list_index === index
-        )}
         field={field.field}
         index={index}
         preview={preview}
@@ -86,8 +82,8 @@ export const renderField = (
   if (field.field.field_type === FieldTypes.group) {
     return (
       <GroupField
-        values={values}
         field={field}
+        index={index}
         preview={preview}
         key={field.field.id}
       ></GroupField>
@@ -96,13 +92,9 @@ export const renderField = (
   if (field.field.field_type === FieldTypes.list) {
     return (
       <ListField
-        values={values}
-        fieldValue={values.find(
-          (v) => v.field === field.field.id && v.list_index === index
-        )}
+      index={index}
         field={field}
         preview={preview}
-        index={index}
         key={field.field.id}
       ></ListField>
     );

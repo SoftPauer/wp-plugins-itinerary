@@ -1,4 +1,6 @@
 import axios, { AxiosResponse } from "axios";
+import { ExcelDisplayTypes } from "../fieldTypes";
+import { LooseObject } from "../utils";
 
 const instance = axios.create({
   baseURL: wpApiSettings.root,
@@ -118,6 +120,7 @@ export interface ITypeProperties {
   keyless?: boolean;
   data_transform?: string;
   data_transform_properties?: string;
+  excelDisplayType?: ExcelDisplayTypes;
 }
 export interface IDataSourceProperties{
   source?: number
@@ -163,23 +166,17 @@ export const Field = {
 export interface IValueProperties {
   deleted?: string[];
 }
-export interface IValue {
+export interface IValues {
   id: number;
   section: number;
   itinerary: number;
-  field: number;
-  value: string;
-  list_index: string;
-  value_properties?: IValueProperties;
+  value: any;
 }
 export interface IValueCreate {
   id?: number;
   section: number;
   itinerary: number;
-  field: number;
-  value: string;
-  list_index?: string;
-  value_properties?: IValueProperties;
+  value: LooseObject;
 }
 export interface IUpdatedRes {
   rowsUpdated: number | boolean;
@@ -188,19 +185,19 @@ export const Value = {
   getValues: async (
     section_id: number,
     itinerary_id: number
-  ): Promise<IValue[]> => {
-    const val = await requestsItinerary.get<IValue[]>(
+  ): Promise<IValues|null> => {
+    const val = await requestsItinerary.get<IValues|null>(
       "values/" + itinerary_id + "/" + section_id
     );
-    val.forEach((r) => {
-      if (r.value_properties)
-        r.value_properties = JSON.parse(r.value_properties as string);
-    });
+    
     return val;
   },
   // getAPost: (id: number): Promise<PostType> => requests.get(`posts/${id}`),
-  createValueOrUpdate: (field: IValueCreate[]): Promise<IUpdatedRes | IValue> =>
-    requestsItinerary.post("values/createOrUpdate", field),
+  createValueOrUpdate: (value: IValueCreate): Promise<IUpdatedRes | IValues> =>{
+    
+   return  requestsItinerary.post("values/createOrUpdate", value);
+
+  },
   // updatePost: (post: PostType, id: number): Promise<PostType> =>
   // 	requests.put(`posts/${id}`, post),
   listDelete: (id: number, index: number): Promise<number> =>

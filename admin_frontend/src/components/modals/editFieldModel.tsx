@@ -15,8 +15,16 @@ import {
   DataTransformTypes,
   DataTransformTypesList,
 } from "../../dataTransforms";
-import { FieldTypes, FieldTypesList } from "../../fieldTypes";
-import { DataSourceTypes, DataSourceTypesList } from "../../state/dataSourceProvider";
+import {
+  ExcelDisplayTypes,
+  ExcelDisplayTypesList,
+  FieldTypes,
+  FieldTypesList,
+} from "../../fieldTypes";
+import {
+  DataSourceTypes,
+  DataSourceTypesList,
+} from "../../state/dataSourceProvider";
 import { useFieldContext } from "../../state/fieldProvider";
 
 const style: any = {
@@ -52,7 +60,7 @@ export const EditFieldModal: FC<EditFieldModalProps> = ({
   field,
 }) => {
   const fieldContext = useFieldContext();
-  
+
   const [state, setState] = useState<EditFieldState>({
     name: field?.field_name ?? "",
     type: field?.field_type ?? "",
@@ -61,7 +69,6 @@ export const EditFieldModal: FC<EditFieldModalProps> = ({
     properties: field?.type_properties,
   });
   useEffect(() => {
-   
     setState({
       name: field?.field_name ?? "",
       type: field?.field_type ?? "",
@@ -82,8 +89,6 @@ export const EditFieldModal: FC<EditFieldModalProps> = ({
       (g) => g.field_type === FieldTypes.select && g.id !== field?.id
     ) ?? [];
 
-    console.log(fieldContext.fields);
-    
   /**
    *  Get Fields required specified data source
    * @param sourceType
@@ -184,6 +189,33 @@ export const EditFieldModal: FC<EditFieldModalProps> = ({
                 })}
               </Select>
             </FormControl>
+            {state.type === FieldTypes.list && (
+              <FormControl>
+                <InputLabel>Excel diplay type</InputLabel>
+                <Select
+                  style={{ width: "200px" }}
+                  labelWidth={100}
+                  value={state.properties?.excelDisplayType??""}
+                  onChange={(val) =>
+                    setState({
+                      ...state,
+                      properties: {
+                        ...state.properties,
+                        excelDisplayType: val.target.value as ExcelDisplayTypes,
+                      },
+                    })
+                  }
+                >
+                  {ExcelDisplayTypesList.map((i, n) => {
+                    return (
+                      <MenuItem key={n} value={i.value}>
+                        {i.value}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+            )}
           </div>
           <div style={{ display: "flex", margin: "10px 0 10px 0" }}>
             <FormControl>

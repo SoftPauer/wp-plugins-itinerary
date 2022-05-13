@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 0.3.2
+Version: 1.0.0
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
 add_action('admin_menu', 'itinerary_plugin_setup_menu');
@@ -68,17 +68,17 @@ add_action('admin_enqueue_scripts', function ($hook) {
 
 register_activation_hook(__FILE__, 'itinerary_install');
 
-global  $wpdb, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_values;
+global  $wpdb, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values;
 
 $table_name_itinerary = $wpdb->prefix . 'itineraries';
 $table_name_sections = $wpdb->prefix . 'itinerary_sections';
 $table_name_fields = $wpdb->prefix . 'itinerary_fields';
-$table_name_values = $wpdb->prefix . 'itinerary_field_values';
+$table_name_section_values = $wpdb->prefix . 'itinerary_values';
 
 function itinerary_install()
 {
-  global $wpdb, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_values;
-  $itinerary_db_version = '0.1';
+  global $wpdb, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values;
+  $itinerary_db_version = '1.0';
   add_option('moodle_base_url', 'replace me');
   add_option('moodle_ws_token', 'replace me');
   $charset_collate = $wpdb->get_charset_collate();
@@ -115,27 +115,19 @@ function itinerary_install()
           field_name tinytext NOT NULL,
           parent mediumint(9),
           type_properties text,
-          PRIMARY KEY  (id),
-          FOREIGN KEY  (section) REFERENCES $table_name_sections(id)
+          PRIMARY KEY  (id)
       ) $charset_collate;";
 
   require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
   dbDelta($sql);
 
-
-  $sql = "CREATE TABLE $table_name_values (
-          id mediumint(9) NOT NULL AUTO_INCREMENT,
-          section mediumint(9)  NOT NULL,
-          itinerary mediumint(9) NOT NULL,
-          field mediumint(9) NOT NULL,
-          list_index varchar(256) NOT NULL,
-          value_properties text,
-          value text,
-          PRIMARY KEY  (id),
-          FOREIGN KEY  (field) REFERENCES $table_name_fields(id),
-          FOREIGN KEY  (itinerary) REFERENCES $table_name_itinerary(id),
-          FOREIGN KEY  (section) REFERENCES $table_name_sections(id)
-      ) $charset_collate;";
+  $sql = "CREATE TABLE $table_name_section_values (
+    id mediumint(9) NOT NULL AUTO_INCREMENT,
+    section mediumint(9)  NOT NULL,
+    itinerary mediumint(9) NOT NULL,
+    value text,
+    PRIMARY KEY  (id)
+  ) $charset_collate;";
 
   require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
   dbDelta($sql);
@@ -231,7 +223,7 @@ add_action('rest_api_init', function () {
   //field values
   register_rest_route('itinerary/v1', 'values/(?P<itinerary_id>\d+)/(?P<section_id>\d+)', array(
     'methods' => WP_REST_Server::READABLE,
-    'callback' => 'get_all_field_values',
+    'callback' => 'get_all_section_values',
     'args' => array(
       'section_id' => array(
         'validate_callback' => function ($param, $request, $key) {
@@ -248,24 +240,7 @@ add_action('rest_api_init', function () {
 
   register_rest_route('itinerary/v1', 'values/createOrUpdate', array(
     'methods' => WP_REST_Server::EDITABLE,
-    'callback' => 'create_new_field_value',
-  ));
-
-  register_rest_route('itinerary/v1', 'values/flagDeleted/(?P<value_id>\d+)/(?P<index>\d+)', array(
-    'methods' => WP_REST_Server::EDITABLE,
-    'callback' => 'mark_deleted',
-    'args' => array(
-      'value_id' => array(
-        'validate_callback' => function ($param, $request, $key) {
-          return is_numeric($param);
-        },
-        'index' => array(
-          'validate_callback' => function ($param, $request, $key) {
-            return is_numeric($param);
-          }
-        )
-      ),
-    )
+    'callback' => 'create_new_section_value',
   ));
 
   register_rest_route('itinerary/v1', 'values/delete/(?P<value_id>\d+)', array(
@@ -334,9 +309,9 @@ function create_new_itinerary(WP_REST_Request $request)
  */
 function delete_itinerary($data)
 {
-  global $wpdb, $table_name_itinerary, $table_name_values;
+  global $wpdb, $table_name_itinerary, $table_name_section_values;
   $wpdb->delete(
-    $table_name_values,
+    $table_name_section_values,
     ['itinerary' => $data['itinerary_id']],
     ['%d'],
   );
@@ -396,14 +371,14 @@ function create_new_section(WP_REST_Request $request)
  */
 function delete_section($data)
 {
-  global $wpdb, $table_name_sections, $table_name_values, $table_name_fields;
+  global $wpdb, $table_name_sections,$table_name_section_values, $table_name_fields;
   $wpdb->delete(
     $table_name_fields,
     ['section' => $data['section_id']],
     ['%d'],
   );
   $wpdb->delete(
-    $table_name_values,
+    $table_name_section_values,
     ['section' => $data['section_id']],
     ['%d'],
   );
@@ -470,12 +445,7 @@ function create_new_field(WP_REST_Request $request)
  */
 function itin_delete_field($data)
 {
-  global $wpdb, $table_name_sections, $table_name_values, $table_name_fields;
-  $wpdb->delete(
-    $table_name_values,
-    ['field' => $data['field_id']],
-    ['%d'],
-  );
+  global $wpdb, $table_name_fields;
   return $wpdb->delete(
     $table_name_fields,
     ['id' => $data['field_id']],
@@ -487,73 +457,53 @@ function itin_delete_field($data)
 /**
  * Return all field values for the section
  */
-function get_all_field_values($data)
+function get_all_section_values($data)
 {
-  global $wpdb, $table_name_values;
-  $results = $wpdb->get_results(
-    "SELECT * FROM {$table_name_values} 
-     WHERE section = {$data['section_id']} 
-     AND itinerary = {$data['itinerary_id']} ",
-    OBJECT
-  );
-  return rest_ensure_response($results);
+  $results = get_section_value($data['section_id'], $data['itinerary_id']);
+  if (empty($results)) {
+    return rest_ensure_response(null);
+  }
+  return rest_ensure_response($results[0]);
 }
 
 /**
  * Create field value
  */
-function create_new_field_value(WP_REST_Request $request)
+function create_new_section_value(WP_REST_Request $request)
 {
-  $body = json_decode($request->get_body(), true);
+  $body = json_decode($request->get_body());
+  error_log(print_r($body, true)); // debug
 
-  error_log(json_encode($body));
-  error_log($body[0]);
-  if (!is_array($body)) {
-    return new WP_Error('400', esc_html__('Body is expected to be array', 'text_domain'), array('status' => 400));
+  if (!key_exists("section", $body)) {
+    return new WP_Error('400', esc_html__('Missing body parameter section', 'text_domain'), array('status' => 400));
   }
-  for ($i = 0; $i < count($body); $i++) {
-    if (!array_key_exists("section", $body[$i])) {
-      return new WP_Error('400', esc_html__('Missing body parameter section, element position =' . $i, 'text_domain'), array('status' => 400));
-    }
-    if (!array_key_exists("itinerary", $body[$i])) {
-      return new WP_Error('400', esc_html__('Missing body parameter itinerary, element position =' . $i, 'text_domain'), array('status' => 400));
-    }
-    if (!array_key_exists("field", $body[$i])) {
-      return new WP_Error('400', esc_html__('Missing body parameter field, element position =' . $i, 'text_domain'), array('status' => 400));
-    }
-    
-    if (!array_key_exists("list_index", $body[$i])) {
-      $body[$i]["list_index"] = "0";
-    }
+  if (!key_exists("itinerary", $body)) {
+    return new WP_Error('400', esc_html__('Missing body parameter itinerary', 'text_domain'), array('status' => 400));
   }
-  $results = [];
-  for ($i = 0; $i <= count($body); $i++) {
-    if(array_key_exists("value", $body[$i])){
-      $res = create_update_value($body[$i]);
-      array_push($results, $res);
-    }
+
+  if (key_exists("value", $body)) {
+    $res = create_update_value($body);
   }
-  return $results;
+
+  return $res;
 }
 
 function create_update_value($value)
 {
-  global $wpdb, $table_name_values;
-  error_log(json_encode($value));
-  if ($value["id"]) {
-    $sql = "UPDATE {$table_name_values} SET value = %s, value_properties = %s WHERE id = {$value["id"]}";
-    $sql = $wpdb->prepare($sql, $value["value"], json_encode($value["value_properties"]));
-    error_log($sql); // debug
+  global $wpdb, $table_name_section_values;
+  $results = get_section_value($value->section, $value->itinerary);
+  $val = json_encode($value->value);
+  if ($results && count($results) > 0) {
+    $sql = "UPDATE {$table_name_section_values} SET value = %s  WHERE id = '{$results[0]->id}'";
+    $sql = $wpdb->prepare($sql,  $val);
     $data = ['updated' => $wpdb->query($sql)];
     return json_encode($data);
   } else {
     $sql = "INSERT INTO 
-    {$table_name_values} (section,itinerary,field,list_index,value_properties,value) 
-     VALUES ($value[section], $value[itinerary], $value[field], '$value[list_index]',%s, %s)";
-    $sql = $wpdb->prepare($sql, json_encode($value['value_properties']), $value['value']);
-    error_log($sql); // debug
+    {$table_name_section_values} (section,itinerary,value) 
+     VALUES ($value->section, $value->itinerary, '$val')";
     $wpdb->query($sql);
-    return  $wpdb->get_row("SELECT * FROM $table_name_values WHERE id = $wpdb->insert_id");
+    return  $wpdb->get_row("SELECT * FROM $table_name_section_values WHERE id = $wpdb->insert_id");
   }
 }
 
@@ -563,63 +513,21 @@ function create_update_value($value)
  */
 function delete_value($data)
 {
-  global $wpdb, $table_name_values, $table_name_fields;
-  $value = $wpdb->get_row("SELECT * FROM $table_name_values WHERE id = $data[value_id]");
-  $field = $wpdb->get_row("SELECT * FROM  $table_name_fields WHERE id =  $value->field");
+  global $wpdb, $table_name_section_values;
 
-  // if ($field->parent) {
-  //   $parent = $wpdb->get_row("SELECT * FROM  $table_name_fields WHERE id = $field->parent");
-  //   if ($parent->field_type == "list") {
-  //     $parentValue = $wpdb->get_row("SELECT * FROM $table_name_values WHERE field = $parent->id AND itinerary =  $value->itinerary");
-  //   }
-  // } else {
-  if ($field->field_type == "list") {
-    // delete all elements in the list and value of the list
-    $ids = getAllValueIdsFromList($field->id, $value->section, $value->itinerary);
-    array_push($ids, $data['value_id']);
-    $sql = $wpdb->prepare(
-      "DELETE FROM $table_name_values
-           WHERE id IN (" . implode(',', $ids) . ")"
-    );
-    return $wpdb->query(
-      $wpdb->prepare(
-        "DELETE FROM $table_name_values
-             WHERE id IN (" . implode(',', $ids) . ")"
-      )
-    );
-  } else {
-    return  $wpdb->delete(
-      $table_name_values,
-      ['id' => $data['value_id']],
-      ['%d'],
-    );
-  }
-  // }
-}
-
-function mark_deleted($data)
-{
-  global $wpdb, $table_name_values;
-
-  $val = $wpdb->get_row("SELECT * FROM $table_name_values WHERE  id = {$data['value_id']}");
-  $props = json_decode($val->value_properties);
-  if (property_exists($props, "deleted")) {
-    array_push($props->deleted, $data['index']);
-  } else {
-    $props->deleted = [$data['index']];
-  }
-  $jsonProps = json_encode($props);
-  $sql = "UPDATE {$table_name_values} SET value_properties = '{$jsonProps}' WHERE id = {$data["value_id"]}";
-  $sql = $wpdb->prepare($sql);
-  error_log($sql); // debug
+  $sql = $wpdb->prepare(
+    "DELETE FROM $table_name_section_values
+           WHERE id = $data[value_id]",
+  );
   return $wpdb->query($sql);
 }
 
 function copy_values_from_last_itin(WP_REST_Request $request)
 {
-  global $wpdb, $table_name_itinerary, $table_name_values, $table_name_fields;
+  global $wpdb, $table_name_itinerary, $table_name_section_values;
   $currentItin = $request['itin_id'];
 
+  // Get last itinerary
   $sql = "SELECT * FROM {$table_name_itinerary} where id = (select max(id) from wp_itineraries where id < {$currentItin});";
   $itin = $wpdb->get_row($sql);
   $prevItin = $itin->id;
@@ -627,57 +535,28 @@ function copy_values_from_last_itin(WP_REST_Request $request)
     return new WP_Error('400', esc_html__('No previous itinerary found ', 'text_domain'), array('status' => 400));
   }
 
+  // check if body is valid
   $body = json_decode($request->get_body());
 
   if (!property_exists($body, "section")) {
 
     return new WP_Error('400', esc_html__('Missing body parameter section', 'text_domain'), array('status' => 400));
   }
+  // Delete all values for the section
+  $wpdb->query("DELETE from {$table_name_section_values} where itinerary = {$currentItin} and section = {$body->section}");
 
-  $wpdb->query("DELETE from {$table_name_values} where itinerary = {$currentItin} and section = {$body->section}");
-
-  $sql = $wpdb->prepare("SELECT * FROM {$table_name_values} 
-  WHERE  itinerary = {$prevItin} AND section = {$body->section}");
+  // get previous values
   $prevRes = $wpdb->get_results(
-    "SELECT * FROM {$table_name_values} 
+    "SELECT * FROM {$table_name_section_values} 
      WHERE  itinerary = {$prevItin} AND section = {$body->section}",
     OBJECT
   );
 
   $sql = "INSERT INTO 
-    {$table_name_values} (section,itinerary,field,list_index,value_properties,value) 
-     VALUES ";
-  for ($x = 0; $x < count($prevRes); $x++) {
-    if ($x > 0) {
-      $sql .= ",";
-    }
-    $sql .= "({$body->section}, $currentItin, {$prevRes[$x]->field}, '{$prevRes[$x]->list_index}','{$prevRes[$x]->value_properties}', '{$prevRes[$x]->value}')";
-  }
+    {$table_name_section_values} (section,itinerary,value) 
+     VALUES ({$body->section}, $currentItin,'{$prevRes[0]->value}')";
   $sql = $wpdb->prepare($sql);
-  $wpdb->query($sql);
   return $wpdb->query($sql);
-}
-
-function getAllValueIdsFromList($f_id, $v_sect, $v_itin)
-{
-  global $wpdb, $table_name_values, $table_name_fields;
-  $ids = [];
-  $sql = "SELECT f.field_type,v.id,v.field FROM $table_name_values AS v 
-        JOIN $table_name_fields AS f ON f.id = v.field 
-        WHERE v.section = $v_sect AND v.itinerary = $v_itin AND f.parent = $f_id";
-
-  error_log(json_encode($sql)); // debug
-  $res = $wpdb->get_results($sql);
-  foreach ($res as $key => $value) {
-    if ($value->field_type == "list") {
-      $ida = getAllValueIdsFromList($value->field, $v_sect, $v_itin);
-      foreach ($ida as $key => $i) {
-        array_push($ids, $i);
-      }
-    }
-    array_push($ids, $value->id);
-  }
-  return $ids;
 }
 
 
@@ -696,4 +575,15 @@ function acf_to_rest_api($response, $user, $request)
 }
 add_filter('rest_prepare_user', 'acf_to_rest_api', 10, 3);
 
-// helpers
+
+function get_section_value($section_id, $itinerary_id)
+{
+  global $wpdb, $table_name_section_values;
+  $results = $wpdb->get_results(
+    "SELECT * FROM {$table_name_section_values} 
+     WHERE section = {$section_id} 
+     AND itinerary = {$itinerary_id} ",
+    OBJECT
+  );
+  return $results;
+}

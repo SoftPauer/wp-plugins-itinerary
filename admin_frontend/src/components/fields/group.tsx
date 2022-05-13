@@ -1,6 +1,6 @@
 import { Button, makeStyles, Typography } from "@material-ui/core";
 import { FC, useContext } from "react";
-import { Field, IValue } from "../../api/api";
+import { Field } from "../../api/api";
 import { ISortedField } from "../../pages/sectionValues";
 import { ModalContext } from "../../state/modals";
 import { useSectionContext } from "../../state/sectionProvider";
@@ -8,8 +8,8 @@ import { FieldWrapper } from "../fieldWrapper";
 
 type GroupProps = {
   field: ISortedField;
-  values: IValue[];
   preview: boolean;
+  index: string | undefined;
 };
 const useStyles = makeStyles((theme) => ({
   groupInd: {
@@ -36,16 +36,15 @@ const useStyles = makeStyles((theme) => ({
 
 export const GroupField: FC<GroupProps> = ({
   field,
-  values,
   preview,
+  index
 }) => {
   const classes = useStyles();
-  const fillFields = (field: ISortedField) => {
+  const fillFields = (field: ISortedField,i:number) => {
     return (
       <FieldWrapper
         field={field}
-        values={values}
-        index={"0"}
+        index={index+"."+i.toString()}
         preview={preview}
       ></FieldWrapper>
     );
@@ -86,7 +85,7 @@ export const GroupField: FC<GroupProps> = ({
           </div>
         )}
       </div>
-      {field.children.map((c) => fillFields(c))}
+      {field.children.map((c,i) => fillFields(c,i))}
     </div>
   );
 };

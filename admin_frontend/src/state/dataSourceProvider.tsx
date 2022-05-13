@@ -1,9 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import {
-  IDataSourceProperties,
-  IUser,
-  User,
-} from "../api/api";
+import { IDataSourceProperties, IUser, User } from "../api/api";
+import { useFieldContext } from "./fieldProvider";
 import { useValueContext } from "./valueProvider";
 
 export enum DataSourceTypes {
@@ -44,12 +41,11 @@ const DataSourceContext = createContext<IDataSourceContext>({
 export const DataSourceProvider = (props: { children: React.ReactNode }) => {
   const [users, setUsers] = useState<IUser[]>([]);
   const valuesContext = useValueContext();
+  const fieldContext = useFieldContext();
+
   useEffect(() => {
     async function fetchData() {
       setUsers(await User.getUsers());
-
-      console.log("users fetched");
-      
     }
     fetchData();
   }, []);
@@ -61,46 +57,42 @@ export const DataSourceProvider = (props: { children: React.ReactNode }) => {
   ): IDataSourceOptions => {
     switch (sourceType) {
       case DataSourceTypes.users:
-          
         return {
           options: users.map((u) => u.name),
           label: "Users",
           labelPlural: "Users",
         };
       case DataSourceTypes.parent:
-        let found = false;
-        let options;
-        let i = index;
-        while (!found) {
-          i = i?.substr(0, i?.lastIndexOf("."));
-          const value = valuesContext.values
-            ?.filter((v) => v.field === sourceProps?.source)
-            .find((v) => {
-              return v.list_index === i;
-            });
-          if(value){
-              found = true;
-              options = value;
-          }
-          if(i?.length??0 < 2){
-            found = true;
-          }
+        if (!sourceProps?.source) {
+          return {
+            options: [],
+            label: "Missing source",
+            labelPlural: "No options found",
+          };
         }
-        if(options){
-            const aOptions = JSON.parse(options?.value);
-             return {
-               options: aOptions,
-               label: "Users",
-               labelPlural: "Users",
-             };
-        }
-        else{
+        const field = fieldContext.getFieldById(sourceProps?.source);
+        if (field) {
+          const val = valuesContext.getValue(field, index);
+
+          if (val) {
             return {
-                options: [],
-                label: "No options found",
-                labelPlural: "No options found",
-              };
+              options: val,
+              label: "Users",
+              labelPlural: "Users",
+            };
+          } else {
+            return {
+              options: [],
+              label: "No options found",
+              labelPlural: "No options found",
+            };
+          }
         }
+        return {
+          options: [],
+          label: "No options found",
+          labelPlural: "No options found",
+        };
       default:
         return { options: [], label: "Missing", labelPlural: "Missing" };
     }

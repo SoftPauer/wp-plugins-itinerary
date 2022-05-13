@@ -1,22 +1,19 @@
 import { Button, makeStyles, Typography } from "@material-ui/core";
 import { FC, useCallback, useContext, useEffect, useState } from "react";
 import Collapsible from "react-collapsible";
-import { Field, IValue, IValueCreate, Value } from "../../api/api";
-import { FieldTypes } from "../../fieldTypes";
+import { Field } from "../../api/api";
 import { ISortedField } from "../../pages/sectionValues";
-import { useItineraryContext } from "../../state/itineraryProvider";
 import { ModalContext } from "../../state/modals";
 import { useSectionContext } from "../../state/sectionProvider";
 import { FieldWrapper } from "../fieldWrapper";
 import XLSX from "xlsx";
-import { getValueFromExcelImport, unNeighborSortedFields } from "../../utils";
 import { StyledDropzone } from "../styledDropzone";
 import { useValueContext } from "../../state/valueProvider";
+import { wsDataToValues } from "../../helpers/sheetUtils";
+import { useSheetContext } from "../../state/sheetProvider";
 
 type ListProps = {
   field: ISortedField;
-  values: IValue[];
-  fieldValue: IValue | undefined;
   preview?: boolean;
   index: string | undefined;
 };
@@ -56,112 +53,81 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: "10px",
   },
 }));
-export const ListField: FC<ListProps> = ({
-  field,
-  values,
-  fieldValue,
-  index,
-  preview = false,
-}) => {
+export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
   const [length, setLength] = useState<number>(
-    Number.parseInt(fieldValue?.value ?? (preview ? "1" : "0"))
+    Number.parseInt(preview ? "1" : "0")
   );
-  const [state, setState] = useState<IValue | undefined>(fieldValue);
   const classes = useStyles();
   const { dispatch } = useContext(ModalContext);
-  const itinContext = useItineraryContext();
   const sectionContext = useSectionContext();
-  const valueContext = useValueContext();
+  const { fieldsToWsData } = useSheetContext();
+  const {
+    getListFieldLength,
+    values,
+    getValue,
+    updateValues,
+    fetchData,
+    deleteItem,
+  } = useValueContext();
 
   useEffect(() => {
-    setState(fieldValue);
-    setLength(Number.parseInt(fieldValue?.value ?? (preview ? "1" : "0")));
-  }, [fieldValue, preview]);
+    const length = getListFieldLength(field.field, index);
+    setLength(Number.parseInt(preview ? "1" : length.toString()));
+  }, [getListFieldLength, preview, values, field.field, index]);
 
-  
-  const addEntry = async (entryCount?: number, reset?: boolean) => {
-    const value = entryCount ?? length + 1;
-    let value_properties = state?.value_properties;
-
-    if (reset) {
-      if (!value_properties) {
-        value_properties = { deleted: [] };
+  const addEntry = async () => {
+    let val = [];
+    try {
+      const v = getValue(field.field, index);
+      console.log(v);
+      if (typeof v === "string") {
+        val = JSON.parse(getValue(field.field, index)) ?? [];
       } else {
-        value_properties.deleted = [];
+        val = v;
       }
+    } catch (error) {
+      console.log(error);
     }
-
-    if (itinContext.selected && sectionContext.selectedSection) {
-      const res = await Value.createValueOrUpdate([
-        {
-          section: sectionContext.selectedSection.id,
-          itinerary: itinContext.selected.id,
-          field: field.field.id,
-          value: value.toString(),
-          list_index: index,
-          id: state?.id,
-          value_properties: value_properties,
-        },
-      ]);
-      if ((res as IValue).id) {
-        setState(res as IValue);
-        setLength(value);
-      } else {
-        setLength(value);
-      }
-    }
+    val.push({});
+    updateValues({
+      index: index,
+      field: field.field,
+      value: JSON.stringify(val),
+    });
+    fetchData(); // react not working very well... useEffect not firing after values change
   };
 
-  
-  const wsDataToValues = (fields: ISortedField[], data: any[]) => {
-    const values: IValueCreate[] = [];
-    data.forEach((el, i) => {
-      fields.forEach((f) => {
-        if (itinContext.selected && sectionContext.selectedSection) {
-          values.push({
-            section: sectionContext.selectedSection.id,
-            itinerary: itinContext.selected.id,
-            field: f.field.id,
-            value: getValueFromExcelImport(el, f.field),
-            list_index: index + "." + i.toString(),
-          });
-        }
+  const onDrop = useCallback(
+    async (acceptedFiles) => {
+      const data = await acceptedFiles[0].arrayBuffer();
+      const workbook = XLSX.read(data);
+      const values = wsDataToValues(
+        field,
+        index ?? "0",
+        0,
+        workbook.Sheets["SheetJS"]
+      );
+      updateValues({
+        field: field.field,
+        index,
+        value: JSON.stringify(values.values),
       });
-    });
-
-    return values;
-  };
-
-  const onDrop = useCallback(async (acceptedFiles) => {
-    const data = await acceptedFiles[0].arrayBuffer();
-    const workbook = XLSX.read(data);
-    const js_sheet = XLSX.utils.sheet_to_json(workbook.Sheets["SheetJS"], {
-      blankrows: false,
-    });
-    addEntry(js_sheet.length, true);
-    const values = wsDataToValues(
-      unNeighborSortedFields(field.children),
-      js_sheet
-    );
-    Value.createValueOrUpdate(values).then((res) => {
-      valueContext.updateValues();
-    });
-  }, [addEntry,field.children,valueContext,wsDataToValues]);
+      fetchData();
+    },
+    [updateValues, field, index, fetchData]
+  );
 
   const fillFields = () => {
     const listElements: JSX.Element[] = [];
     let userFriendlyIndex = 0;
     for (let i = 0; i < length; i++) {
       const fields: JSX.Element[] = [];
-      if (fieldValue?.value_properties?.deleted?.includes(i.toString())) {
-        continue;
-      }
+
       userFriendlyIndex++;
       field.children.forEach((c) => {
         fields.push(
           <FieldWrapper
             field={c}
-            values={values}
             index={index + "." + i.toString()}
             preview={preview}
             key={c.field.id}
@@ -173,11 +139,8 @@ export const ListField: FC<ListProps> = ({
           {!preview && (
             <Button
               onClick={() => {
-                if (fieldValue)
-                  Value.listDelete(fieldValue?.id, i).then((res) => {
-                    if (res === 1) {
-                    }
-                  });
+                deleteItem(field.field, index + "." + i.toString());
+                fetchData();
               }}
             >
               Remove
@@ -206,54 +169,33 @@ export const ListField: FC<ListProps> = ({
     }
     return listElements;
   };
-  const fieldsToWsData = (fields: ISortedField[]) => {
-    const ws_data: any[] = [];
-    let ws_row: any[] = [];
-    let ws_row_value: any[] = [];
-
-    fields.forEach((e) => {
-      switch (e.field.field_type) {
-        case FieldTypes.list:
-          if (ws_row.length > 0) {
-            ws_data.push(ws_row);
-            ws_data.push(ws_row_value);
-            ws_row_value = [];
-            ws_row = [];
-          }
-          ws_data.push([e.field.field_name]);
-          ws_data.push(...fieldsToWsData(e.children));
-          ws_data.push(["EOL " + e.field.field_name]);
-          break;
-        default:
-          ws_row.push(e.field.field_name);
-          ws_row_value.push("");
-          break;
-      }
-    });
-    if (ws_row.length > 0) {
-      ws_data.push(ws_row);
-      ws_data.push(ws_row_value);
-      ws_row_value = [];
-      ws_row = [];
-    }
-    return ws_data;
-  };
-
 
   const generateUploadTemplate = () => {
     var workBook = XLSX.utils.book_new();
     var ws_name = "SheetJS";
     /* make worksheet */
-    var ws_data = fieldsToWsData(unNeighborSortedFields(field.children));
+    var ws_data = fieldsToWsData(field, index ?? "0");
 
-    // var ws =XLSX.utils.json_to_sheet(fieldContext.fields);
     var ws = XLSX.utils.aoa_to_sheet(ws_data);
+    ws["!cols"] = [
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 },
+    ];
 
     /* Add the worksheet to the workbook */
     XLSX.utils.book_append_sheet(workBook, ws, ws_name);
-    XLSX.writeFile(workBook, "out.xlsb");
+    XLSX.writeFile(
+      workBook,
+      (sectionContext.selectedSection?.name ?? "out") + ".xlsx"
+    );
   };
-
 
   return (
     <div>
@@ -293,11 +235,12 @@ export const ListField: FC<ListProps> = ({
             color="secondary"
             variant="contained"
             onClick={() => {
-              if (fieldValue) {
-                Value.deleteValue(fieldValue?.id).then((res) => {
-                  valueContext.updateValues();
-                });
-              }
+              updateValues({
+                index: index,
+                field: field.field,
+                value: "[]",
+              });
+              fetchData();
             }}
           >
             Clear list

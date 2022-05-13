@@ -8,9 +8,9 @@ import { PageWrapper } from "./pages/pageWrapper";
 import { FieldProvider } from "./state/fieldProvider";
 import { ValueProvider } from "./state/valueProvider";
 import { DataSourceProvider } from "./state/dataSourceProvider";
+import { SheetProvider } from "./state/sheetProvider";
 
 function App() {
-
   const theme = createTheme({
     palette: {
       primary: {
@@ -46,7 +46,7 @@ function App() {
       },
     },
   });
- 
+
   return (
     <div className="App">
       <ThemeProvider theme={theme}>
@@ -55,10 +55,12 @@ function App() {
             <FieldProvider>
               <ValueProvider>
                 <DataSourceProvider>
-                <ModalProvider>
-                  <ModalsWrapper></ModalsWrapper>
-                  <PageWrapper></PageWrapper>
-                </ModalProvider>
+                  <SheetProvider>
+                    <ModalProvider>
+                      <ModalsWrapper></ModalsWrapper>
+                      <PageWrapper></PageWrapper>
+                    </ModalProvider>
+                  </SheetProvider>
                 </DataSourceProvider>
               </ValueProvider>
             </FieldProvider>
