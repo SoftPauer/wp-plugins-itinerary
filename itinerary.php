@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.0.1
+Version: 1.0.2
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
 add_action('admin_menu', 'itinerary_plugin_setup_menu');
@@ -20,7 +20,7 @@ function itinerary_plugin_setup_menu()
     add_menu_page(
       'Sections-'  . $section->name,
       $section->name,
-      'manage_options',
+      'eventr_manager',
       'itinerary-plugin-section' . $section->name,
       function () use ($section_gl) {
         itinerary_ini_section($section_gl->name);
@@ -371,7 +371,7 @@ function create_new_section(WP_REST_Request $request)
  */
 function delete_section($data)
 {
-  global $wpdb, $table_name_sections,$table_name_section_values, $table_name_fields;
+  global $wpdb, $table_name_sections, $table_name_section_values, $table_name_fields;
   $wpdb->delete(
     $table_name_fields,
     ['section' => $data['section_id']],
