@@ -8,7 +8,7 @@ import {
 import { IField, Value } from "../api/api";
 import { FieldTypes } from "../fieldTypes";
 import { getJsonKeyFromField, LooseObject } from "../utils";
-import { getFieldByIdFromFields, useFieldContext } from "./fieldProvider";
+import {  useFieldContext } from "./fieldProvider";
 import { useItineraryContext } from "./itineraryProvider";
 import { useSectionContext } from "./sectionProvider";
 
@@ -100,6 +100,9 @@ export const ValueProvider = (props: { children: React.ReactNode }) => {
   };
 
   const updateValues = async (value: IUpdateValue) => {
+
+    console.log(value);
+    
     const key = getJsonKeyFromField(value.field);
     let newValue: LooseObject = values;
     if (value.field.parent === null) {
@@ -135,7 +138,7 @@ export const ValueProvider = (props: { children: React.ReactNode }) => {
         value.value
       );
     }
-
+    console.log(newValue);
     if (sectionContext.selectedSection) {
       await Value.createValueOrUpdate({
         itinerary: itineraryContext.selected.id,
@@ -403,40 +406,3 @@ export const useValueContext = () => {
   return useContext(ValueContext);
 };
 
-export const getValue = (
-  field: IField,
-  fields: IField[],
-  sectionValues: LooseObject,
-  index?: string
-) => {
-  const key = getJsonKeyFromField(field);
-
-  if (field.parent === null) {
-    if (sectionValues.hasOwnProperty(key)) return sectionValues[key];
-    return "";
-  }
-  let parent = getFieldByIdFromFields(fields, field.parent);
-  const parentKeys = [];
-  while (parent) {
-    if (parent) {
-      const key = getJsonKeyFromField(parent);
-      parentKeys.push(key);
-      parent = getFieldByIdFromFields(fields, parent.parent);
-    }
-  }
-  const indexes = index?.split(".").slice(1) ?? [];
-  let value = sectionValues;
-
-  parentKeys.reverse().forEach((key, i) => {
-    if (value?.hasOwnProperty(key)) {
-      if (Array.isArray(value[key])) {
-        value = value[key][indexes[i]];
-      } else {
-        value = value[key];
-      }
-    }
-  });
-
-  if (value?.hasOwnProperty(key)) return value[key];
-  return "";
-};

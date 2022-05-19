@@ -1,16 +1,18 @@
 import { Button, makeStyles, Typography } from "@material-ui/core";
 import { FC, useContext } from "react";
-import { IField, Field, Value, User, requestsMoodle } from "../api/api";
+import { IField,  Value, User,  } from "../api/api";
 import { FieldWrapper } from "../components/fieldWrapper";
 import { ItinerarySelection } from "../components/itinerarySelection";
-import {  sortFields } from "../fieldTypes";
+import { sortFields } from "../fieldTypes";
 import { useItineraryContext } from "../state/itineraryProvider";
 import { useSectionContext } from "../state/sectionProvider";
 import { ModalContext } from "../state/modals";
-import { buildJsonForSection, LooseObject } from "../utils";
+import {
+  getJsonKeyFromSection,
+  LooseObject,
+} from "../utils";
 import { useFieldContext } from "../state/fieldProvider";
 import { useValueContext } from "../state/valueProvider";
-
 
 export interface ISortedField {
   field: IField;
@@ -40,12 +42,7 @@ export const SectionValuesPage: FC = () => {
       return <div key={1}></div>;
     }
 
-    return (
-      <FieldWrapper
-        key={field.field.id}
-        field={field}
-      ></FieldWrapper>
-    );
+    return <FieldWrapper key={field.field.id} field={field}></FieldWrapper>;
   };
 
   const renderFields = () => {
@@ -64,11 +61,13 @@ export const SectionValuesPage: FC = () => {
     let json: LooseObject = {};
     for (let i = 0; i < sectionContext.sections.length; i++) {
       const s = sectionContext.sections[i];
-      const fields = await Field.getFields(s.id);
 
       const val = await Value.getValues(s.id, itinContext.selected.id);
-      const sectObj = buildJsonForSection(s, fields, val);
-      json[Object.keys(sectObj)[0]] = sectObj[Object.keys(sectObj)[0]];
+      if (val) {
+        json[getJsonKeyFromSection(s)] = JSON.parse(val?.value);
+      } else {
+        json[getJsonKeyFromSection(s)] = null;
+      }
     }
     let userswp = await User.getUsers();
 
@@ -91,20 +90,6 @@ export const SectionValuesPage: FC = () => {
     json["updatedAt"] = today;
     json["macrosVersion"] = "0.1.0";
     console.log(json);
-    
-
-    requestsMoodle.updateApp(JSON.stringify(json)).then((res) => {
-      dispatch({
-        type: "close",
-      });
-      dispatch({
-        type: "open",
-        modal: "Text",
-        modalData: { text: res },
-      });
-    });
-
-     
   };
 
   const copyValuesFromLastItin = () => {
@@ -148,7 +133,6 @@ export const SectionValuesPage: FC = () => {
       >
         Copy last values
       </Button>
-     
     </div>
   );
 };
