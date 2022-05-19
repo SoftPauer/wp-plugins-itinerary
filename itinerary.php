@@ -68,16 +68,17 @@ add_action('admin_enqueue_scripts', function ($hook) {
 
 register_activation_hook(__FILE__, 'itinerary_install');
 
-global  $wpdb, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values;
+global  $wpdb, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values, $table_name_itinerary_data;
 
 $table_name_itinerary = $wpdb->prefix . 'itineraries';
 $table_name_sections = $wpdb->prefix . 'itinerary_sections';
 $table_name_fields = $wpdb->prefix . 'itinerary_fields';
 $table_name_section_values = $wpdb->prefix . 'itinerary_values';
+$table_name_itinerary_data = $wpdb->prefix . 'itinerary_data';
 
 function itinerary_install()
 {
-  global $wpdb, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values;
+  global $wpdb, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values, $table_name_itinerary_data;
   $itinerary_db_version = '1.0';
   add_option('moodle_base_url', 'replace me');
   add_option('moodle_ws_token', 'replace me');
@@ -127,6 +128,18 @@ function itinerary_install()
     itinerary mediumint(9) NOT NULL,
     value text,
     PRIMARY KEY  (id)
+  ) $charset_collate;";
+
+  require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+  dbDelta($sql);
+
+  $sql = "CREATE TABLE $table_name_itinerary_data (
+    id mediumint(9) NOT NULL AUTO_INCREMENT,
+    itinerary_id mediumint(9) NOT NULL,
+    time_updated datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+    json_data mediumint(9)  NOT NULL,
+    PRIMARY KEY  (id),
+    FOREIGN KEY(itinerary_id) REFERENCES $table_name_itinerary(id)
   ) $charset_collate;";
 
   require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -371,7 +384,7 @@ function create_new_section(WP_REST_Request $request)
  */
 function delete_section($data)
 {
-  global $wpdb, $table_name_sections,$table_name_section_values, $table_name_fields;
+  global $wpdb, $table_name_sections, $table_name_section_values, $table_name_fields;
   $wpdb->delete(
     $table_name_fields,
     ['section' => $data['section_id']],
