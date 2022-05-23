@@ -173,11 +173,11 @@ add_action('rest_api_init', function () {
       ),
     )
   ));
-  register_rest_route('itinerary/v1', 'itineraries/updateMoodle/(?P<itin_id>\d+)', array(
-    'methods' => WP_REST_Server::READABLE,
-    'callback' => 'update_moodel',
+  register_rest_route('itinerary/v1', 'itineraries/updateApp', array(
+    'methods' => WP_REST_Server::EDITABLE,
+    'callback' => 'update_entry_in_db',
     'args' => array(
-      'itin_id' => array(
+      'itinId' => array(
         'validate_callback' => function ($param, $request, $key) {
           return is_numeric($param);
         }
@@ -280,11 +280,16 @@ add_action('rest_api_init', function () {
     )
   ));
 
-  register_rest_route('itinerary/v1', 'itineraries/updateApp', array(
-    'methods' => WP_REST_Server::EDITABLE,
-    'callback' => 'update_entry_in_db',
+  register_rest_route('itinerary/v1', 'raceMap', array(
+    'methods' => WP_REST_Server::READABLE,
+    'callback' => 'get_race_map',
+  ));
+
+  register_rest_route('itinerary/v1', 'data/(?P<itin_id>\d+)', array(
+    'methods' => WP_REST_Server::READABLE,
+    'callback' => 'get_itin_data',
     'args' => array(
-      'itinId' => array(
+      'itin_id' => array(
         'validate_callback' => function ($param, $request, $key) {
           return is_numeric($param);
         }
@@ -292,6 +297,52 @@ add_action('rest_api_init', function () {
     )
   ));
 });
+
+/**
+ * Get race map data from the db
+ */
+
+function get_race_map()
+{
+  global $wpdb, $table_name_itinerary_data;
+  $raceMap = array();
+  $raceData = $wpdb->get_results("select t.* from $table_name_itinerary_data t where t.time_updated = (select max(t1.time_updated) from $table_name_itinerary_data t1 where t1.itinerary_id = t.itinerary_id);");
+
+  foreach ($raceData as $race) {
+    error_log($race->json_data);
+    $jsonData = json_decode($race->json_data);
+    $start_time = strtotime($jsonData->general_info->startDate);
+    $end_time = strtotime($jsonData->general_info->endDate);
+    $id = $race->itinerary_id;
+    $race_name = $jsonData->general_info->raceName;
+    $race_endpoint = '/wp-json/itinerary/v1/data/' . $race->id;
+
+    $race_item = array(
+      "end_time" => $end_time,
+      "id" => $id,
+      "race_endpoint" => $race_endpoint,
+      "race_name" => $race_name,
+      "start_time" => $start_time,
+      "last_updated" => strtotime($race->time_updated)
+    );
+    array_push($raceMap, $race_item);
+  }
+
+  return ($raceMap);
+}
+
+/**
+ * get json data for race id 
+ */
+
+function get_itin_data(WP_REST_Request $request)
+{
+  global $wpdb, $table_name_itinerary_data;
+  $id = $request['itin_id'];
+  $result = $wpdb->get_results("SELECT * FROM $table_name_itinerary_data WHERE id = $id");
+  return (json_decode($result[0]->json_data));
+}
+
 
 /**
  * Creates new entry into the final values table of the db to read from react-dashboard
