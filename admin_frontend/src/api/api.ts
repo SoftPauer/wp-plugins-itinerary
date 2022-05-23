@@ -82,6 +82,19 @@ export const Itinerary = {
   deleteItinerary: (id: number): Promise<void> =>
     requestsItinerary.delete(`itineraries/delete/${id}`),
 };
+
+export interface IUpdateApp {
+  itinId: number;
+  time_updated: string;
+  json_data: string;
+}
+
+export const UpdateApp = {
+  createAppEntry: (payload: IUpdateApp): Promise<JSON> => {
+    return requestsItinerary.post("itineraries/updateApp", payload);
+  },
+};
+
 export interface ISection {
   id: number;
   name: string;
@@ -122,8 +135,8 @@ export interface ITypeProperties {
   data_transform_properties?: string;
   excelDisplayType?: ExcelDisplayTypes;
 }
-export interface IDataSourceProperties{
-  source?: number
+export interface IDataSourceProperties {
+  source?: number;
 }
 export interface IField {
   id: number;
@@ -185,18 +198,18 @@ export const Value = {
   getValues: async (
     section_id: number,
     itinerary_id: number
-  ): Promise<IValues|null> => {
-    const val = await requestsItinerary.get<IValues|null>(
+  ): Promise<IValues | null> => {
+    const val = await requestsItinerary.get<IValues | null>(
       "values/" + itinerary_id + "/" + section_id
     );
-    
+
     return val;
   },
   // getAPost: (id: number): Promise<PostType> => requests.get(`posts/${id}`),
-  createValueOrUpdate: (value: IValueCreate): Promise<IUpdatedRes | IValues> =>{
-    
-   return  requestsItinerary.post("values/createOrUpdate", value);
-
+  createValueOrUpdate: (
+    value: IValueCreate
+  ): Promise<IUpdatedRes | IValues> => {
+    return requestsItinerary.post("values/createOrUpdate", value);
   },
   // updatePost: (post: PostType, id: number): Promise<PostType> =>
   // 	requests.put(`posts/${id}`, post),
@@ -204,8 +217,8 @@ export const Value = {
     requestsItinerary.put(`values/flagDeleted/${id}/${index}`, {}),
   deleteValue: (id: number): Promise<number> =>
     requestsItinerary.delete(`values/delete/${id}`),
-  copyLastItin: (id: number,section:number): Promise<string> =>
-    requestsItinerary.post(`values/copyLast/${id}`, {section}),
+  copyLastItin: (id: number, section: number): Promise<string> =>
+    requestsItinerary.post(`values/copyLast/${id}`, { section }),
 };
 
 export interface IUser {

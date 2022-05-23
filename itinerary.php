@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.0.1
+Version: 1.0.2
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
 add_action('admin_menu', 'itinerary_plugin_setup_menu');
@@ -137,7 +137,7 @@ function itinerary_install()
     id mediumint(9) NOT NULL AUTO_INCREMENT,
     itinerary_id mediumint(9) NOT NULL,
     time_updated datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-    json_data mediumint(9)  NOT NULL,
+    json_data json NOT NULL,
     PRIMARY KEY  (id),
     FOREIGN KEY(itinerary_id) REFERENCES $table_name_itinerary(id)
   ) $charset_collate;";
@@ -279,7 +279,34 @@ add_action('rest_api_init', function () {
       ),
     )
   ));
+
+  register_rest_route('itinerary/v1', 'itineraries/updateApp', array(
+    'methods' => WP_REST_Server::EDITABLE,
+    'callback' => 'update_entry_in_db',
+    'args' => array(
+      'itinId' => array(
+        'validate_callback' => function ($param, $request, $key) {
+          return is_numeric($param);
+        }
+      ),
+    )
+  ));
 });
+
+/**
+ * Creates new entry into the final values table of the db to read from react-dashboard
+ */
+
+function update_entry_in_db(WP_REST_Request $request)
+{
+  global $wpdb, $table_name_itinerary_data;
+  $params = $request->get_json_params();
+  $itinerary_id = $params['itinId'];
+  $json_data = $params['json_data'];
+  $time_updated = $params['time_updated'];
+  $results = $wpdb->get_results(" INSERT INTO $table_name_itinerary_data (itinerary_id, time_updated, json_data) VALUES ($itinerary_id, $time_updated, '$json_data') ");
+  return rest_ensure_response($results);
+}
 
 /**
  * Return all itineraries

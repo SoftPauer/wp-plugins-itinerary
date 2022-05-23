@@ -1,16 +1,13 @@
 import { Button, makeStyles, Typography } from "@material-ui/core";
 import { FC, useContext } from "react";
-import { IField,  Value, User,  } from "../api/api";
+import { IField, Value, User, UpdateApp } from "../api/api";
 import { FieldWrapper } from "../components/fieldWrapper";
 import { ItinerarySelection } from "../components/itinerarySelection";
 import { sortFields } from "../fieldTypes";
 import { useItineraryContext } from "../state/itineraryProvider";
 import { useSectionContext } from "../state/sectionProvider";
 import { ModalContext } from "../state/modals";
-import {
-  getJsonKeyFromSection,
-  LooseObject,
-} from "../utils";
+import { getJsonKeyFromSection, LooseObject } from "../utils";
 import { useFieldContext } from "../state/fieldProvider";
 import { useValueContext } from "../state/valueProvider";
 
@@ -90,6 +87,28 @@ export const SectionValuesPage: FC = () => {
     json["updatedAt"] = today;
     json["macrosVersion"] = "0.1.0";
     console.log(json);
+
+    // commit data to database instead of sending to moodle!
+
+    const payload = {
+      itinId: itinContext.selected.id,
+      time_updated: `'${new Date(timeElapsed)
+        .toISOString()
+        .slice(0, 19)
+        .replace("T", " ")}'`,
+      json_data: JSON.stringify(json),
+    };
+
+    UpdateApp.createAppEntry(payload);
+    dispatch({
+      type: "close",
+      modal: "Loading",
+    });
+    dispatch({
+      type: "open",
+      modal: "Text",
+      modalData: { text: "App Has been Updated!" },
+    });
   };
 
   const copyValuesFromLastItin = () => {
