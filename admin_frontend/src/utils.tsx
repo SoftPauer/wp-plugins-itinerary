@@ -1,145 +1,16 @@
 import { IField, ISection, IValues } from "./api/api";
-import { DataTransformTypes, resolveDataTransform } from "./dataTransforms";
-import { FieldTypes, sortFields } from "./fieldTypes";
+import { FieldTypes, } from "./fieldTypes";
 import { ISortedField } from "./pages/sectionValues";
 import { format } from "date-fns";
-import { getValue } from "./state/valueProvider";
+import { getFieldByIdFromFields } from "./state/fieldProvider";
 export interface LooseObject {
   [key: string]: any;
 }
-type LooseobjString = LooseObject | string;
 export const stringToJsonSafeKey = (s: string) => {
   return s.toLowerCase().replaceAll(" ", "_");
 };
 export const findValue = (field: IField, values: IValues, index?: string) => {
   return { value: "" };
-};
-
-export const buildJsonForSection = (
-  section: ISection,
-  fields: IField[],
-  values: IValues | null
-) => {
-  const json: LooseObject = {};
-  const sortedFields = sortFields(fields, false);
-  const sectJsonName =
-    section.properties?.jsonName === undefined
-      ? section.name
-      : section.properties?.jsonName;
-  json[sectJsonName] = {};
-  if (values) {
-    if (
-      fields.length === 1 &&
-      sortedFields[0].field.field_type === FieldTypes.list
-    ) {
-      const fv = buildJsonForField(sortedFields[0], fields, values, "0");
-
-      if (!(typeof fv === "string") && !(typeof fv === "undefined")) {
-        json[sectJsonName] = fv.value;
-      }
-    } else {
-      sortedFields.forEach((f) => {
-        const fv = buildJsonForField(f, fields, values, "0");
-        if (!(typeof fv === "string") && !(typeof fv === "undefined")) {
-          json[sectJsonName][fv.key] = fv.value;
-        }
-      });
-    }
-  }
-  return json;
-};
-
-export const buildJsonForField = (
-  field: ISortedField,
-  fields: IField[],
-  values: IValues,
-  indexValue: string
-) => {
-  let key;
-  let value;
-  const parsedValues = JSON.parse(values.value);
-  switch (field.field.field_type) {
-    case FieldTypes.text:
-    case FieldTypes.date:
-    case FieldTypes.time:
-      value = getValue(field.field, fields, parsedValues, indexValue);
-      if (field.field.type_properties?.keyless) return value;
-
-      key = field.field.field_name;
-      if (field.field.type_properties?.json_key) {
-        key = field.field.type_properties?.json_key;
-      }
-
-      return { key, value };
-    case FieldTypes.group: //does not have value, we need to go
-      key = field.field.field_name;
-      if (field.field.type_properties?.json_key) {
-        key = field.field.type_properties?.json_key;
-      }
-      let grValue: LooseObject = {};
-      field.children.forEach((f) => {
-        const fv = buildJsonForField(f, fields, values, indexValue);
-        if (!(typeof fv === "string") && !(typeof fv === "undefined")) {
-          grValue[fv.key] = fv.value;
-        }
-      });
-      return { key, value: grValue };
-    case FieldTypes.select:
-      key = field.field.field_name;
-      if (field.field.type_properties?.json_key) {
-        key = field.field.type_properties?.json_key;
-      }
-      let slValue: LooseObject = [];
-      value = getValue(field.field, fields, parsedValues, indexValue);
-      if (value) {
-        if (
-          field.field.type_properties?.data_transform ===
-          DataTransformTypes.selectWithKey
-        ) {
-          slValue = resolveDataTransform(
-            field.field.type_properties?.data_transform_properties,
-            DataTransformTypes.selectWithKey,
-            value
-          );
-        }
-      }
-      return { key, value: slValue };
-    case FieldTypes.list: //value is the length of the list
-      key = field.field.field_name;
-      if (field.field.type_properties?.json_key) {
-        key = field.field.type_properties?.json_key;
-      }
-
-      let lsValue: LooseobjString[] = [];
-      const val = getValue(field.field, fields, parsedValues, indexValue);
-
-      if (val) {
-        for (let i = 0; i < val.length; i++) {
-          let lsElValue: LooseObject = {};
-          field.children.forEach((f) => {
-            const fv = buildJsonForField(
-              f,
-              fields,
-              values,
-              indexValue + "." + i.toString()
-            );
-            if (!(typeof fv === "undefined"))
-              if (!(typeof fv === "string")) {
-                lsElValue[fv.key] = fv.value;
-                lsElValue["id"] = i + 1;
-              } else {
-                lsValue.push(fv);
-              }
-          });
-          if (Object.keys(lsElValue).length > 0) {
-            lsValue.push(lsElValue);
-          }
-        }
-      }
-      return { key, value: lsValue };
-    default:
-      return { key: "not_Found", value: "not Found" };
-  }
 };
 
 export const unNeighborSortedFields = (fields: ISortedField[]) => {
@@ -165,7 +36,51 @@ export const getValueFromExcelImport = (excelRow: any, field: IField) => {
 
 export const getJsonKeyFromField = (field: IField) => {
   if (field.type_properties?.json_key) {
-    return field.type_properties?.json_key + "^" + field.id;
+    return field.type_properties?.json_key ;
   }
-  return field.field_name.replaceAll(" ", "_") + "^" + field.id;
+  return field.field_name.replaceAll(" ", "_") ;
 };
+
+export const getJsonKeyFromSection = (section: ISection) => {
+
+  return section.name.replaceAll(" ", "_").toLocaleLowerCase() ;
+};
+
+export const getValueNoContext = (
+  field: IField,
+  fields: IField[],
+  sectionValues: LooseObject,
+  index?: string
+) => {
+  const key = getJsonKeyFromField(field);
+
+  if (field.parent === null) {
+    if (sectionValues.hasOwnProperty(key)) return sectionValues[key];
+    return "";
+  }
+  let parent = getFieldByIdFromFields(fields, field.parent);
+  const parentKeys = [];
+  while (parent) {
+    if (parent) {
+      const key = getJsonKeyFromField(parent);
+      parentKeys.push(key);
+      parent = getFieldByIdFromFields(fields, parent.parent);
+    }
+  }
+  const indexes = index?.split(".").slice(1) ?? [];
+  let value = sectionValues;
+
+  parentKeys.reverse().forEach((key, i) => {
+    if (value?.hasOwnProperty(key)) {
+      if (Array.isArray(value[key])) {
+        value = value[key][indexes[i]];
+      } else {
+        value = value[key];
+      }
+    }
+  });
+
+  if (value?.hasOwnProperty(key)) return value[key];
+  return "";
+};
+
