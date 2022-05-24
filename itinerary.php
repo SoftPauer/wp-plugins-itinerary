@@ -6,6 +6,9 @@ Author: Andrius Murauskas
 Version: 1.0.2
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
+
+use function PHPSTORM_META\type;
+
 add_action('admin_menu', 'itinerary_plugin_setup_menu');
 
 function itinerary_plugin_setup_menu()
@@ -80,8 +83,6 @@ function itinerary_install()
 {
   global $wpdb, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values, $table_name_itinerary_data;
   $itinerary_db_version = '1.0';
-  add_option('moodle_base_url', 'replace me');
-  add_option('moodle_ws_token', 'replace me');
   $charset_collate = $wpdb->get_charset_collate();
 
   $sql = "CREATE TABLE $table_name_itinerary (
@@ -137,7 +138,7 @@ function itinerary_install()
     id mediumint(9) NOT NULL AUTO_INCREMENT,
     itinerary_id mediumint(9) NOT NULL,
     time_updated datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-    json_data json NOT NULL,
+    json_data text  NOT NULL,
     PRIMARY KEY  (id),
     FOREIGN KEY(itinerary_id) REFERENCES $table_name_itinerary(id)
   ) $charset_collate;";
@@ -167,17 +168,6 @@ add_action('rest_api_init', function () {
     'callback' => 'delete_itinerary',
     'args' => array(
       'itinerary_id' => array(
-        'validate_callback' => function ($param, $request, $key) {
-          return is_numeric($param);
-        }
-      ),
-    )
-  ));
-  register_rest_route('itinerary/v1', 'itineraries/updateApp', array(
-    'methods' => WP_REST_Server::EDITABLE,
-    'callback' => 'update_entry_in_db',
-    'args' => array(
-      'itinId' => array(
         'validate_callback' => function ($param, $request, $key) {
           return is_numeric($param);
         }
@@ -280,6 +270,18 @@ add_action('rest_api_init', function () {
     )
   ));
 
+  register_rest_route('itinerary/v1', 'itineraries/updateApp', array(
+    'methods' => WP_REST_Server::EDITABLE,
+    'callback' => 'update_entry_in_db',
+    'args' => array(
+      'itinId' => array(
+        'validate_callback' => function ($param, $request, $key) {
+          return is_numeric($param);
+        }
+      ),
+    )
+  ));
+
   register_rest_route('itinerary/v1', 'raceMap', array(
     'methods' => WP_REST_Server::READABLE,
     'callback' => 'get_race_map',
@@ -298,6 +300,7 @@ add_action('rest_api_init', function () {
   ));
 });
 
+
 /**
  * Get race map data from the db
  */
@@ -306,7 +309,7 @@ function get_race_map()
 {
   global $wpdb, $table_name_itinerary_data;
   $raceMap = array();
-  $raceData = $wpdb->get_results("select t.* from $table_name_itinerary_data t where t.time_updated = (select max(t1.time_updated) from $table_name_itinerary_data t1 where t1.itinerary_id = t.itinerary_id);");
+  $raceData = $wpdb->get_results("select t.* from wp_itinerary_data t where t.time_updated = (select max(t1.time_updated) from wp_itinerary_data t1 where t1.itinerary_id = t.itinerary_id);");
 
   foreach ($raceData as $race) {
     error_log($race->json_data);
@@ -330,10 +333,6 @@ function get_race_map()
 
   return ($raceMap);
 }
-
-/**
- * get json data for race id 
- */
 
 function get_itin_data(WP_REST_Request $request)
 {
