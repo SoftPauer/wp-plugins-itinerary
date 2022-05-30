@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.0.5
+Version: 1.0.6
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
 
@@ -297,6 +297,18 @@ add_action('rest_api_init', function () {
       ),
     )
   ));
+
+  register_rest_route('itinerary/v1', 'ical/(?P<usertoken>\d+)', array(
+    'methods' => WP_REST_Server::READABLE,
+    'callback' => 'get_ical_for_user',
+    'args' => array(
+      'usertoken' => array(
+        'validate_callback' => function ($param, $request, $key) {
+          return true;
+        }
+      ),
+    )
+  ));
 });
 
 
@@ -325,7 +337,8 @@ function get_race_map()
       "race_endpoint" => $race_endpoint,
       "race_name" => $race_name,
       "start_time" => $start_time,
-      "last_updated" => strtotime($race->time_updated)
+      "last_updated" => strtotime($race->time_updated),
+      "race_id" => $race->id
     );
     array_push($raceMap, $race_item);
   }
@@ -675,4 +688,56 @@ function get_section_value($section_id, $itinerary_id)
     OBJECT
   );
   return $results;
+}
+
+//Ical
+function get_ical_for_user(WP_REST_Request $request){
+  global $wpdb, $table_name_itinerary_data;
+
+  //for not its just an id
+  $userToken = $request['usertoken'];
+	
+  $user = get_user_by('id', $userToken );
+  $display_name = $user->display_name;
+  //get last 3 itineraries 
+
+  $raceMap =get_race_map();
+  $lastRacesIds = array_map( fn ($race)=>
+    $race['race_id'],
+    array_slice ($raceMap, -3, 3, true));
+  $stringRaceIds = implode(',',$lastRacesIds);
+  $lastItins = $wpdb->get_results("SELECT * FROM $table_name_itinerary_data WHERE id in ( $stringRaceIds )");
+  $lastItinsJson = array_map(fn($itin)=>json_decode($itin->json_data),$lastItins);
+  // echo $lastItinsJson;
+ //find all flight events 
+  $flights = array_map(fn($itin)=>$itin->flights,$lastItinsJson);
+  
+ 
+ 
+    
+    $ical = "BEGIN:VCALENDAR
+    PRODID:-//Google Inc//Google Calendar 70.9054//EN
+    VERSION:2.0
+    CALSCALE:GREGORIAN
+    METHOD:PUBLISH
+    X-WR-CALNAME:Jewish Holidays
+    X-WR-TIMEZONE:UTC
+    X-WR-CALDESC:Jewish Holidays
+    BEGIN:VEVENT
+    DTSTART;VALUE=DATE:20220428
+    DTEND;VALUE=DATE:20220429
+    DTSTAMP:20220527T153209Z
+    UID:20220428_td17mrpvedr80qolf693jklsv4@google.com
+    CLASS:PUBLIC
+    CREATED:20211123T092251Z
+    DESCRIPTION:
+    LAST-MODIFIED:20211123T092251Z
+    SEQUENCE:0
+    STATUS:CONFIRMED
+    SUMMARY:Yom HaShoah
+    TRANSP:TRANSPARENT
+    END:VEVENT
+    END:VCALENDAR
+    ";
+    return $flights;
 }
