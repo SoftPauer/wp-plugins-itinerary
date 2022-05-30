@@ -14,6 +14,7 @@ export enum FieldTypes {
   list = "list",
   select = "select",
   time = "time",
+  dateTime = "dateTime",
 }
 
 export const FieldTypesList: {
@@ -64,6 +65,17 @@ export const renderField = (
         index={index}
         preview={preview}
         type="date"
+        key={field.field.id}
+      ></AppDatePicker>
+    );
+  }
+  if (field.field.field_type === FieldTypes.dateTime) {
+    return (
+      <AppDatePicker
+        field={field.field}
+        index={index}
+        preview={preview}
+        type="datetime-local"
         key={field.field.id}
       ></AppDatePicker>
     );
