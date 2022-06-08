@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.0.8
+Version: 1.0.9
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
 
@@ -323,7 +323,6 @@ function get_race_map()
   $raceData = $wpdb->get_results("select t.* from wp_itinerary_data t where t.time_updated = (select max(t1.time_updated) from wp_itinerary_data t1 where t1.itinerary_id = t.itinerary_id);");
 
   foreach ($raceData as $race) {
-    error_log($race->json_data);
     $jsonData = json_decode($race->json_data);
     $start_time = strtotime($jsonData->general_info->startDate);
     $end_time = strtotime($jsonData->general_info->endDate);
@@ -411,7 +410,14 @@ function create_new_itinerary(WP_REST_Request $request)
  */
 function delete_itinerary($data)
 {
-  global $wpdb, $table_name_itinerary, $table_name_section_values;
+  global $wpdb, $table_name_itinerary, $table_name_section_values,  $table_name_itinerary_data;
+
+   $wpdb->delete(
+    $table_name_itinerary_data,
+    ['itinerary_id' => $data['itinerary_id']],
+    ['%d'],
+  );
+
   $wpdb->delete(
     $table_name_section_values,
     ['itinerary' => $data['itinerary_id']],
@@ -538,7 +544,6 @@ function create_new_field(WP_REST_Request $request)
     parent = {$parent},
     type_properties = '{$props}'";
   $sql = $wpdb->prepare($sql, $body->id, $body->section, $body->position, $body->type, $body->name);
-  error_log($sql); // debug
   return $wpdb->query($sql);
 }
 
@@ -574,7 +579,6 @@ function get_all_section_values($data)
 function create_new_section_value(WP_REST_Request $request)
 {
   $body = json_decode($request->get_body());
-  error_log(print_r($body, true)); // debug
 
   if (!key_exists("section", $body)) {
     return new WP_Error('400', esc_html__('Missing body parameter section', 'text_domain'), array('status' => 400));
