@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.0.9
+Version: 1.0.10
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
 
@@ -702,6 +702,7 @@ function getIcalDate($time,$timeZone, $inclTime = true)
     $timeZones = json_decode($timeZonesStr, true);
     $timeZoneKey = array_search($timeZone,array_column($timeZones, 'text'));
     $timeZoneObj = $timeZones[$timeZoneKey];
+    $timeZoneObj['offset'] = $timeZoneObj['offset'] * -1;
     $eventTime = strtotime("{$timeZoneObj['offset']} hours",$eventTime);
   }else{
     $ukTimeZone = new DateTimeZone("Europe/London");
