@@ -139,10 +139,6 @@ export const SectionValuesPage: FC = () => {
       <div className={classes.fields}>
         {itinContext.selected !== undefined && renderFields()}
       </div>
-      <Typography variant="h6" component="h2">
-        Json data will look like this:
-      </Typography>
-      {/* <ReactJson collapsed={true} name={false} src={renderJsonData()} /> */}
 
       <Button
         style={{ marginLeft: "10px" }}

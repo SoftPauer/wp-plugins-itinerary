@@ -27,11 +27,13 @@ export const unNeighborSortedFields = (fields: ISortedField[]) => {
 export const excelDateToJSDate = (date: number) => {
   return new Date(Math.round((date - 25569) * 86400 * 1000));
 };
-export const getValueFromExcelImport = (excelRow: any, field: IField) => {
+export const getValueFromExcelImport = (field: IField ,value: any) => {
+  
   if (field.field_type === FieldTypes.date) {
-    return format(excelDateToJSDate(excelRow[field.field_name]), "yyyy-MM-dd");
+    if(typeof value === "string") return value;
+    return format(excelDateToJSDate(value), "yyyy-MM-dd");
   }
-  return excelRow[field.field_name];
+  return value;
 };
 
 export const getJsonKeyFromField = (field: IField) => {

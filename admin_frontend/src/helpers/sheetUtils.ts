@@ -2,7 +2,7 @@ import XLSX from "xlsx";
 import { ExcelDisplayTypes, FieldTypes } from "../fieldTypes";
 import { ISortedField } from "../pages/sectionValues";
 import { getFieldByFieldName } from "../state/fieldProvider";
-import { getJsonKeyFromField, unNeighborSortedFields } from "../utils";
+import { getJsonKeyFromField, getValueFromExcelImport, unNeighborSortedFields } from "../utils";
 export const END_OF_LIST = "-------";
 export const ALPHABET = [
   "A",
@@ -110,7 +110,7 @@ export const wsDataToValuesTableStyle = (
       switch (fields[j].field.field_type) {
         default:
           const jsonKey = getJsonKeyFromField(fields[j].field);
-          const fieldValue = sheet[ALPHABET[emptyColumn + j] + startingPos]?.v;
+          const fieldValue = getValueFromExcelImport(fields[j].field,sheet[ALPHABET[emptyColumn + j] + startingPos]?.v);
           values[i][jsonKey] = fieldValue;
           break;
       }
@@ -174,7 +174,9 @@ export const wsDataToValuesLinnearStyle = (
           const thisField = getFieldByFieldName(fields, fieldName);
           if (!thisField) continue;
           const jsonKey = getJsonKeyFromField(thisField?.field);
-          const fieldValue = sheet[ALPHABET[emptyColumn + 1] + startingPos].v;
+         
+          
+          const fieldValue =getValueFromExcelImport(thisField?.field, sheet[ALPHABET[emptyColumn + 1] + startingPos].v);
           values[i][jsonKey] = fieldValue;
           break;
       }
