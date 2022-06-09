@@ -39,11 +39,7 @@ function App() {
       MuiInput: { root: { width: "350px" } },
       MuiSelect: { root: { border: "solid 1px", paddingLeft: "8px" } },
       MuiFormLabel: { root: { fontWeight: 600, color: "rgba(0, 0, 0, 1)" } },
-      MuiTextField: {
-        root: {
-          width: "350px",
-        },
-      },
+
     },
   });
 

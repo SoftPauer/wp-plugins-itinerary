@@ -31,7 +31,9 @@ export const SectionProvider = (props: { children: React.ReactNode }) => {
       const sectionName =
         document
           .getElementById("general-info-react")
-          ?.getAttribute("section") ?? "unknown";
+          ?.getAttribute("section") ??
+        decodeURI(window.location.search.slice(1));
+
       setselectedSection(sections.find((s) => s.name === sectionName));
       setSections(sections);
     }

@@ -3,11 +3,10 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.0.4
+Version: 1.0.12
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
 
-use function PHPSTORM_META\type;
 
 add_action('admin_menu', 'itinerary_plugin_setup_menu');
 
@@ -298,6 +297,18 @@ add_action('rest_api_init', function () {
       ),
     )
   ));
+
+  register_rest_route('itinerary/v1', 'ical/(?P<usertoken>\d+)', array(
+    'methods' => WP_REST_Server::READABLE,
+    'callback' => 'get_ical_for_user',
+    'args' => array(
+      'usertoken' => array(
+        'validate_callback' => function ($param, $request, $key) {
+          return true;
+        }
+      ),
+    )
+  ));
 });
 
 
@@ -312,7 +323,6 @@ function get_race_map()
   $raceData = $wpdb->get_results("select t.* from wp_itinerary_data t where t.time_updated = (select max(t1.time_updated) from wp_itinerary_data t1 where t1.itinerary_id = t.itinerary_id);");
 
   foreach ($raceData as $race) {
-    error_log($race->json_data);
     $jsonData = json_decode($race->json_data);
     $start_time = strtotime($jsonData->general_info->startDate);
     $end_time = strtotime($jsonData->general_info->endDate);
@@ -326,7 +336,8 @@ function get_race_map()
       "race_endpoint" => $race_endpoint,
       "race_name" => $race_name,
       "start_time" => $start_time,
-      "last_updated" => strtotime($race->time_updated)
+      "last_updated" => strtotime($race->time_updated),
+      "race_id" => $race->id
     );
     array_push($raceMap, $race_item);
   }
@@ -399,7 +410,14 @@ function create_new_itinerary(WP_REST_Request $request)
  */
 function delete_itinerary($data)
 {
-  global $wpdb, $table_name_itinerary, $table_name_section_values;
+  global $wpdb, $table_name_itinerary, $table_name_section_values,  $table_name_itinerary_data;
+
+   $wpdb->delete(
+    $table_name_itinerary_data,
+    ['itinerary_id' => $data['itinerary_id']],
+    ['%d'],
+  );
+
   $wpdb->delete(
     $table_name_section_values,
     ['itinerary' => $data['itinerary_id']],
@@ -526,7 +544,6 @@ function create_new_field(WP_REST_Request $request)
     parent = {$parent},
     type_properties = '{$props}'";
   $sql = $wpdb->prepare($sql, $body->id, $body->section, $body->position, $body->type, $body->name);
-  error_log($sql); // debug
   return $wpdb->query($sql);
 }
 
@@ -562,7 +579,6 @@ function get_all_section_values($data)
 function create_new_section_value(WP_REST_Request $request)
 {
   $body = json_decode($request->get_body());
-  error_log(print_r($body, true)); // debug
 
   if (!key_exists("section", $body)) {
     return new WP_Error('400', esc_html__('Missing body parameter section', 'text_domain'), array('status' => 400));
@@ -676,4 +692,91 @@ function get_section_value($section_id, $itinerary_id)
     OBJECT
   );
   return $results;
+}
+
+function getIcalDate($time,$timeZone, $inclTime = true)
+{
+  $eventTime = strtotime($time);
+  if($timeZone){
+    $timeZonesStr = file_get_contents( plugin_dir_url(__FILE__) ."admin_frontend/src/assets/timezones.json");
+    $timeZones = json_decode($timeZonesStr, true);
+    $timeZoneKey = array_search($timeZone,array_column($timeZones, 'text'));
+    $timeZoneObj = $timeZones[$timeZoneKey];
+    $timeZoneObj['offset'] = $timeZoneObj['offset'] * -1;
+    $eventTime = strtotime("{$timeZoneObj['offset']} hours",$eventTime);
+  }else{
+    $ukTimeZone = new DateTimeZone("Europe/London");
+    $datetime_UTC = date_create("now", timezone_open("Etc/GMT"));
+    $offset = timezone_offset_get($ukTimeZone, $datetime_UTC) / 3600;
+    $eventTime = strtotime("{$offset} hours",$eventTime);
+  }
+    return date('Ymd' . ($inclTime ? '\THis' : ''), $eventTime)."Z";
+}
+
+//Ical
+function get_ical_for_user(WP_REST_Request $request){
+  global $wpdb, $table_name_itinerary_data;
+
+  //for not its just an id
+  $userToken = $request['usertoken'];
+	
+  $user = get_user_by('id', $userToken );
+  $display_name = $user->display_name;
+  //get last 3 itineraries 
+
+  $raceMap =get_race_map();
+  $lastRacesIds = array_map( fn ($race)=>
+    $race['race_id'],
+    array_slice ($raceMap, -3, 3, true));
+  $stringRaceIds = implode(',',$lastRacesIds);
+  $lastItins = $wpdb->get_results("SELECT * FROM $table_name_itinerary_data WHERE id in ( $stringRaceIds )");
+  $lastItinsJson = array_map(fn($itin)=>json_decode($itin->json_data),$lastItins);
+  // echo $lastItinsJson;
+ //find all flight events 
+  $flights = array_map(fn($itin)=> $itin->flights->Flight,$lastItinsJson);
+
+  $flightsForTheUser =[];
+  foreach($flights as $flight){
+    foreach($flight as $flightItem){
+      if(in_array(  $display_name ,$flightItem->passengers)){
+        array_push($flightsForTheUser,$flightItem);
+      }
+    }
+  }
+  $eventsForTheFlights =[];
+  foreach($flightsForTheUser as $flight){
+    foreach($flight->events as $event){
+      if(in_array(  $display_name ,$event->appliesFor)){
+        array_push($eventsForTheFlights,$event);
+      }
+    }
+  }
+    
+    $ical = "BEGIN:VCALENDAR
+PRODID:-//Google Inc//Google Calendar 70.9054//EN
+VERSION:2.0
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Eventr Calendar
+X-WR-TIMEZONE:UTC
+X-WR-CALDESC:Eventr Calendar
+";
+    foreach($eventsForTheFlights as $event){
+      $ical .= "BEGIN:VEVENT
+DTSTART:". getIcalDate($event->time,$event->timezone) ."
+DTEND:". getIcalDate($event->time,$event->timezone) ."
+DTSTAMP:". date('Ymd' . '\THis' , time()) ."Z
+UID:". str_replace(" ","_",$event->time . $event->description) ."
+SUMMARY:". $event->description ."
+STATUS:CONFIRMED
+DESCRIPTION:".$event->description."
+END:VEVENT
+";
+    }
+    $ical .= "END:VCALENDAR";
+   //set correct content-type-header
+    header('Content-type: text/calendar; charset=utf-8');
+    header('Content-Disposition: inline; filename=calendar.ics');
+    //  echo  json_encode(   $flights);
+    echo    $ical ;
 }

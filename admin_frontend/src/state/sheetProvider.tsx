@@ -62,7 +62,7 @@ export const SheetProvider = (props: { children: React.ReactNode }) => {
       fields.forEach((e) => {
         switch (e.field.field_type) {
           case FieldTypes.list:
-            ws_data.push([...emptyColumns, "", e.field.field_name]);
+            ws_data.push([...emptyColumns, "",  { v: e.field.field_name, t: "s", s: { font: { bold: true } } }]);
             const listWsData = fieldsToWsData(
               e,
               index + "." + i.toString(),
@@ -71,14 +71,14 @@ export const SheetProvider = (props: { children: React.ReactNode }) => {
             ws_data.push(...listWsData);
             break;
           case FieldTypes.select:
-            ws_row.push(...emptyColumns, e.field.field_name);
+            ws_row.push(...emptyColumns, { v: e.field.field_name, t: "s", s: { font: { bold: true } } });
             const selectvalue = getValue(e.field, index + "." + i.toString());
             ws_row.push(...selectvalue);
             ws_data.push(ws_row);
             ws_row = [];
             break;
           default:
-            ws_row.push(...emptyColumns, e.field.field_name);
+            ws_row.push(...emptyColumns,  { v: e.field.field_name, t: "s", s: { font: { bold: true } } });
             const val = getValue(e.field, index + "." + i.toString());
             ws_row.push(val);
             ws_data.push(ws_row);
@@ -101,7 +101,7 @@ export const SheetProvider = (props: { children: React.ReactNode }) => {
     const length = getListFieldLength(field.field, index);
     const emptyColumns = Array(emptyColumn).fill("");
     fields.forEach((e) => {
-      ws_row.push(e.field.field_name);
+      ws_row.push({ v: e.field.field_name, t: "s", s: { font: { bold: true } } });
     });
     ws_data.push([...emptyColumns, ...ws_row]);
     ws_row = [];

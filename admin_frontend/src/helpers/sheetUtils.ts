@@ -110,7 +110,7 @@ export const wsDataToValuesTableStyle = (
       switch (fields[j].field.field_type) {
         default:
           const jsonKey = getJsonKeyFromField(fields[j].field);
-          const fieldValue = sheet[ALPHABET[emptyColumn + j] + startingPos].v;
+          const fieldValue = sheet[ALPHABET[emptyColumn + j] + startingPos]?.v;
           values[i][jsonKey] = fieldValue;
           break;
       }

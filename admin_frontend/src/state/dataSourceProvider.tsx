@@ -2,10 +2,12 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { IDataSourceProperties, IUser, User } from "../api/api";
 import { useFieldContext } from "./fieldProvider";
 import { useValueContext } from "./valueProvider";
+import timezones from "../assets/timezones.json";
 
 export enum DataSourceTypes {
   users = "users",
   parent = "parent",
+  timezones = "timezones",
 }
 
 export const DataSourceTypesList: {
@@ -88,11 +90,18 @@ export const DataSourceProvider = (props: { children: React.ReactNode }) => {
             };
           }
         }
+        
         return {
           options: [],
           label: "No options found",
           labelPlural: "No options found",
         };
+      case DataSourceTypes.timezones:
+        return {
+          options: timezones.map((t) => t.text),
+          label: "Timezone",
+          labelPlural: "Timezones",
+        }
       default:
         return { options: [], label: "Missing", labelPlural: "Missing" };
     }
