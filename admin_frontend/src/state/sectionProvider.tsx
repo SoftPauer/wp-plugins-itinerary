@@ -23,12 +23,13 @@ export const SectionProvider = (props: { children: React.ReactNode }) => {
     const [editSelectedSection, setEditSelectedSection] =
     useState<ISection|undefined>();
   const [sections, setSections] = useState<ISection[]>([]);
-
+  
   useEffect(() => {
     async function fetchData() {
       const sections = await Section.getSections();
       const sectionName= document.getElementById("general-info-react")?.getAttribute("section") ??
-        "unknown"
+       decodeURI(window.location.search.slice(1));
+      
       setselectedSection(sections.find(s=>s.name===sectionName));
       setSections(sections);
     }
