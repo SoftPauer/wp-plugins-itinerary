@@ -17,6 +17,8 @@ import {
   ISectionContext,
   useSectionContext,
 } from "../../state/sectionProvider";
+import { LocalConvenienceStoreOutlined } from "@material-ui/icons";
+import { debug } from "console";
 import { useValueContext } from "../../state/valueProvider";
 const style: any = {
   position: "absolute",
@@ -40,6 +42,16 @@ interface IChannelData {
   channelName?: string;
   users?: string[];
   subChannels?: IChannelData[];
+}
+function flat(node: any, prev: IField[], result: IField[]) {
+  console.log(node);
+  if (Array.isArray(node)) {
+    node.forEach((e) => flat(e, prev, result));
+  } else {
+    prev.push(node.field);
+    if (!node.children.length) result.concat(prev);
+    else flat(node.children, prev, result);
+  }
 }
 
 function getChannels(
