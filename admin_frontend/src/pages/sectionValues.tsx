@@ -1,5 +1,5 @@
 import { Button, makeStyles, Typography } from "@material-ui/core";
-import { FC, useContext } from "react";
+import { FC, useContext, useState } from "react";
 import { IField, Value, User, UpdateApp } from "../api/api";
 import { FieldWrapper } from "../components/fieldWrapper";
 import { ItinerarySelection } from "../components/itinerarySelection";
@@ -10,6 +10,7 @@ import { ModalContext } from "../state/modals";
 import { getJsonKeyFromSection, LooseObject } from "../utils";
 import { useFieldContext } from "../state/fieldProvider";
 import { useValueContext } from "../state/valueProvider";
+import { CreateRocketChannelsModal } from "../components/modals/createRocketChannelsModal";
 
 export interface ISortedField {
   field: IField;
@@ -33,6 +34,7 @@ export const SectionValuesPage: FC = () => {
   const fieldContext = useFieldContext();
   const valueContext = useValueContext();
   const { dispatch } = useContext(ModalContext);
+  const [modelState, setAddChannelModel] = useState<boolean>(false);
 
   const fillFields = (field: ISortedField) => {
     if (sectionContext.selectedSection === undefined) {
@@ -116,6 +118,16 @@ export const SectionValuesPage: FC = () => {
       valueContext.copyValuesFromLastItin(sectionContext.selectedSection.id);
   };
 
+  const doesContainUserType = () => {
+    let containsUserType = false;
+    fieldContext.fields.forEach((field) => {
+      if (field.type_properties?.data_source === "users") {
+        containsUserType = true;
+      }
+    });
+    return containsUserType;
+  };
+
   return (
     <div className={classes.sectionPage}>
       <div className={classes.topSection}>
@@ -152,6 +164,25 @@ export const SectionValuesPage: FC = () => {
       >
         Copy last values
       </Button>
+      {doesContainUserType() ? (
+        <Button
+          style={{ marginLeft: "10px" }}
+          color="default"
+          variant="contained"
+          onClick={() => {
+            setAddChannelModel(true);
+          }}
+        >
+          Create Rocket Channels
+        </Button>
+      ) : (
+        <></>
+      )}
+
+      <CreateRocketChannelsModal
+        open={modelState}
+        handleClose={() => setAddChannelModel(false)}
+      />
     </div>
   );
 };
