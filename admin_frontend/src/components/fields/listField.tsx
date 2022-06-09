@@ -6,7 +6,7 @@ import { ISortedField } from "../../pages/sectionValues";
 import { ModalContext } from "../../state/modals";
 import { useSectionContext } from "../../state/sectionProvider";
 import { FieldWrapper } from "../fieldWrapper";
-import XLSX from "xlsx";
+import XLSX from "xlsx-js-style";
 import { StyledDropzone } from "../styledDropzone";
 import { useValueContext } from "../../state/valueProvider";
 import { wsDataToValues } from "../../helpers/sheetUtils";
@@ -178,6 +178,13 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
 
     var ws = XLSX.utils.aoa_to_sheet(ws_data);
     ws["!cols"] = [
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 },
+      { wpx: 100 },
       { wpx: 100 },
       { wpx: 100 },
       { wpx: 100 },
