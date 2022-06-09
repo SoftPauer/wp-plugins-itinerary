@@ -38,7 +38,7 @@ export const requestsMoodle = {
   },
 };
 
-const requestsItinerary = {
+export const requestsItinerary = {
   get: <T>(url: string) =>
     instance.get<T>("itinerary/v1/" + url).then<T>(responseBody),
   post: (url: string, body: {}) =>
@@ -49,7 +49,7 @@ const requestsItinerary = {
     instance.delete("itinerary/v1/" + url).then(responseBody),
 };
 
-const requestsCoreWP = {
+export const requestsCoreWP = {
   get: <T>(url: string) =>
     instance
       .get("wp/v2/" + url, { headers: { "X-WP-Nonce": wpApiSettings.nonce } })
@@ -230,7 +230,7 @@ export interface IUser {
     last_name: string[];
   };
   data: {
-    data: { user_email: string; user_login: string };
+    data: { user_email: string; user_login: string; display_name: string };
     caps: { subscriber: boolean; administrator: boolean };
   };
 }

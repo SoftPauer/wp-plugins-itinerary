@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { IItinerary, Itinerary } from "../api/api";
-interface IItineraryContext {
+export interface IItineraryContext {
   selected: IItinerary;
   itineraries: IItinerary[];
   setSelectedItin: (itin: IItinerary) => void;
