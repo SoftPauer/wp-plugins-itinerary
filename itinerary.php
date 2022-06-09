@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.0.13
+Version: 1.0.14
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
 
@@ -77,10 +77,12 @@ $table_name_sections = $wpdb->prefix . 'itinerary_sections';
 $table_name_fields = $wpdb->prefix . 'itinerary_fields';
 $table_name_section_values = $wpdb->prefix . 'itinerary_values';
 $table_name_itinerary_data = $wpdb->prefix . 'itinerary_data';
+$table_name_itinerary_channels = $wpdb->prefix . 'itinerary_rocket_channels';
+
 
 function itinerary_install()
 {
-  global $wpdb, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values, $table_name_itinerary_data;
+  global $wpdb, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values, $table_name_itinerary_data, $table_name_itinerary_channels;
   $itinerary_db_version = '1.0';
   $charset_collate = $wpdb->get_charset_collate();
 
@@ -146,6 +148,20 @@ function itinerary_install()
   dbDelta($sql);
 
   add_option('itinerary_db_version', $itinerary_db_version);
+
+  $sql = "CREATE TABLE $table_name_itinerary_channels (
+    id mediumint(9) NOT NULL AUTO_INCREMENT,
+    itinerary_id mediumint(9) NOT NULL,
+    section_id mediumint(9) NOT NULL,
+    json_data text NOT NULL,
+    channel_id text,
+    PRIMARY KEY (id),
+    FOREIGN KEY (itinerary_id) REFERENCES $table_name_itinerary (id),
+    FOREIGN KEY (section_id) REFERENCES $table_name_sections (id)
+  ) $charset_collate;";
+
+  require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+  dbDelta($sql);
 }
 
 // API setup
@@ -309,7 +325,54 @@ add_action('rest_api_init', function () {
       ),
     )
   ));
+  register_rest_route('itinerary/v1', 'rocketChannel/create', array(
+    'methods' => WP_REST_Server::CREATABLE,
+    'callback' => 'create_rocket_channel',
+  ));
+
+  register_rest_route('itinerary/v1', 'rocketChannel/getChannels/(?P<itinerary_id>\d+)/(?P<section_id>\d+)', array(
+    'methods' => WP_REST_Server::READABLE,
+    'callback' => 'get_rocket_channels',
+    'args' => array(
+      'section_id' => array(
+        'validate_callback' => function ($param, $request, $key) {
+          return is_numeric($param);
+        }
+      ),
+      'itinerary_id' => array(
+        'validate_callback' => function ($param, $request, $key) {
+          return is_numeric($param);
+        }
+      ),
+    )
+  ));
 });
+
+
+function create_rocket_channel(WP_REST_Request $request)
+{
+  global $wpdb, $table_name_itinerary_channels;
+  $params = $request->get_json_params();
+  $itinId = $params['itineraryId'];
+  $sectionId = $params['sectionId'];
+  $jsonData = $params['jsonData'];
+  $channelId = $params['channelId'];
+  $sql = "INSERT INTO $table_name_itinerary_channels (itinerary_id, section_id, channel_id, json_data) VALUES ($itinId, $sectionId, '$channelId', '$jsonData')";
+  $result = $wpdb->query($sql);
+  return rest_ensure_response($result);
+}
+
+function get_rocket_channels($request)
+{
+  global $wpdb, $table_name_itinerary_channels;
+  $itinId = $request['itinerary_id'];
+  $sectionId = $request['section_id'];
+
+  $sql = "SELECT * FROM $table_name_itinerary_channels WHERE itinerary_id = $itinId AND section_id = $sectionId";
+  $sqlResult = $wpdb->get_results($sql);
+
+  return rest_ensure_response($sqlResult);
+}
 
 
 /**
