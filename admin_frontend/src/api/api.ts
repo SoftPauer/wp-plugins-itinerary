@@ -7,16 +7,6 @@ const instance = axios.create({
   timeout: 15000,
 });
 
-const moodleInstance = axios.create({
-  baseURL:
-    wpApiSettings.moodle_base_url +
-    "/webservice/rest/server.php?moodlewsrestformat=json",
-  timeout: 150000,
-  headers: {
-    "Content-Type": "application/x-www-form-urlencoded",
-    Accept: "application/json",
-  },
-});
 
 const responseBody = <T>(response: AxiosResponse<T | any>) => response.data;
 const responseBodyWithHeaders = <T>(response: AxiosResponse<T>) => {
@@ -27,16 +17,7 @@ interface IResponseWithHeader<T> {
   data: T;
   headers: Record<string, string>;
 }
-export const requestsMoodle = {
-  updateApp: (json: string) => {
-    const data = new FormData();
-    data.append("wstoken", wpApiSettings.moodle_ws_token);
-    data.append("json", json);
-    data.append("wsfunction", "local_data_consumer_upload");
 
-    return moodleInstance.post("", data).then(responseBody);
-  },
-};
 
 export const requestsItinerary = {
   get: <T>(url: string) =>

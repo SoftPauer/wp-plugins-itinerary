@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.0.14
+Version: 1.0.15
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
 
@@ -61,8 +61,6 @@ add_action('admin_enqueue_scripts', function ($hook) {
   wp_localize_script('react_js', 'wpApiSettings', array(
     'root' => esc_url_raw(rest_url()),
     'nonce' => wp_create_nonce('wp_rest'),
-    'moodle_base_url' => get_option('moodle_base_url'),
-    'moodle_ws_token' => get_option('moodle_ws_token')
   ));
 });
 
