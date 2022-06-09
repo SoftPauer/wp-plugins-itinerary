@@ -7,7 +7,7 @@ const wordpressInstance = axios.create({
 });
 
 const rocketInstance = axios.create({
-  baseURL: "http://alpinechat.bwtsoftpauer.com",
+  baseURL: "https://alpinechat.bwtsoftpauer.com",
   timeout: 15000,
   // headers: {
   //   "Content-Type": "application/json",
