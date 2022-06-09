@@ -20,6 +20,7 @@ Limitation on excel import export:
 Table list types CANNOT have list or select fields inside. 
 
 
+
 To run standalone: 
  ```
   document.getElementById('general-info-react')
