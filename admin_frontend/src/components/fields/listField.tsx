@@ -11,6 +11,7 @@ import { StyledDropzone } from "../styledDropzone";
 import { useValueContext } from "../../state/valueProvider";
 import { wsDataToValues } from "../../helpers/sheetUtils";
 import { useSheetContext } from "../../state/sheetProvider";
+import { useFieldContext } from "../../state/fieldProvider";
 
 type ListProps = {
   field: ISortedField;
@@ -69,6 +70,7 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
     fetchData,
     deleteItem,
   } = useValueContext();
+  const fieldContext = useFieldContext();
 
   useEffect(() => {
     const length = getListFieldLength(field.field, index);
@@ -119,11 +121,25 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
 
   const fillFields = () => {
     const listElements: JSX.Element[] = [];
-    let userFriendlyIndex = 0;
     for (let i = 0; i < length; i++) {
       const fields: JSX.Element[] = [];
-
-      userFriendlyIndex++;
+      let key_string = "";
+      if (field.field.type_properties?.key_fields)
+        for (
+          let j = 0;
+          j < field.field.type_properties?.key_fields?.length;
+          j++
+        ) {
+          const keyField = fieldContext.getFieldById(
+            Number.parseInt(field.field.type_properties?.key_fields[j])
+          );
+          if (keyField) {
+            key_string += getValue(keyField, index + "." + i.toString());
+          }
+          if(j < field.field.type_properties?.key_fields?.length - 1){
+            key_string += ",";
+          }
+        }
       field.children.forEach((c) => {
         fields.push(
           <FieldWrapper
@@ -156,8 +172,13 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
             <div className={classes.header}>
               <div className={classes.groupInd}></div>
               <Typography variant="h5" component="h3">
-                {`${field.field.field_name} ${userFriendlyIndex}`}
+                {`${field.field.field_name}`}
               </Typography>
+              <Typography
+                style={{ paddingLeft: 5 }}
+                variant="body1"
+                component="p"
+              >{`(${key_string})`}</Typography>
             </div>
           }
         >

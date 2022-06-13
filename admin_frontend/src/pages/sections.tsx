@@ -2,12 +2,12 @@ import { Button, Typography } from "@material-ui/core";
 import { FC,useState } from "react";
 import { Section} from "../api/api";
 import { FieldWrapper } from "../components/fieldWrapper";
-import { CreateFieldModal } from "../components/modals/createFieldModal";
 import { CreateSectionModal } from "../components/modals/createSectionModal";
+import { EditFieldModal } from "../components/modals/editFieldModel";
 import { SectionSelection } from "../components/sectionSelector";
-import {  sortFields } from "../fieldTypes";
 import { useFieldContext } from "../state/fieldProvider";
 import { useSectionContext } from "../state/sectionProvider";
+import { sortFields } from "../utils";
 import { ISortedField } from "./sectionValues";
 
 export const SectionsPage: FC<{}> = () => {
@@ -64,7 +64,7 @@ export const SectionsPage: FC<{}> = () => {
         >
           Delete section
         </Button>
-        <CreateSectionModal // TODO move all model into model controller component
+        <CreateSectionModal 
           open={modelState}
           handleClose={() => setaddSectionModel(false)}
         ></CreateSectionModal>
@@ -77,11 +77,11 @@ export const SectionsPage: FC<{}> = () => {
         >
           Add field
         </Button>
-        <CreateFieldModal
+        <EditFieldModal
           section={sectionContext.editSection?.id ?? 0}
           open={newFieldModelState}
           handleClose={() => setNewFieldModelState(false)}
-        ></CreateFieldModal>
+        ></EditFieldModal>
       </div>
       <Typography variant="h6" component="h2">
         Section fields will look like this:

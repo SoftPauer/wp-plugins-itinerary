@@ -29,6 +29,7 @@ export const FieldProvider = (props: { children: React.ReactNode }) => {
   const loadFields = async (section:number)=>{
     setfields(await Field.getFields(section));
   }
+  
   const getFieldById = (id:number)=>{
     return getFieldByIdFromFields(fields,id);
   }
@@ -52,8 +53,9 @@ export const useFieldContext = () => {
 
 
 export const getFieldByIdFromFields = (fields:IField[], id:number)=>{
-  return fields.find((field)=>field.id===id);
+  return fields.find((field )=>  field.id  == id);
 }
+
 export const getFieldByFieldName = (fields:ISortedField[], name:string)=>{
   return fields.find((field)=>field.field.field_name === name);
 }

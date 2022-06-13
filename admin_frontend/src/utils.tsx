@@ -86,3 +86,59 @@ export const getValueNoContext = (
   return "";
 };
 
+export const sortFields = (fields: IField[], neighborIt: boolean = true) => {
+  let sortedFields: ISortedField[] = [];
+  // sort parent - children
+  let childFields = fields
+    .sort((a, b) => a.position - b.position)
+    .filter((f) => {
+      if (f.parent === null) {
+        sortedFields.push({ field: f, children: [] });
+      }
+      return f.parent !== null;
+    });
+
+  sortedFields.forEach((s) => {
+    s.children = findChildren(s.field, childFields);
+  });
+
+  //find neighbors
+  if (neighborIt) {
+    sortedFields = sortNeighbors(sortedFields);
+  }
+
+  return sortedFields;
+};
+
+export const findNeighbors = (parent: IField, sortedFields: ISortedField[]) => {
+  const neighbors = sortedFields.filter(
+    (s) => s.field.position === parent.position && s.field.id !== parent.id
+  );
+  return neighbors;
+};
+export const sortNeighbors = (sortedFields: ISortedField[]) => {
+  for (let i = 0; i < sortedFields.length; i++) {
+    const neighbors = findNeighbors(sortedFields[i].field, sortedFields);
+    sortedFields[i].neighbors = sortNeighbors(neighbors);
+    sortedFields = sortedFields.filter(
+      (s) => !neighbors.map((n) => n.field.id).includes(s.field.id)
+    );
+    sortedFields[i].children = sortNeighbors(sortedFields[i].children);
+  }
+  return sortedFields;
+};
+
+export const findChildren = (parent: IField, fields: IField[]) => {
+  const sortedFields: ISortedField[] = [];
+  fields.filter((f) => {
+    if (parent.id === f.parent) {
+      sortedFields.push({ field: f, children: [] });
+      return true;
+    }
+    return false;
+  });
+  sortedFields.forEach((s) => {
+    s.children = findChildren(s.field, fields);
+  });
+  return sortedFields;
+};

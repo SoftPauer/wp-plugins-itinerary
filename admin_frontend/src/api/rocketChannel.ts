@@ -1,10 +1,6 @@
 import axios, { AxiosResponse } from "axios";
-import { requestsCoreWP, requestsItinerary } from "../api/api";
+import { requestsCoreWP, requestsItinerary } from "./api";
 
-const wordpressInstance = axios.create({
-  baseURL: wpApiSettings.root,
-  timeout: 15000,
-});
 
 const rocketInstance = axios.create({
   baseURL: "https://alpinechat.bwtsoftpauer.com",

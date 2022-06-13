@@ -1,5 +1,4 @@
 import { Typography } from "@material-ui/core";
-import { IField } from "./api/api";
 import { AppDatePicker } from "./components/fields/datePicker";
 import { GroupField } from "./components/fields/group";
 import { ListField } from "./components/fields/listField";
@@ -119,59 +118,3 @@ export const renderField = (
   );
 };
 
-export const sortFields = (fields: IField[], neighborIt: boolean = true) => {
-  let sortedFields: ISortedField[] = [];
-  // sort parent - children
-  let childFields = fields
-    .sort((a, b) => a.position - b.position)
-    .filter((f) => {
-      if (f.parent === null) {
-        sortedFields.push({ field: f, children: [] });
-      }
-      return f.parent !== null;
-    });
-
-  sortedFields.forEach((s) => {
-    s.children = findChildren(s.field, childFields);
-  });
-
-  //find neighbors
-  if (neighborIt) {
-    sortedFields = sortNeighbors(sortedFields);
-  }
-
-  return sortedFields;
-};
-
-const findNeighbors = (parent: IField, sortedFields: ISortedField[]) => {
-  const neighbors = sortedFields.filter(
-    (s) => s.field.position === parent.position && s.field.id !== parent.id
-  );
-  return neighbors;
-};
-const sortNeighbors = (sortedFields: ISortedField[]) => {
-  for (let i = 0; i < sortedFields.length; i++) {
-    const neighbors = findNeighbors(sortedFields[i].field, sortedFields);
-    sortedFields[i].neighbors = sortNeighbors(neighbors);
-    sortedFields = sortedFields.filter(
-      (s) => !neighbors.map((n) => n.field.id).includes(s.field.id)
-    );
-    sortedFields[i].children = sortNeighbors(sortedFields[i].children);
-  }
-  return sortedFields;
-};
-
-const findChildren = (parent: IField, fields: IField[]) => {
-  const sortedFields: ISortedField[] = [];
-  fields.filter((f) => {
-    if (parent.id === f.parent) {
-      sortedFields.push({ field: f, children: [] });
-      return true;
-    }
-    return false;
-  });
-  sortedFields.forEach((s) => {
-    s.children = findChildren(s.field, fields);
-  });
-  return sortedFields;
-};

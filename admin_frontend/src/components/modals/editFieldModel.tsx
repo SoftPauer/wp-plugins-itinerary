@@ -1,3 +1,4 @@
+import MultiSelect from "@antlerengineering/multiselect";
 import {
   Box,
   Button,
@@ -26,13 +27,14 @@ import {
   DataSourceTypesList,
 } from "../../state/dataSourceProvider";
 import { useFieldContext } from "../../state/fieldProvider";
+import { findChildren } from "../../utils";
 
 const style: any = {
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 500,
+  width: 800,
   bgcolor: "background.paper",
   border: "2px solid #000",
   boxShadow: 24,
@@ -60,7 +62,6 @@ export const EditFieldModal: FC<EditFieldModalProps> = ({
   field,
 }) => {
   const fieldContext = useFieldContext();
-
   const [state, setState] = useState<EditFieldState>({
     name: field?.field_name ?? "",
     type: field?.field_type ?? "",
@@ -88,6 +89,19 @@ export const EditFieldModal: FC<EditFieldModalProps> = ({
     fieldContext.fields.filter(
       (g) => g.field_type === FieldTypes.select && g.id !== field?.id
     ) ?? [];
+
+  const membersList = (field?: IField) => {
+    if (field) {
+      const children = findChildren(field, fieldContext.fields);
+      return children.map((c) => {
+        return {
+          value: c.field.id.toString(),
+          label: c.field.field_name,
+        };
+      });
+    }
+    return [];
+  };
 
   /**
    *  Get Fields required specified data source
@@ -142,7 +156,7 @@ export const EditFieldModal: FC<EditFieldModalProps> = ({
       >
         <Box sx={style}>
           <Typography variant="h6" component="h2">
-            Edit Field
+            Edit/Create Field
           </Typography>
           <TextField
             style={{ width: "100%" }}
@@ -190,31 +204,52 @@ export const EditFieldModal: FC<EditFieldModalProps> = ({
               </Select>
             </FormControl>
             {state.type === FieldTypes.list && (
-              <FormControl>
-                <InputLabel>Excel diplay type</InputLabel>
-                <Select
-                  style={{ width: "200px" }}
-                  labelWidth={100}
-                  value={state.properties?.excelDisplayType??""}
-                  onChange={(val) =>
-                    setState({
-                      ...state,
-                      properties: {
-                        ...state.properties,
-                        excelDisplayType: val.target.value as ExcelDisplayTypes,
-                      },
-                    })
-                  }
-                >
-                  {ExcelDisplayTypesList.map((i, n) => {
-                    return (
-                      <MenuItem key={n} value={i.value}>
-                        {i.value}
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-              </FormControl>
+              <>
+                <FormControl>
+                  <InputLabel>Excel diplay type</InputLabel>
+                  <Select
+                    style={{ width: "200px" }}
+                    labelWidth={100}
+                    value={state.properties?.excelDisplayType ?? ""}
+                    onChange={(val) =>
+                      setState({
+                        ...state,
+                        properties: {
+                          ...state.properties,
+                          excelDisplayType: val.target
+                            .value as ExcelDisplayTypes,
+                        },
+                      })
+                    }
+                  >
+                    {ExcelDisplayTypesList.map((i, n) => {
+                      return (
+                        <MenuItem key={n} value={i.value}>
+                          {i.value}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </FormControl>
+                <FormControl>
+                  <MultiSelect
+                    options={membersList(field)}
+                    multiple={true}
+                    label={"Key field"}
+                    labelPlural={"Key fields"}
+                    value={state.properties?.key_fields ?? []}
+                    onChange={(val) =>
+                      setState({
+                        ...state,
+                        properties: {
+                          ...state.properties,
+                          key_fields: val,
+                        },
+                      })
+                    }
+                  />
+                </FormControl>
+              </>
             )}
           </div>
           <div style={{ display: "flex", margin: "10px 0 10px 0" }}>
@@ -251,7 +286,6 @@ export const EditFieldModal: FC<EditFieldModalProps> = ({
               <InputLabel>Data transform</InputLabel>
               <Select
                 style={{ width: "200px" }}
-                label="Parent"
                 value={state.properties?.data_transform}
                 onChange={(val) => {
                   setState({
@@ -296,7 +330,6 @@ export const EditFieldModal: FC<EditFieldModalProps> = ({
             <InputLabel>Parent</InputLabel>
             <Select
               style={{ width: "200px" }}
-              label="Parent"
               value={state.parent}
               onChange={(val) =>
                 setState({ ...state, parent: val.target.value as number })
@@ -339,7 +372,7 @@ export const EditFieldModal: FC<EditFieldModalProps> = ({
               });
             }}
           >
-            Edit field
+            Save
           </Button>
         </Box>
       </Modal>

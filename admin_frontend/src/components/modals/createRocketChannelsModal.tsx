@@ -1,12 +1,12 @@
 import { Box, Button, Modal, TextField, Typography } from "@material-ui/core";
 import React, { FC, useState } from "react";
 import { IField, User } from "../../api/api";
-import { FieldTypes, sortFields } from "../../fieldTypes";
 import {
   IRocketChannelCreate,
   IRocketChannelData,
   RocketChat,
-} from "../../helpers/rocketChannel";
+} from "../../api/rocketChannel";
+import { FieldTypes } from "../../fieldTypes";
 import { ISortedField } from "../../pages/sectionValues";
 import { useFieldContext } from "../../state/fieldProvider";
 import {
@@ -17,9 +17,9 @@ import {
   ISectionContext,
   useSectionContext,
 } from "../../state/sectionProvider";
-import { LocalConvenienceStoreOutlined } from "@material-ui/icons";
-import { debug } from "console";
+
 import { useValueContext } from "../../state/valueProvider";
+import { sortFields } from "../../utils";
 const style: any = {
   position: "absolute",
   top: "50%",

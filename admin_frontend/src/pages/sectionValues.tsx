@@ -3,14 +3,12 @@ import { FC, useContext, useState } from "react";
 import { IField, Value, User, UpdateApp } from "../api/api";
 import { FieldWrapper } from "../components/fieldWrapper";
 import { ItinerarySelection } from "../components/itinerarySelection";
-import { sortFields } from "../fieldTypes";
 import { useItineraryContext } from "../state/itineraryProvider";
 import { useSectionContext } from "../state/sectionProvider";
 import { ModalContext } from "../state/modals";
-import { getJsonKeyFromSection, LooseObject } from "../utils";
+import { getJsonKeyFromSection, LooseObject, sortFields } from "../utils";
 import { useFieldContext } from "../state/fieldProvider";
 import { useValueContext } from "../state/valueProvider";
-import { CreateRocketChannelsModal } from "../components/modals/createRocketChannelsModal";
 
 export interface ISortedField {
   field: IField;
@@ -175,10 +173,10 @@ export const SectionValuesPage: FC = () => {
         <></>
       )}
 
-      <CreateRocketChannelsModal
+      {/* <CreateRocketChannelsModal
         open={modelState}
         handleClose={() => setAddChannelModel(false)}
-      />
+      /> */}
     </div>
   );
 };

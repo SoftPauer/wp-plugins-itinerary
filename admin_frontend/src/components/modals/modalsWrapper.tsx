@@ -1,6 +1,5 @@
 import { FC, useContext } from "react";
 import { ModalContext } from "../../state/modals";
-import { CreateFieldModal } from "./createFieldModal";
 import { EditFieldModal } from "./editFieldModel";
 import {
   Box,
@@ -26,11 +25,6 @@ export const ModalsWrapper: FC<{}> = () => {
 
   return (
     <div>
-      <CreateFieldModal
-        section={state.modalData?.section ?? 0}
-        open={state.active && state.modal === "CreateField"}
-        handleClose={() => dispatch({ type: "close" })}
-      ></CreateFieldModal>
       <EditFieldModal 
         open={state.active && state.modal === "EditField"}
         handleClose={() => dispatch({ type: "close" })}
