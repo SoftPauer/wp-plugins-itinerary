@@ -2,6 +2,7 @@ import axios, { AxiosResponse } from "axios";
 import { ExcelDisplayTypes } from "../fieldTypes";
 import { LooseObject } from "../utils";
 
+
 const instance = axios.create({
   baseURL: wpApiSettings.root,
   timeout: 15000,
@@ -115,6 +116,7 @@ export interface ITypeProperties {
   data_transform?: string;
   data_transform_properties?: string;
   excelDisplayType?: ExcelDisplayTypes;
+  key_fields?: string[];// used to diplay next to the header 
 }
 export interface IDataSourceProperties {
   source?: number;
