@@ -158,7 +158,7 @@ export const SectionValuesPage: FC = () => {
       >
         Copy last values
       </Button>
-      {doesContainUserType() ? (
+      {/* {doesContainUserType() ? (
         <Button
           style={{ marginLeft: "10px" }}
           color="default"
@@ -171,7 +171,7 @@ export const SectionValuesPage: FC = () => {
         </Button>
       ) : (
         <></>
-      )}
+      )} */}
 
       {/* <CreateRocketChannelsModal
         open={modelState}
