@@ -1,7 +1,7 @@
 import MultiSelect from "@antlerengineering/multiselect";
 import { Button, FormControl, makeStyles } from "@material-ui/core";
 import { FC, useContext, useEffect, useState } from "react";
-import { Field, IField, } from "../../api/api";
+import { Field, IField } from "../../api/api";
 import {
   IDataSourceOptions,
   useDataSourceContext,
@@ -51,12 +51,7 @@ export const AppSelectField: FC<AppSelectFieldProps> = ({
       );
     }
     fetchData();
-  }, [
-    index,
-    field,
-    dataSourceContext,
-    valueContext
-  ]);
+  }, [index, field, dataSourceContext, valueContext]);
 
   return (
     <div className={classes.appSelectFieldField}>
@@ -69,7 +64,7 @@ export const AppSelectField: FC<AppSelectFieldProps> = ({
           label={options?.label}
           onClose={() => {
             valueContext.updateValues({
-              field:field,
+              field: field,
               value: JSON.stringify(state),
               index: index,
             });

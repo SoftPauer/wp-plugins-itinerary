@@ -43,16 +43,6 @@ interface IChannelData {
   users?: string[];
   subChannels?: IChannelData[];
 }
-function flat(node: any, prev: IField[], result: IField[]) {
-  console.log(node);
-  if (Array.isArray(node)) {
-    node.forEach((e) => flat(e, prev, result));
-  } else {
-    prev.push(node.field);
-    if (!node.children.length) result.concat(prev);
-    else flat(node.children, prev, result);
-  }
-}
 
 function getChannels(
   parent: IField,
@@ -193,8 +183,6 @@ export const CreateRocketChannelsModal: FC<CreateRocketChannelsModalProps> = ({
     const possibleChannels: IChannelData[] = [];
     const sortedFields = sortFields(fieldContext.fields, false);
     sortedFields.forEach((element, index) => {
-      console.log(element);
-      console.log(valueContext.getValue(element.field, index.toString()));
       possibleChannels.push(
         ...getChannels(
           element.field,
@@ -205,7 +193,6 @@ export const CreateRocketChannelsModal: FC<CreateRocketChannelsModalProps> = ({
       );
     });
 
-    console.log("All Channel Branches: ", possibleChannels);
     return possibleChannels;
   };
 
@@ -270,9 +257,7 @@ export const CreateRocketChannelsModal: FC<CreateRocketChannelsModalProps> = ({
                             getExisitingChannels(
                               itnContext,
                               sectionContext
-                            ).then((res) => {
-                              console.log(res);
-                            });
+                            ).then((res) => {});
                             await createRocketChannels(
                               subChannel,
                               itnContext,

@@ -8,7 +8,7 @@ import {
   TextField,
 } from "@material-ui/core";
 import { FC, useEffect, useState, useContext } from "react";
-import { Field, IField, } from "../../api/api";
+import { Field, IField } from "../../api/api";
 import {
   IDataSourceOptions,
   useDataSourceContext,
@@ -44,8 +44,8 @@ export const AppTextField: FC<AppTextFieldProps> = ({
   const dataSourceContext = useDataSourceContext();
 
   useEffect(() => {
-    const initFieldValue = valueContext.getValue(field,index);
-    
+    const initFieldValue = valueContext.getValue(field, index);
+
     setState({ inputString: initFieldValue });
     setOptions(
       dataSourceContext.resolveDataSource(
@@ -54,7 +54,7 @@ export const AppTextField: FC<AppTextFieldProps> = ({
         index
       )
     );
-  }, [ valueContext.values,field, dataSourceContext,index,valueContext]);
+  }, [valueContext.values, field, dataSourceContext, index, valueContext]);
 
   return (
     <div className={classes.appTextField}>
@@ -71,7 +71,7 @@ export const AppTextField: FC<AppTextFieldProps> = ({
           value={state?.inputString}
           onBlur={() => {
             valueContext.updateValues({
-              field:field,
+              field: field,
               value: state?.inputString ?? "",
               index: index,
             });
@@ -91,7 +91,7 @@ export const AppTextField: FC<AppTextFieldProps> = ({
             }
             onBlur={() => {
               valueContext.updateValues({
-                field:field,
+                field: field,
                 value: state?.inputString ?? "",
                 index: index,
               });

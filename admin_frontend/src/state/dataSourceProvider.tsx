@@ -61,8 +61,8 @@ export const DataSourceProvider = (props: { children: React.ReactNode }) => {
       case DataSourceTypes.users:
         return {
           options: users.map((u) => u.name),
-          label: "Users",
-          labelPlural: "Users",
+          label: "Passenger",
+          labelPlural: "Passengers",
         };
       case DataSourceTypes.parent:
         if (!sourceProps?.source) {
@@ -79,8 +79,8 @@ export const DataSourceProvider = (props: { children: React.ReactNode }) => {
           if (val) {
             return {
               options: val,
-              label: "Users",
-              labelPlural: "Users",
+              label: "Passenger",
+              labelPlural: "Passengers",
             };
           } else {
             return {
@@ -90,7 +90,7 @@ export const DataSourceProvider = (props: { children: React.ReactNode }) => {
             };
           }
         }
-        
+
         return {
           options: [],
           label: "No options found",
@@ -101,7 +101,7 @@ export const DataSourceProvider = (props: { children: React.ReactNode }) => {
           options: timezones.map((t) => t.text),
           label: "Timezone",
           labelPlural: "Timezones",
-        }
+        };
       default:
         return { options: [], label: "Missing", labelPlural: "Missing" };
     }

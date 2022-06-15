@@ -136,7 +136,7 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
           if (keyField) {
             key_string += getValue(keyField, index + "." + i.toString());
           }
-          if(j < field.field.type_properties?.key_fields?.length - 1){
+          if (j < field.field.type_properties?.key_fields?.length - 1) {
             key_string += ",";
           }
         }

@@ -8,7 +8,7 @@ import {
 import { IField, Value } from "../api/api";
 import { FieldTypes } from "../fieldTypes";
 import { getJsonKeyFromField, LooseObject } from "../utils";
-import {  useFieldContext } from "./fieldProvider";
+import { useFieldContext } from "./fieldProvider";
 import { useItineraryContext } from "./itineraryProvider";
 import { useSectionContext } from "./sectionProvider";
 
@@ -100,9 +100,6 @@ export const ValueProvider = (props: { children: React.ReactNode }) => {
   };
 
   const updateValues = async (value: IUpdateValue) => {
-
-    console.log(value);
-    
     const key = getJsonKeyFromField(value.field);
     let newValue: LooseObject = values;
     if (value.field.parent === null) {
@@ -138,7 +135,6 @@ export const ValueProvider = (props: { children: React.ReactNode }) => {
         value.value
       );
     }
-    console.log(newValue);
     if (sectionContext.selectedSection) {
       await Value.createValueOrUpdate({
         itinerary: itineraryContext.selected.id,
@@ -193,7 +189,6 @@ export const ValueProvider = (props: { children: React.ReactNode }) => {
       }
     }
     if (parentKeysFields[i].field_type === FieldTypes.list) {
-      console.log(newValue[getJsonKeyFromField(parentKeysFields[i])]);
       if (
         typeof newValue[getJsonKeyFromField(parentKeysFields[i])] === "string"
       )
@@ -225,7 +220,6 @@ export const ValueProvider = (props: { children: React.ReactNode }) => {
         };
       }
     }
-    console.log(newValue);
 
     return newValue;
   };
@@ -249,7 +243,6 @@ export const ValueProvider = (props: { children: React.ReactNode }) => {
       }
     }
     if (parentKeysFields[i].field_type === FieldTypes.list) {
-      console.log(newValue[getJsonKeyFromField(parentKeysFields[i])]);
       if (
         typeof newValue[getJsonKeyFromField(parentKeysFields[i])] === "string"
       )
@@ -335,7 +328,6 @@ export const ValueProvider = (props: { children: React.ReactNode }) => {
     if (field.parent === null) {
       if (values?.hasOwnProperty(key)) {
         try {
-          console.log(typeof values[key]);
           if (typeof values[key] === "string") {
             const value = JSON.parse(values[key]);
             return value.length;
@@ -405,4 +397,3 @@ export const ValueProvider = (props: { children: React.ReactNode }) => {
 export const useValueContext = () => {
   return useContext(ValueContext);
 };
-

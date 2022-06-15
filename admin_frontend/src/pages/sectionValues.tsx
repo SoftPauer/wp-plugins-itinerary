@@ -86,7 +86,6 @@ export const SectionValuesPage: FC = () => {
     const today = new Date(timeElapsed).toISOString();
     json["updatedAt"] = today;
     json["macrosVersion"] = "0.1.0";
-    console.log(json);
 
     // commit data to database instead of sending to moodle!
 
@@ -107,7 +106,7 @@ export const SectionValuesPage: FC = () => {
     dispatch({
       type: "open",
       modal: "Text",
-      modalData: { text: "App Has been Updated!" },
+      modalData: { text: "App has been updated!" },
     });
   };
 

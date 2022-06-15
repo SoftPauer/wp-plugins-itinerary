@@ -103,7 +103,7 @@ export const renderField = (
   if (field.field.field_type === FieldTypes.list) {
     return (
       <ListField
-      index={index}
+        index={index}
         field={field}
         preview={preview}
         key={field.field.id}
@@ -117,4 +117,3 @@ export const renderField = (
     </Typography>
   );
 };
-
