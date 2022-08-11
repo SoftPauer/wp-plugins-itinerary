@@ -8,6 +8,8 @@ import {
   Modal,
   Select,
   TextField,
+  Checkbox,
+  FormControlLabel,
   Typography,
 } from "@material-ui/core";
 import { FC, useEffect, useState } from "react";
@@ -110,7 +112,28 @@ export const EditFieldModal: FC<EditFieldModalProps> = ({
   const getDataSourceExtraFields = () => {
     switch (state.properties?.data_source) {
       case DataSourceTypes.users:
-        return <div></div>;
+        return (
+          <div>
+            <FormControl>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    onChange={(val) =>
+                      setState({
+                        ...state,
+                        properties: {
+                          ...state.properties,
+                          showOnDashboard: val.target.checked,
+                        },
+                      })
+                    }
+                  />
+                }
+                label="Add to dashboard?"
+              />
+            </FormControl>
+          </div>
+        );
       case DataSourceTypes.parent:
         return (
           <FormControl>

@@ -568,6 +568,15 @@ function get_all_fields($data)
   $results = $wpdb->get_results("SELECT * FROM {$table_name_fields} WHERE section = {$data['section_id']}", OBJECT);
   return rest_ensure_response($results);
 }
+/**
+ * Return all fields checked true
+ */
+function get_all_show_on_dashboard()
+{
+  global $wpdb, $table_name_fields;
+  $results = $wpdb->get_results("SELECT * FROM `wp_itinerary_fields` WHERE type_properties like '%"showOnDashboard":true%';", OBJECT);
+  return rest_ensure_response($results);
+}
 
 /**
  * Create field

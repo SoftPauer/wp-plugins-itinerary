@@ -117,6 +117,7 @@ export interface ITypeProperties {
   data_transform_properties?: string;
   excelDisplayType?: ExcelDisplayTypes;
   key_fields?: string[];// used to diplay next to the header 
+  showOnDashboard?: boolean;
 }
 export interface IDataSourceProperties {
   source?: number;
