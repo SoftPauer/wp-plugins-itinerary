@@ -54,7 +54,7 @@ export const AppTextField: FC<AppTextFieldProps> = ({
         index
       )
     );
-  }, [valueContext.values, field, dataSourceContext, index, valueContext]);
+  }, [valueContext.values, field, dataSourceContext, index]);
 
   return (
     <div className={classes.appTextField}>

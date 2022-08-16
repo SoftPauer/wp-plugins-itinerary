@@ -2,52 +2,68 @@
     "Alex Powell": {
         "Flights": [
             {
-                "flightDate": "2022-05-25",
+                "flightDate": "2022-05-26",
                 "passengers": [
-                    "Andrius Murauskas",
-                    "Dan Stokoe",
-                    "Catherine Schade",
                     "Alex Powell",
-                    "Akio Haga"
+                    "Alex Hindle"
                 ],
-                "outboundAirportAbr": "LTN",
-                "inboundAirportAbr": "BCN",
-                "duration": "2h 10m",
+                "outboundAirportAbr": "LHR",
+                "inboundAirportAbr": "MIA",
+                "duration": "8h 15",
                 "events": [
                     {
-                        "time": "09:30",
-                        "description": "National Express to Depart Endstone",
+                        "time": "2022-05-26T10:40",
+                        "timezone": "(UTC+01:00) Edinburgh, London",
+                        "description": "Flight BA207 departs",
                         "appliesFor": [
                             "Alex Powell",
-                            "Andrius Murauskas",
-                            "Dan Stokoe"
+                            "Alex Hindle"
                         ]
                     },
                     {
-                        "time": "11:00",
-                        "description": "Check-in at",
+                        "time": "2022-05-26T14:55",
+                        "timezone": "(UTC-04:00) Eastern Daylight Time (US & Canada)",
+                        "description": "Flight BA207 arrives",
                         "appliesFor": [
                             "Alex Powell",
-                            "Andrius Murauskas",
-                            "Dan Stokoe"
+                            "Alex Hindle"
+                        ]
+                    }
+                ]
+            },
+            {
+                "flightDate": "2022-05-01",
+                "passengers": [
+                    "Andrius Murauskatest",
+                    "Bud Wurstner",
+                    "Catherine Schade",
+                    "Courtney Seymour",
+                    "Alex Powell"
+                ],
+                "outboundAirportAbr": "LHR",
+                "inboundAirportAbr": "MIA",
+                "duration": "8h 15",
+                "events": [
+                    {
+                        "time": "2022-05-01T12:50",
+                        "timezone": "(UTC+01:00) Edinburgh, London",
+                        "description": "Flight AA039 departs ",
+                        "appliesFor": [
+                            "Andrius Murauskatest",
+                            "Bud Wurstner",
+                            "Catherine Schade",
+                            "Courtney Seymour"
                         ]
                     },
                     {
-                        "time": "17:20",
-                        "description": "Flight FR7807 departs",
+                        "time": "2022-05-01T17:30",
+                        "timezone": "(UTC-04:00) Eastern Daylight Time (US & Canada)",
+                        "description": "Flight AA039 arrives",
                         "appliesFor": [
-                            "Alex Powell",
-                            "Andrius Murauskas",
-                            "Dan Stokoe"
-                        ]
-                    },
-                    {
-                        "time": "18:30",
-                        "description": "Flight FR7807 arrives in Barcelona",
-                        "appliesFor": [
-                            "Alex Powell",
-                            "Andrius Murauskas",
-                            "Dan Stokoe"
+                            "Andrius Murauskatest",
+                            "Bud Wurstner",
+                            "Catherine Schade",
+                            "Courtney Seymour"
                         ]
                     }
                 ]
@@ -84,7 +100,7 @@
                 ]
             }
         ],
-        "Car_allocations": [
+        "Hire_Cars": [
             {
                 "carType": "Subaru BRZ",
                 "mainDriver": "Alex Powell",
@@ -179,7 +195,7 @@
                 ]
             }
         ],
-        "Car_allocations": [
+        "Hire_Cars": [
             
         ]
     },
@@ -212,7 +228,7 @@
                         "description": "Check-in at",
                         "appliesFor": [
                             "Alex Powell",
-                            "Andrius Murauskas",
+                            "Andrius Murauskasf",
                             "Dan Stokoe"
                         ]
                     },
@@ -289,7 +305,7 @@
                 ]
             }
         ],
-        "Car_allocations": [
+        "Hire_Cars": [
             
         ]
     },
@@ -348,9 +364,9 @@
             }
         ],
         "Hotels": [
-            {}
+            
         ],
-        "Car_allocations": [
+        "Hire_Cars": [
             {
                 "carType": "Subaru BRZ",
                 "mainDriver": "Alex Powell",
@@ -417,8 +433,8 @@
         "Hotels": [
             
         ],
-        "Car_allocations": [
-        
+        "Hire_Cars": [
+            
         ]
     }
 }

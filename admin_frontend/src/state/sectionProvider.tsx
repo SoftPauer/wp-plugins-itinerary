@@ -4,22 +4,27 @@ export interface ISectionContext {
   selectedSection: ISection | undefined;
   editSection: ISection | undefined;
   sections: ISection[];
+  selectedItem: number | undefined;
   setSelectedSection: (section: ISection | undefined) => void;
   setEditSection: (section: ISection | undefined) => void;
+  setSelectedItem: (section: number | undefined) => void;
 }
 
 const SectionContext = createContext<ISectionContext>({
   selectedSection: undefined,
   editSection: undefined,
   sections: [],
+  selectedItem: undefined,
   setSelectedSection: (section: ISection | undefined) => {},
   setEditSection: (section: ISection | undefined) => {},
+  setSelectedItem: (section: number | undefined) => {},
 });
 
 export const SectionProvider = (props: { children: React.ReactNode }) => {
   const [selectedSection, setselectedSection] = useState<
     ISection | undefined
   >();
+  const [selectedItem, setSelectedItem] = useState<number | undefined>();
   const [editSelectedSection, setEditSelectedSection] = useState<
     ISection | undefined
   >();
@@ -43,6 +48,8 @@ export const SectionProvider = (props: { children: React.ReactNode }) => {
   return (
     <SectionContext.Provider
       value={{
+        selectedItem: selectedItem,
+        setSelectedItem: setSelectedItem,
         selectedSection: selectedSection,
         sections: sections,
         setSelectedSection: setselectedSection,

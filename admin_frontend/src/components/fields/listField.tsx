@@ -12,6 +12,7 @@ import { useValueContext } from "../../state/valueProvider";
 import { wsDataToValues } from "../../helpers/sheetUtils";
 import { useSheetContext } from "../../state/sheetProvider";
 import { useFieldContext } from "../../state/fieldProvider";
+import { SatelliteSharp } from "@material-ui/icons";
 
 type ListProps = {
   field: ISortedField;
@@ -58,6 +59,13 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
   const [length, setLength] = useState<number>(
     Number.parseInt(preview ? "1" : "0")
   );
+
+  const handleClose = () => {
+    localStorage.removeItem("item");
+  };
+
+  const states: boolean[] = [];
+
   const classes = useStyles();
   const { dispatch } = useContext(ModalContext);
   const sectionContext = useSectionContext();
@@ -76,6 +84,13 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
     const length = getListFieldLength(field.field, index);
     setLength(Number.parseInt(preview ? "1" : length.toString()));
   }, [getListFieldLength, preview, values, field.field, index]);
+
+  for (let i = 0; i < length; i++) {
+    states.push(false);
+  }
+  if (sectionContext.selectedItem !== undefined) {
+    states[sectionContext.selectedItem] = true;
+  }
 
   const addEntry = async () => {
     let val = [];
@@ -166,7 +181,7 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
       );
       listElements.push(
         <Collapsible
-          open={false}
+          open={states[i]}
           transitionTime={250}
           trigger={
             <div className={classes.header}>
@@ -181,6 +196,8 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
               >{`(${key_string})`}</Typography>
             </div>
           }
+          className={`${i}`}
+          onClick={handleClose}
         >
           <div key={i + "listElem"} className={classes.listField}>
             {fields}

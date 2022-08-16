@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useState, MouseEventHandler, useEffect } from "react";
 import data from "./dummyData.json";
 import {
   TableContainer,
@@ -9,20 +9,48 @@ import {
   TableRow,
 } from "@material-ui/core";
 import { ItinerarySelection } from "../components/itinerarySelection";
+import { useItineraryContext } from "../state/itineraryProvider";
+import { FieldProvider } from "../state/fieldProvider";
+
+enum Emojis {
+  "Flights" = "✈️",
+  "Hotels" = "🏠",
+  "Hire_Cars" = "🚗",
+}
+
+const Emoji = (props: {
+  field: string;
+  count: number;
+  onClick: () => void;
+}) => {
+  if (props.count >= 1) {
+    return (
+      <span onClick={props.onClick}>
+        {Emojis[props.field as keyof typeof Emojis]}
+      </span>
+    );
+  } else {
+    return <span></span>;
+  }
+};
 
 const DashboardRow = (props: { row: any; name: string }) => {
-  const handleEmojis = (field: string, count: number) => {
-    switch (field) {
-      case "Flights":
-        return Array(count).fill("✈️").join(" ");
-      case "Hotels":
-        return Array(count).fill("🏠").join(" ");
-      case "Car_allocations":
-        return Array(count).fill("🚗").join(" ");
+  const handleEmojiClick = (booking: string, items: {}) => {
+    if (items) {
+      localStorage.setItem("item", JSON.stringify(items));
+      console.log(items);
+    }
+    if (booking && booking.includes("_")) {
+      const word: string = booking;
+      const replace = word.replaceAll("_", "+");
+      //window.location.search = "?page=itinerary-plugin-section" + replace;
+    } else {
+      window.location.search = "?page=itinerary-plugin-section" + booking;
     }
   };
 
   const keyArr = [];
+
   for (const key in props.row) {
     keyArr.push(key);
   }
@@ -33,7 +61,17 @@ const DashboardRow = (props: { row: any; name: string }) => {
       {keyArr.map((booking) => {
         return (
           <TableCell>
-            {handleEmojis(booking, props.row[booking].length)}
+            {props.row[booking].map((emojiObj: {}) => {
+              return (
+                <Emoji
+                  field={booking}
+                  count={props.row[booking].length}
+                  onClick={() => {
+                    handleEmojiClick(booking, emojiObj);
+                  }}
+                ></Emoji>
+              );
+            })}
           </TableCell>
         );
       })}
@@ -79,6 +117,8 @@ const DashboardTable = (props: { rows: Record<string, {}> }) => {
 };
 
 export const DashboardPage: FC<{}> = () => {
+  const itinContext = useItineraryContext();
+
   const [userList, setUserList] = useState(data);
   if (!userList) return <></>;
 
@@ -90,7 +130,7 @@ export const DashboardPage: FC<{}> = () => {
 };
 
 const DashboardHead = (props: { section: string }) => {
-  if (props.section === "Car_allocations") {
+  if (props.section.includes("_")) {
     const word: string = props.section;
     const replace = word.replaceAll("_", " ");
     return <TableCell>{replace}</TableCell>;

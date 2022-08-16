@@ -20,14 +20,12 @@ export const FieldWrapper: FC<FieldWrapperProps> = ({
   const classes = useStyles();
   const getFieldWithNeighbors = () => {
     const fields: JSX.Element[] = [];
-    
+
     fields.push(renderField(field, index, preview));
-    
+
     if (field.neighbors) {
       fields.push(
-        ...field.neighbors.map((n) =>
-          renderField(n, index, preview)
-        )
+        ...field.neighbors.map((n) => renderField(n, index, preview))
       );
     }
     return fields;
