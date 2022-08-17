@@ -33,10 +33,10 @@ export const SectionValuesPage: FC = () => {
   const valueContext = useValueContext();
   const { dispatch } = useContext(ModalContext);
   const [modelState, setAddChannelModel] = useState<boolean>(false);
-  const [items, setItems] = useState([]);
-  const local = localStorage.getItem("item");
+ // const [items, setItems] = useState([]);
+  //const local = localStorage.getItem("item");
 
-  useEffect(() => {
+  /* useEffect(() => {
     if (local !== null) {
       const items = JSON.parse(local);
       if (items) {
@@ -46,7 +46,7 @@ export const SectionValuesPage: FC = () => {
     } else {
       sectionContext.setSelectedItem(undefined);
     }
-  }, []);
+  }, []); */
 
   //Fix localhost deletion re-render issue
 

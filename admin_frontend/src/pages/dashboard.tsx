@@ -16,6 +16,7 @@ enum Emojis {
   "Flights" = "✈️",
   "Hotels" = "🏠",
   "Hire_Cars" = "🚗",
+  "Private" = "☑️",
 }
 
 const Emoji = (props: {
@@ -37,13 +38,13 @@ const Emoji = (props: {
 const DashboardRow = (props: { row: any; name: string }) => {
   const handleEmojiClick = (booking: string, items: {}) => {
     if (items) {
-      localStorage.setItem("item", JSON.stringify(items));
-      console.log(items);
+      localStorage.setItem("items", JSON.stringify(items));
+      localStorage.setItem("name", JSON.stringify(props.name));
     }
     if (booking && booking.includes("_")) {
       const word: string = booking;
       const replace = word.replaceAll("_", "+");
-      //window.location.search = "?page=itinerary-plugin-section" + replace;
+      window.location.search = "?page=itinerary-plugin-section" + replace;
     } else {
       window.location.search = "?page=itinerary-plugin-section" + booking;
     }
@@ -75,6 +76,7 @@ const DashboardRow = (props: { row: any; name: string }) => {
           </TableCell>
         );
       })}
+      <TableCell>{Emojis.Private}</TableCell>
     </TableRow>
   );
 };
@@ -103,6 +105,7 @@ const DashboardTable = (props: { rows: Record<string, {}> }) => {
               {headArr.map((name) => {
                 return <DashboardHead section={name}></DashboardHead>;
               })}
+              <TableCell>Private</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
