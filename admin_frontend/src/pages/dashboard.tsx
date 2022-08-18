@@ -11,6 +11,7 @@ import {
 import { ItinerarySelection } from "../components/itinerarySelection";
 import { useItineraryContext } from "../state/itineraryProvider";
 import { FieldProvider } from "../state/fieldProvider";
+import { TrendingUpOutlined } from "@material-ui/icons";
 
 enum Emojis {
   "Flights" = "✈️",
@@ -22,14 +23,19 @@ enum Emojis {
 const Emoji = (props: {
   field: string;
   count: number;
-  onClick: () => void;
+  onClick?: () => void;
+  isPrivate?: boolean;
 }) => {
   if (props.count >= 1) {
-    return (
-      <span onClick={props.onClick}>
-        {Emojis[props.field as keyof typeof Emojis]}
-      </span>
-    );
+    if (!props.isPrivate) {
+      return (
+        <span onClick={props.onClick}>
+          {Emojis[props.field as keyof typeof Emojis]}
+        </span>
+      );
+    } else {
+      return <span>{Emojis[props.field as keyof typeof Emojis]}</span>;
+    }
   } else {
     return <span></span>;
   }
@@ -51,15 +57,21 @@ const DashboardRow = (props: { row: any; name: string }) => {
   };
 
   const keyArr = [];
+  const bools = [false, false, true, false, true];
+  var isPrivate: boolean = true;
 
   for (const key in props.row) {
-    keyArr.push(key);
+    if (key !== "private") {
+      keyArr.push(key);
+    } else {
+      isPrivate = props.row[key];
+    }
   }
 
   return (
     <TableRow>
       <TableCell>{props.name}</TableCell>
-      {keyArr.map((booking) => {
+      {keyArr.map((booking, index) => {
         return (
           <TableCell>
             {props.row[booking].map((emojiObj: {}) => {
@@ -70,13 +82,17 @@ const DashboardRow = (props: { row: any; name: string }) => {
                   onClick={() => {
                     handleEmojiClick(booking, emojiObj);
                   }}
+                  isPrivate={isPrivate}
                 ></Emoji>
               );
             })}
           </TableCell>
         );
       })}
-      <TableCell>{Emojis.Private}</TableCell>
+      <TableCell>
+        {isPrivate === true && <Emoji field={"Private"} count={1}></Emoji>}
+        {isPrivate === false && <span></span>}
+      </TableCell>
     </TableRow>
   );
 };
