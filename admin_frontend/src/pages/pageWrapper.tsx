@@ -7,10 +7,13 @@ export const PageWrapper: FC<{}> = () => {
   const sectionContext = useSectionContext();
   return (
     <div>
-      {sectionContext.selectedSection === undefined && <SectionsPage></SectionsPage>}
+      {sectionContext.selectedSection === undefined && (
+        <SectionsPage></SectionsPage>
+      )}
       {sectionContext.selectedSection !== undefined && (
-        <SectionValuesPage ></SectionValuesPage>
+        <SectionValuesPage></SectionValuesPage>
       )}
     </div>
   );
+  ``;
 };
