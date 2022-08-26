@@ -71,6 +71,7 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
   const classes = useStyles();
   const { dispatch } = useContext(ModalContext);
   const sectionContext = useSectionContext();
+  const valueContext = useValueContext();
   const { fieldsToWsData } = useSheetContext();
   const {
     getListFieldLength,
@@ -84,7 +85,6 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
 
   const [key, setKey] = useState<string>("");
   const local = localStorage.getItem("items");
-  let compareKey: string = "";
 
   useEffect(() => {
     const length = getListFieldLength(field.field, index);
@@ -189,6 +189,9 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
             key_string += ",";
           }
         }
+
+      sectionContext.setListKey(key_string);
+
       field.children.forEach((c) => {
         fields.push(
           <FieldWrapper
@@ -196,6 +199,7 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
             index={index + "." + i.toString()}
             preview={preview}
             key={c.field.id}
+            listKey={key_string}
           ></FieldWrapper>
         );
       });

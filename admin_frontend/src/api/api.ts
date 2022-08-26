@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from "axios";
+import { intervalToDuration } from "date-fns";
 import { ExcelDisplayTypes } from "../fieldTypes";
 import { LooseObject } from "../utils";
 
@@ -30,6 +31,7 @@ export const requestsItinerary = {
   delete: (url: string) =>
     instance.delete("itinerary/v1/" + url).then(responseBody),
 };
+
 
 export const requestsCoreWP = {
   get: <T>(url: string) =>
@@ -63,6 +65,31 @@ export const Itinerary = {
   // 	requests.put(`posts/${id}`, post),
   deleteItinerary: (id: number): Promise<void> =>
     requestsItinerary.delete(`itineraries/delete/${id}`),
+};
+
+export interface ICosting{
+  id: number;
+  itinerary_id: number;
+  section_id: number;
+  costing: string;
+}
+
+export interface ICreateCosting{
+  itinerary_id: number;
+  section_id:number;
+  costing:LooseObject;
+}
+
+export const Costing = {
+  getCosting: (): Promise<ICosting[]> =>
+    requestsItinerary.get("costings"),
+  // getAPost: (id: number): Promise<PostType> => requests.get(`posts/${id}`),
+  createCosting: (post: ICreateCosting): Promise<number> =>
+    requestsItinerary.post("costings/create", post),
+  // updatePost: (post: PostType, id: number): Promise<PostType> =>
+  // 	requests.put(`posts/${id}`, post),
+  deleteCosting: (id: number): Promise<void> =>
+    requestsItinerary.delete(`costings/delete/${id}`),
 };
 
 export interface IUpdateApp {
