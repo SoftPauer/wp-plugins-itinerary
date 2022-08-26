@@ -13,6 +13,8 @@ add_action('admin_menu', 'itinerary_plugin_setup_menu');
 function itinerary_plugin_setup_menu()
 {
   add_menu_page('Sections', 'Sections', 'manage_options', 'itinerary-plugin-sections', 'itinerary_init_sections');
+  add_menu_page('Dashboard', 'Dashboard', 'manage_options', 'itinerary-plugin-dashboard', 'itinerary_init_dashboard');
+
 
   global $wpdb;
   $sections = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}itinerary_sections", OBJECT);
@@ -34,6 +36,10 @@ function itinerary_init_sections()
 {
   echo "<div section='sections' id='general-info-react'></div>";
 }
+function itinerary_init_dashboard()
+{
+  echo "<div section='dashboard' id='general-info-react'></div>";
+}
 
 function itinerary_ini_section($name)
 {
@@ -42,7 +48,7 @@ function itinerary_ini_section($name)
 
 
 add_action('admin_enqueue_scripts', function ($hook) {
-  $dev = false;
+  $dev = true;
   if (!substr($hook, 0, strlen('toplevel_page_itinerary-plugin')) ===  'toplevel_page_itinerary-plugin') {
     return;
   }
@@ -68,7 +74,7 @@ add_action('admin_enqueue_scripts', function ($hook) {
 
 register_activation_hook(__FILE__, 'itinerary_install');
 
-global  $wpdb, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values, $table_name_itinerary_data;
+global  $wpdb, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values, $table_name_itinerary_data,$table_name_costings;
 
 $table_name_itinerary = $wpdb->prefix . 'itineraries';
 $table_name_sections = $wpdb->prefix . 'itinerary_sections';
@@ -76,7 +82,8 @@ $table_name_fields = $wpdb->prefix . 'itinerary_fields';
 $table_name_section_values = $wpdb->prefix . 'itinerary_values';
 $table_name_itinerary_data = $wpdb->prefix . 'itinerary_data';
 $table_name_itinerary_channels = $wpdb->prefix . 'itinerary_rocket_channels';
-$table_name_costings = $wpdb->prefix . 'costings';
+$table_name_costings = $wpdb->prefix . 'itinerary_costings';
+
 
 
 function itinerary_install()
@@ -162,10 +169,11 @@ function itinerary_install()
   require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
   dbDelta($sql);
 
-  $sql = "CREATE TABLE $table_name_costings (
+    $sql = "CREATE TABLE $table_name_costings (
     id mediumint(9) NOT NULL AUTO_INCREMENT,
     itinerary_id mediumint(9) NOT NULL,
     section_id mediumint(9) NOT NULL,
+    listKey text NOT NULL,
     costing text,
     PRIMARY KEY (id),
     FOREIGN KEY (itinerary_id) REFERENCES $table_name_itinerary (id),
@@ -204,27 +212,6 @@ add_action('rest_api_init', function () {
     )
   ));
 
-  //sections
-  register_rest_route('itinerary/v1', 'sections', array(
-    'methods' => WP_REST_Server::READABLE,
-    'callback' => 'get_all_sections',
-  ));
-  register_rest_route('itinerary/v1', 'sections/create', array(
-    'methods' => WP_REST_Server::CREATABLE,
-    'callback' => 'create_new_section',
-  ));
-  register_rest_route('itinerary/v1', 'sections/delete/(?P<section_id>\d+)', array(
-    'methods' => WP_REST_Server::DELETABLE,
-    'callback' => 'delete_section',
-    'args' => array(
-      'section_id' => array(
-        'validate_callback' => function ($param, $request, $key) {
-          return is_numeric($param);
-        }
-      ),
-    )
-  ));
-
   //costings
    register_rest_route('itinerary/v1', 'costings', array(
     'methods' => WP_REST_Server::READABLE,
@@ -246,6 +233,26 @@ add_action('rest_api_init', function () {
     )
   ));
 
+  //sections
+  register_rest_route('itinerary/v1', 'sections', array(
+    'methods' => WP_REST_Server::READABLE,
+    'callback' => 'get_all_sections',
+  ));
+  register_rest_route('itinerary/v1', 'sections/create', array(
+    'methods' => WP_REST_Server::CREATABLE,
+    'callback' => 'create_new_section',
+  ));
+  register_rest_route('itinerary/v1', 'sections/delete/(?P<section_id>\d+)', array(
+    'methods' => WP_REST_Server::DELETABLE,
+    'callback' => 'delete_section',
+    'args' => array(
+      'section_id' => array(
+        'validate_callback' => function ($param, $request, $key) {
+          return is_numeric($param);
+        }
+      ),
+    )
+  ));
   //fields
   register_rest_route('itinerary/v1', 'fields/(?P<section_id>\d+)', array(
     'methods' => WP_REST_Server::READABLE,
@@ -382,7 +389,101 @@ add_action('rest_api_init', function () {
       ),
     )
   ));
+
+  register_rest_route('itinerary/v1', 'itineraries/addDashboardField/(?P<field_id>\d+)', array(
+    'methods' => WP_REST_Server::EDITABLE,
+    'callback' => 'add_dashboard_field',
+    'args' => array(
+      'field_id' => array(
+        'validate_callback' => function ($param, $request, $key) {
+          return is_numeric($param);
+        }
+      ),
+    )
+  ));
+
+  register_rest_route('itinerary/v1', 'itineraries/getDashboardFields', array(
+    'methods' => WP_REST_Server::READABLE,
+    'callback' => 'get_dashboard_fields',
+  ));
 });
+
+/**
+ * Return all costings
+ */
+function get_all_costings(WP_REST_Request $request){
+  global $wpdb, $table_name_costings;
+  $body = json_decode($request->get_body());
+  $results = $wpdb->get_results("SELECT * FROM {$table_name_costings}", OBJECT);
+
+  return rest_ensure_response($results);
+}
+
+/**
+ * adds a new costing
+ */
+function create_new_costing(WP_REST_Request $request)
+{
+  global $wpdb, $table_name_costings;
+  $body = json_decode($request->get_body());
+  error_log(print_r($body,true));
+  return $wpdb->insert(
+    $table_name_costings,
+    array(
+      "itinerary_id"=>$body->itinerary_id,
+      "section_id"=>$body->section_id,
+      "listKey"=>$body->listKey,
+      "costing" => json_encode($body->costing),
+    ),
+    array(
+      '%d',
+      '%d',
+      "%s",
+      '%s',
+    )
+  );
+}
+
+/**
+ * DELETE costing
+ */
+function delete_costing($data){
+  
+}
+
+
+function get_dashboard_fields()
+{
+  global $wpdb;
+  $currentFieldQuery = $wpdb->get_results("SELECT * FROM `wp_options` WHERE `option_name` = 'dashboardFields'");
+  if ($currentFieldQuery == NULL) {
+    return array();
+  } else {
+    $currentFields = unserialize($currentFieldQuery[0]->option_value);
+    return $currentFields;
+  }
+}
+
+function add_dashboard_field(WP_REST_Request $request)
+{
+  global $wpdb;
+  $fieldId = $request['field_id'];
+  $currentFieldsQuery = $wpdb->get_results("SELECT * FROM `wp_options` WHERE `option_name` = 'dashboardFields'");
+  if ($currentFieldsQuery == NULL) {
+    $fields = array($fieldId);
+    $result = $wpdb->insert('wp_options', array('option_name' => 'dashboardFields', 'option_value' => serialize($fields)));
+    return new WP_REST_Response(array('success' => true), 200);
+  } else {
+    $currentFields = unserialize($currentFieldsQuery[0]->option_value);
+    if (in_array($fieldId, $currentFields)) {
+      return new WP_REST_Response(array('success' => false, 'message' => 'Field already exists'), 201);
+    } else {
+      array_push($currentFields, $fieldId);
+      $result = $wpdb->get_results("UPDATE `wp_options` SET `option_value` = '" . serialize($currentFields) . "' WHERE `option_name` = 'dashboardFields'");
+    }
+  }
+  return rest_ensure_response($result);
+}
 
 
 function create_rocket_channel(WP_REST_Request $request)
@@ -596,44 +697,6 @@ function delete_section($data)
   );
 }
 
-/**
- * Return all costings
- */
-function get_all_costings(){
-  global $wpdb, $table_name_costings;
-  $results = $wpdb->get_results("SELECT * FROM {$table_name_costings}", OBJECT);
-
-  return rest_ensure_response($results);
-}
-
-/**
- * adds a new costing
- */
-function create_new_costing(WP_REST_Request $request)
-{
-  global $wpdb, $table_name_sections;
-  $body = json_decode($request->get_body());
-
-  return $wpdb->insert(
-    $table_name_sections,
-    array(
-     
-    ),
-    array(
-      '%d',
-      '%d',
-      '%d',
-      '%d',
-    )
-  );
-}
-
-/**
- * DELETE costing
- */
-function delete_costing($data){
-  
-}
 
 /**
  * Return all fields for the section
@@ -642,15 +705,6 @@ function get_all_fields($data)
 {
   global $wpdb, $table_name_fields;
   $results = $wpdb->get_results("SELECT * FROM {$table_name_fields} WHERE section = {$data['section_id']}", OBJECT);
-  return rest_ensure_response($results);
-}
-/**
- * Return all fields checked true
- */
-function get_all_show_on_dashboard()
-{
-  global $wpdb, $table_name_fields;
-  $results = $wpdb->get_results("SELECT * FROM `wp_itinerary_fields` WHERE type_properties like '%"showOnDashboard":true%';", OBJECT);
   return rest_ensure_response($results);
 }
 
@@ -707,16 +761,20 @@ function itin_delete_field($data)
 }
 
 
+
 /**
  * Return all field values for the section
  */
 function get_all_section_values($data)
 {
-  $results = get_section_value($data['section_id'], $data['itinerary_id']);
-  if (empty($results)) {
-    return rest_ensure_response(null);
+  if ($data['section_id'] != 0) {
+    $results = get_section_value($data['section_id'], $data['itinerary_id']);
+    if (empty($results)) {
+      return rest_ensure_response(null);
+    }
+    return rest_ensure_response($results[0]);
   }
-  return rest_ensure_response($results[0]);
+  return rest_ensure_response(get_itinerary_values($data['itinerary_id']));
 }
 
 /**
@@ -839,6 +897,18 @@ function get_section_value($section_id, $itinerary_id)
   );
   return $results;
 }
+
+function get_itinerary_values($itinerary_id){
+  global $wpdb, $table_name_section_values;
+  $results = $wpdb->get_results(
+    "SELECT * FROM {$table_name_section_values} 
+    WHERE itinerary = {$itinerary_id} ",
+    OBJECT
+  );
+  error_log(json_encode($result));
+  return $results;
+}
+
 
 function getIcalDate($time, $timeZone, $inclTime = true)
 {
