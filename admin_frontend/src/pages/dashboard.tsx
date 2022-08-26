@@ -122,7 +122,6 @@ const DashboardTable = (props: { rows: Record<string, {}> }) => {
   const headArr = [];
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-
   const { rows } = props;
   for (const key in rows) {
     const value: any = rows[key];
@@ -237,6 +236,7 @@ const ReportsTable = (props: { rows: Record<string, {}> }) => {
 const ReportsGrid = () => {
   const [rows, setRows] = useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+  const itinContext = useItineraryContext();
 
   const columns: GridColumns = [
     {

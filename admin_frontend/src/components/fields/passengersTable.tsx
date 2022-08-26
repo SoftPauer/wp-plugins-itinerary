@@ -29,6 +29,7 @@ import { ModalContext } from "../../state/modals";
 import styles from "./table.module.css";
 import { Theme, makeStyles } from "@material-ui/core";
 import Collapsible from "react-collapsible";
+import { useItineraryContext } from "../../state/itineraryProvider";
 
 type costingTableFieldProps = {
   field: IField;
@@ -125,6 +126,7 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
   const { dispatch } = useContext(ModalContext);
   const classes = useStyles();
   const apiRef = useGridApiRef();
+  const itinContext = useItineraryContext();
 
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
   const sectionContext = useSectionContext();
@@ -155,7 +157,10 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
     passengers.forEach((passenger) => {
       costingArr.some((element) => {
         const costingObj = JSON.parse(element.costing);
-        if (costingObj.units.Passenger === passenger) {
+        if (
+          costingObj.units.Passenger === passenger &&
+          element.listKey === listKey
+        ) {
           rows.push({
             id: randomId(),
             name: costingObj.units.Passenger,

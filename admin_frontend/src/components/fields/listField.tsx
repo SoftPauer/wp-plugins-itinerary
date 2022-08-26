@@ -190,8 +190,6 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
           }
         }
 
-      sectionContext.setListKey(key_string);
-
       field.children.forEach((c) => {
         fields.push(
           <FieldWrapper

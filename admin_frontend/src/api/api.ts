@@ -32,6 +32,16 @@ export const requestsItinerary = {
     instance.delete("itinerary/v1/" + url).then(responseBody),
 };
 
+export const requestsCosting = {
+  get: <T>(url: string) =>
+    instance.get<T>("itinerary/v1/" + url, body).then<T>(responseBody),
+  post: (url: string, body: {}) =>
+    instance.post("itinerary/v1/" + url, body).then(responseBody),
+  put: (url: string, body: {}) =>
+    instance.put("itinerary/v1/" + url, body).then(responseBody),
+  delete: (url: string) =>
+    instance.delete("itinerary/v1/" + url).then(responseBody),
+};
 
 export const requestsCoreWP = {
   get: <T>(url: string) =>
@@ -71,18 +81,20 @@ export interface ICosting{
   id: number;
   itinerary_id: number;
   section_id: number;
+  listKey: string;
   costing: string;
 }
 
 export interface ICreateCosting{
   itinerary_id: number;
   section_id:number;
+  listKey:string;
   costing:LooseObject;
 }
 
 export const Costing = {
   getCosting: (): Promise<ICosting[]> =>
-    requestsItinerary.get("costings"),
+    requestsCosting.get("costings"),
   // getAPost: (id: number): Promise<PostType> => requests.get(`posts/${id}`),
   createCosting: (post: ICreateCosting): Promise<number> =>
     requestsItinerary.post("costings/create", post),
