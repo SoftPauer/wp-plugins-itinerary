@@ -3,7 +3,6 @@ import { ExcelDisplayTypes } from "../fieldTypes";
 import { LooseObject } from "../utils";
 
 
-var wpApiSettings ={root: 'https://gta-global-cms.bwtsoftpauer.com/wp-json/', nonce: '54ba4b208a'};
 const instance = axios.create({
   baseURL: wpApiSettings.root,
   timeout: 15000,
