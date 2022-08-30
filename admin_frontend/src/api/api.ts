@@ -34,7 +34,7 @@ export const requestsItinerary = {
 
 export const requestsCosting = {
   get: <T>(url: string) =>
-    instance.get<T>("itinerary/v1/" + url, body).then<T>(responseBody),
+    instance.get<T>("itinerary/v1/" + url).then<T>(responseBody),
   post: (url: string, body: {}) =>
     instance.post("itinerary/v1/" + url, body).then(responseBody),
   put: (url: string, body: {}) =>
@@ -93,8 +93,8 @@ export interface ICreateCosting{
 }
 
 export const Costing = {
-  getCosting: (): Promise<ICosting[]> =>
-    requestsCosting.get("costings"),
+  getCosting: (id: number): Promise<ICosting[]> =>
+    requestsCosting.get(`costings/${id}`),
   // getAPost: (id: number): Promise<PostType> => requests.get(`posts/${id}`),
   createCosting: (post: ICreateCosting): Promise<number> =>
     requestsItinerary.post("costings/create", post),

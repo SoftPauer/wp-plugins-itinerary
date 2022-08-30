@@ -152,7 +152,7 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
   const populateTable = async () => {
     let rows: any[] = [];
     const passengers = options?.options ?? [];
-    const costingArr = await Costing.getCosting();
+    const costingArr = await Costing.getCosting(itinContext.selected.id);
 
     passengers.forEach((passenger) => {
       costingArr.some((element) => {

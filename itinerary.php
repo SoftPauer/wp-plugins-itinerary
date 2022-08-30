@@ -213,9 +213,16 @@ add_action('rest_api_init', function () {
   ));
 
   //costings
-   register_rest_route('itinerary/v1', 'costings', array(
+   register_rest_route('itinerary/v1', 'costings/(?P<itinerary_id>\d+)', array(
     'methods' => WP_REST_Server::READABLE,
     'callback' => 'get_all_costings',
+    'args' => array(
+      'itinerary_id' => array(
+        'validate_callback' => function ($param, $request, $key) {
+          return is_numeric($param);
+        }
+      ),
+    )
   ));
   register_rest_route('itinerary/v1', 'costings/create', array(
     'methods' => WP_REST_Server::CREATABLE,
@@ -411,10 +418,10 @@ add_action('rest_api_init', function () {
 /**
  * Return all costings
  */
-function get_all_costings(WP_REST_Request $request){
+function get_all_costings($data){
   global $wpdb, $table_name_costings;
   $body = json_decode($request->get_body());
-  $results = $wpdb->get_results("SELECT * FROM {$table_name_costings}", OBJECT);
+  $results = $wpdb->get_results("SELECT * FROM {$table_name_costings} WHERE 'itinerary_id' = $data['itinerary_id']", OBJECT);
 
   return rest_ensure_response($results);
 }

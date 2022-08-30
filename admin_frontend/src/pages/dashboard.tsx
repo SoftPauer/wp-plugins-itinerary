@@ -292,7 +292,7 @@ const ReportsGrid = () => {
 
   const populateTable = async () => {
     let rows: any[] = [];
-    const costingArr = await Costing.getCosting();
+    const costingArr = await Costing.getCosting(itinContext.selected.id);
 
     costingArr.some((element) => {
       const costingObj = JSON.parse(element.costing);
