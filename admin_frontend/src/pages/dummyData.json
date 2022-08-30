@@ -29,7 +29,18 @@
                             "Alex Hindle"
                         ]
                     }
-                ]
+                ],
+                 "Costing": {
+                    "totalCost": "1300",
+                    "units": [
+                        {
+                        "id": 1,
+                        "Passenger": "Alex Powell",
+                        "FareType": "Business Class",
+                        "Price": "1300"
+                        }
+                    ]
+                }
             },
             {
                 "flightDate": "2022-05-01",
@@ -66,12 +77,23 @@
                             "Courtney Seymour"
                         ]
                     }
-                ]
+                ],
+                 "Costing": {
+                    "totalCost": "1300",
+                    "units": [
+                        {
+                        "id": 1,
+                        "Passenger": "Alex Powell",
+                        "FareType": "Business Class",
+                        "Price": "1300"
+                        }
+                    ]
+                }
             }
         ],
         "Hotels": [
             {
-                "name": "Hilton Barcelona",
+                "name": "Hilton Baku",
                 "addressLineOne": "Avinguda Diagonal",
                 "addressLineTwo": "589-591",
                 "city": "Barcelona",
@@ -84,8 +106,8 @@
                     {
                         "name": "Alex Powell",
                         "roomType": "Club Sea View",
-                        "checkIn": "2022-05-25",
-                        "checkOut": "2022-05-29",
+                        "checkIn": "2022-06-07",
+                        "checkOut": "2022-06-13",
                         "comments": "VIP"
                     },
                     {
@@ -108,7 +130,8 @@
                 "pickUp": "Avis Car Rental 23 May",
                 "return": "Avis Car Rental 29 May"
             }
-        ]
+        ],
+        "Private":[false]
     },
     "Dan Stokoe": {
         "Flights": [
@@ -161,7 +184,18 @@
                             "Dan Stokoe"
                         ]
                     }
-                ]
+                ],
+                 "Costing": {
+                    "totalCost": "1300",
+                    "units": [
+                        {
+                        "id": 1,
+                        "Passenger": "Alex Powell",
+                        "FareType": "Business Class",
+                        "Price": "1300"
+                        }
+                    ]
+                }
             }
         ],
         "Hotels": [
@@ -196,8 +230,15 @@
             }
         ],
         "Hire_Cars": [
-            
-        ]
+            {
+                "carType": "Subaru BRZ",
+                "mainDriver": "Dan Stokoe",
+                "secondDriver": "Andrius Murauskas",
+                "pickUp": "Avis Car Rental 23 May",
+                "return": "Avis Car Rental 29 May"
+            }
+        ],
+        "Private":[true]
     },
     "Catherine Schade": {
         "Flights": [
@@ -250,7 +291,18 @@
                             "Dan Stokoe"
                         ]
                     }
-                ]
+                ],
+                 "Costing": {
+                    "totalCost": "1300",
+                    "units": [
+                        {
+                        "id": 1,
+                        "Passenger": "Alex Powell",
+                        "FareType": "Business Class",
+                        "Price": "1300"
+                        }
+                    ]
+                }
             },
             {
                 "passengers": [
@@ -271,12 +323,23 @@
                     },
                     {},
                     {}
-                ]
+                ],
+                 "Costing": {
+                    "totalCost": "1300",
+                    "units": [
+                        {
+                        "id": 1,
+                        "Passenger": "Alex Powell",
+                        "FareType": "Business Class",
+                        "Price": "1300"
+                        }
+                    ]
+                }
             }
         ],
         "Hotels": [
             {
-                "name": "Hilton Barcelona",
+                "ç": "Hilton Barcelona",
                 "addressLineOne": "Avinguda Diagonal",
                 "addressLineTwo": "589-591",
                 "city": "Barcelona",
@@ -307,7 +370,8 @@
         ],
         "Hire_Cars": [
             
-        ]
+        ],
+        "Private":[false]
     },
     "Andrius Murauskas": {
         "Flights": [
@@ -360,7 +424,18 @@
                             "Dan Stokoe"
                         ]
                     }
-                ]
+                ],
+                 "Costing": {
+                    "totalCost": "1300",
+                    "units": [
+                        {
+                        "id": 1,
+                        "Passenger": "Alex Powell",
+                        "FareType": "Business Class",
+                        "Price": "1300"
+                        }
+                    ]
+                }
             }
         ],
         "Hotels": [
@@ -374,7 +449,8 @@
                 "pickUp": "Avis Car Rental 23 May",
                 "return": "Avis Car Rental 29 May"
             }
-        ]
+        ],
+        "Private":[true]
     },
     "Akio Haga": {
         "Flights": [
@@ -427,7 +503,18 @@
                             "Dan Stokoe"
                         ]
                     }
-                ]
+                ],
+                 "Costing": {
+                    "totalCost": "1300",
+                    "units": [
+                        {
+                        "id": 1,
+                        "Passenger": "Alex Powell",
+                        "FareType": "Business Class",
+                        "Price": "1300"
+                        }
+                    ]
+                }
             }
         ],
         "Hotels": [
@@ -435,6 +522,295 @@
         ],
         "Hire_Cars": [
             
-        ]
+        ],
+        "Private":[true]
+        
+    },
+     "Fernando Tamayo": {
+        "Flights": [
+            {
+                "flightDate": "2022-05-26",
+                "passengers": [
+                    "Alex Powell",
+                    "Alex Hindle"
+                ],
+                "outboundAirportAbr": "LHR",
+                "inboundAirportAbr": "MIA",
+                "duration": "8h 15",
+                "events": [
+                    {
+                        "time": "2022-05-26T10:40",
+                        "timezone": "(UTC+01:00) Edinburgh, London",
+                        "description": "Flight BA207 departs",
+                        "appliesFor": [
+                            "Alex Powell",
+                            "Alex Hindle"
+                        ]
+                    },
+                    {
+                        "time": "2022-05-26T14:55",
+                        "timezone": "(UTC-04:00) Eastern Daylight Time (US & Canada)",
+                        "description": "Flight BA207 arrives",
+                        "appliesFor": [
+                            "Alex Powell",
+                            "Alex Hindle"
+                        ]
+                    }
+                ],
+                 "Costing": {
+                    "totalCost": "1300",
+                    "units": [
+                        {
+                        "id": 1,
+                        "Passenger": "Fernando Tamayo",
+                        "FareType": "Business Class",
+                        "Price": "1400"
+                        }
+                    ]
+                }
+            },
+            {
+                "flightDate": "2022-05-01",
+                "passengers": [
+                    "Andrius Murauskatest",
+                    "Bud Wurstner",
+                    "Catherine Schade",
+                    "Courtney Seymour",
+                    "Alex Powell"
+                ],
+                "outboundAirportAbr": "LHR",
+                "inboundAirportAbr": "MIA",
+                "duration": "8h 15",
+                "events": [
+                    {
+                        "time": "2022-05-01T12:50",
+                        "timezone": "(UTC+01:00) Edinburgh, London",
+                        "description": "Flight AA039 departs ",
+                        "appliesFor": [
+                            "Andrius Murauskatest",
+                            "Bud Wurstner",
+                            "Catherine Schade",
+                            "Courtney Seymour"
+                        ]
+                    },
+                    {
+                        "time": "2022-05-01T17:30",
+                        "timezone": "(UTC-04:00) Eastern Daylight Time (US & Canada)",
+                        "description": "Flight AA039 arrives",
+                        "appliesFor": [
+                            "Andrius Murauskatest",
+                            "Bud Wurstner",
+                            "Catherine Schade",
+                            "Courtney Seymour"
+                        ]
+                    }
+                ],
+                 "Costing": {
+                    "totalCost": "1300",
+                    "units": [
+                        {
+                        "id": 1,
+                        "Passenger": "Fernando Tamayo",
+                        "FareType": "Business Class",
+                        "Price": "1200"
+                        }
+                    ]
+                }
+            }
+        ],
+        "Hotels": [
+            {
+                "name": "Hilton Baku",
+                "addressLineOne": "Avinguda Diagonal",
+                "addressLineTwo": "589-591",
+                "city": "Barcelona",
+                "postcode": "08014 ",
+                "country": "Spain",
+                "telephoneNumber": "(+34) 934 95 77 77",
+                "website": "https:\/\/www.hilton.com\/en\/hotels\/bcnhitw-hilton-barcelona\/",
+                "contactName": "John Smith",
+                "guests": [
+                    {
+                        "name": "Alex Powell",
+                        "roomType": "Club Sea View",
+                        "checkIn": "2022-06-07",
+                        "checkOut": "2022-06-13",
+                        "comments": "VIP"
+                    },
+                    {
+                        "name": "Juliette Silverton"
+                    },
+                    {
+                        "name": "Rosalee Calvert"
+                    },
+                    {
+                        "name": "Ryan Smulson"
+                    }
+                ]
+            }
+        ],
+        "Hire_Cars": [
+            {
+                "carType": "Subaru BRZ",
+                "mainDriver": "Alex Powell",
+                "secondDriver": "Andrius Murauskas",
+                "pickUp": "Avis Car Rental 23 May",
+                "return": "Avis Car Rental 29 May"
+            }
+        ],
+        "Private":[false]
+    },
+    "Eren Yaegar": {
+        "Flights": [
+            {
+                "flightDate": "2022-05-25",
+                "passengers": [
+                    "Andrius Murauskas",
+                    "Dan Stokoe",
+                    "Catherine Schade",
+                    "Alex Powell",
+                    "Akio Haga"
+                ],
+                "outboundAirportAbr": "LTN",
+                "inboundAirportAbr": "BCN",
+                "duration": "2h 10m",
+                "events": [
+                    {
+                        "time": "09:30",
+                        "description": "National Express to Depart Endstone",
+                        "appliesFor": [
+                            "Alex Powell",
+                            "Andrius Murauskas",
+                            "Dan Stokoe"
+                        ]
+                    },
+                    {
+                        "time": "11:00",
+                        "description": "Check-in at",
+                        "appliesFor": [
+                            "Alex Powell",
+                            "Andrius Murauskas",
+                            "Dan Stokoe"
+                        ]
+                    },
+                    {
+                        "time": "17:20",
+                        "description": "Flight FR7807 departs",
+                        "appliesFor": [
+                            "Alex Powell",
+                            "Andrius Murauskas",
+                            "Dan Stokoe"
+                        ]
+                    },
+                    {
+                        "time": "18:30",
+                        "description": "Flight FR7807 arrives in Barcelona",
+                        "appliesFor": [
+                            "Alex Powell",
+                            "Andrius Murauskas",
+                            "Dan Stokoe"
+                        ]
+                    }
+                ],
+                 "Costing": {
+                    "totalCost": "1300",
+                    "units": [
+                        {
+                        "id": 1,
+                        "Passenger": "Eren Yaegar",
+                        "FareType": "Economy Class",
+                        "Price": "700"
+                        }
+                    ]
+                }
+            }
+        ],
+        "Hotels": [
+            
+        ],
+        "Hire_Cars": [
+            
+        ],
+        "Private":[true]
+    },
+    "Mario Bros": {
+        "Flights": [
+            {
+                "flightDate": "2022-05-25",
+                "passengers": [
+                    "Andrius Murauskas",
+                    "Dan Stokoe",
+                    "Catherine Schade",
+                    "Alex Powell",
+                    "Akio Haga"
+                ],
+                "outboundAirportAbr": "LTN",
+                "inboundAirportAbr": "BCN",
+                "duration": "2h 10m",
+                "events": [
+                    {
+                        "time": "09:30",
+                        "description": "National Express to Depart Endstone",
+                        "appliesFor": [
+                            "Alex Powell",
+                            "Andrius Murauskas",
+                            "Dan Stokoe"
+                        ]
+                    },
+                    {
+                        "time": "11:00",
+                        "description": "Check-in at",
+                        "appliesFor": [
+                            "Alex Powell",
+                            "Andrius Murauskas",
+                            "Dan Stokoe"
+                        ]
+                    },
+                    {
+                        "time": "17:20",
+                        "description": "Flight FR7807 departs",
+                        "appliesFor": [
+                            "Alex Powell",
+                            "Andrius Murauskas",
+                            "Dan Stokoe"
+                        ]
+                    },
+                    {
+                        "time": "18:30",
+                        "description": "Flight FR7807 arrives in Barcelona",
+                        "appliesFor": [
+                            "Alex Powell",
+                            "Andrius Murauskas",
+                            "Dan Stokoe"
+                        ]
+                    }
+                ],
+                 "Costing": {
+                    "totalCost": "1300",
+                    "units": [
+                        {
+                        "id": 1,
+                        "Passenger": "Mario Bros",
+                        "FareType": "Business Class",
+                        "Price": "1670"
+                        }
+                    ]
+                }
+            }
+        ],
+        "Hotels": [
+            
+        ],
+        "Hire_Cars": [
+            {
+                "carType": "Subaru BRZ",
+                "mainDriver": "Alex Powell",
+                "secondDriver": "Andrius Murauskas",
+                "pickUp": "Avis Car Rental 23 May",
+                "return": "Avis Car Rental 29 May"
+            }
+        ],
+        "Private":[false]
     }
 }
+
