@@ -225,16 +225,9 @@ add_action('rest_api_init', function () {
   ));
 
   //costings
-   register_rest_route('itinerary/v1', 'costings/(?P<itinerary_id>\d+)', array(
+   register_rest_route('itinerary/v1', 'costings', array(
     'methods' => WP_REST_Server::READABLE,
     'callback' => 'get_all_costings',
-    'args' => array(
-      'itinerary_id' => array(
-        'validate_callback' => function ($param, $request, $key) {
-          return is_numeric($param);
-        }
-      ),
-    )
   ));
   register_rest_route('itinerary/v1', 'costings/create', array(
     'methods' => WP_REST_Server::CREATABLE,
@@ -421,18 +414,6 @@ add_action('rest_api_init', function () {
     )
   ));
 
-  register_rest_route('itinerary/v1', 'itineraries/addDashboardField/(?P<field_id>\d+)', array(
-    'methods' => WP_REST_Server::EDITABLE,
-    'callback' => 'add_dashboard_field',
-    'args' => array(
-      'field_id' => array(
-        'validate_callback' => function ($param, $request, $key) {
-          return is_numeric($param);
-        }
-      ),
-    )
-  ));
-
   register_rest_route('itinerary/v1', 'itineraries/getDashboardFields', array(
     'methods' => WP_REST_Server::READABLE,
     'callback' => 'get_dashboard_fields',
@@ -455,20 +436,15 @@ add_action('rest_api_init', function () {
     )
   ));
 
-  register_rest_route('itinerary/v1', 'itineraries/getDashboardFields', array(
-    'methods' => WP_REST_Server::READABLE,
-    'callback' => 'get_dashboard_fields',
-  ));
-
 });
 
 /**
  * Return all costings
  */
-function get_all_costings($data){
+function get_all_costings(){
   global $wpdb, $table_name_costings;
   $body = json_decode($request->get_body());
-  $results = $wpdb->get_results("SELECT * FROM {$table_name_costings} WHERE 'itinerary_id' = $data['itinerary_id']", OBJECT);
+  $results = $wpdb->get_results("SELECT * FROM {$table_name_costings}", OBJECT);
 
   return rest_ensure_response($results);
 }
@@ -503,40 +479,6 @@ function create_new_costing(WP_REST_Request $request)
  */
 function delete_costing($data){
   
-}
-
-
-function get_dashboard_fields()
-{
-  global $wpdb;
-  $currentFieldQuery = $wpdb->get_results("SELECT * FROM `wp_options` WHERE `option_name` = 'dashboardFields'");
-  if ($currentFieldQuery == NULL) {
-    return array();
-  } else {
-    $currentFields = unserialize($currentFieldQuery[0]->option_value);
-    return $currentFields;
-  }
-}
-
-function add_dashboard_field(WP_REST_Request $request)
-{
-  global $wpdb;
-  $fieldId = $request['field_id'];
-  $currentFieldsQuery = $wpdb->get_results("SELECT * FROM `wp_options` WHERE `option_name` = 'dashboardFields'");
-  if ($currentFieldsQuery == NULL) {
-    $fields = array($fieldId);
-    $result = $wpdb->insert('wp_options', array('option_name' => 'dashboardFields', 'option_value' => serialize($fields)));
-    return new WP_REST_Response(array('success' => true), 200);
-  } else {
-    $currentFields = unserialize($currentFieldsQuery[0]->option_value);
-    if (in_array($fieldId, $currentFields)) {
-      return new WP_REST_Response(array('success' => false, 'message' => 'Field already exists'), 201);
-    } else {
-      array_push($currentFields, $fieldId);
-      $result = $wpdb->get_results("UPDATE `wp_options` SET `option_value` = '" . serialize($currentFields) . "' WHERE `option_name` = 'dashboardFields'");
-    }
-  }
-  return rest_ensure_response($result);
 }
 
 

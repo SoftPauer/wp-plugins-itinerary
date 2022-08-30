@@ -93,8 +93,8 @@ export interface ICreateCosting{
 }
 
 export const Costing = {
-  getCosting: (id: number): Promise<ICosting[]> =>
-    requestsCosting.get(`costings/${id}`),
+  getCosting: (id:number): Promise<ICosting[]> =>
+    requestsCosting.get(`costings`),
   // getAPost: (id: number): Promise<PostType> => requests.get(`posts/${id}`),
   createCosting: (post: ICreateCosting): Promise<number> =>
     requestsItinerary.post("costings/create", post),
