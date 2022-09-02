@@ -77,6 +77,14 @@ export const Itinerary = {
     requestsItinerary.delete(`itineraries/delete/${id}`),
 };
 
+export const requestsReport={
+  get: <T>(url:string)=>instance.get<T>("itinerary/v1/" + url).then<T>(responseBody),
+}
+
+export const Report = {
+  getReport: (): Promise<Record<string, {}>>=>requestsReport.get("itineraries/generateReport"),
+}
+
 export interface ICosting{
   id: number;
   itinerary_id: number;

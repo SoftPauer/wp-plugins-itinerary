@@ -31,12 +31,12 @@ import { ItinerarySelection } from "../components/itinerarySelection";
 import { useItineraryContext } from "../state/itineraryProvider";
 import { FieldProvider } from "../state/fieldProvider";
 import { TrendingUpOutlined } from "@material-ui/icons";
-import { Costing, ICosting, Itinerary } from "../api/api";
+import { Costing, ICosting, Itinerary, Report } from "../api/api";
 
 enum Emojis {
-  "Flights" = "✈️ ",
-  "Hotels" = "🏠 ",
-  "Hire_Cars" = "🚗 ",
+  "Flight" = "✈️ ",
+  "hotel" = "🏠 ",
+  "cars" = "🚗 ",
   "Private" = "☑️",
 }
 
@@ -68,7 +68,7 @@ const DashboardRow = (props: { row: any; name: string }) => {
       const replace = word.replaceAll("_", "+");
       window.location.search = "?page=itinerary-plugin-section" + replace;
     } else {
-      window.location.search = "?page=itinerary-plugin-section" + booking;
+      window.location.search = "?page=itinerary-plugin-section" + booking + "s";
     }
   };
 
@@ -128,6 +128,8 @@ const DashboardTable = (props: { rows: Record<string, {}> }) => {
     rowArray.push(key);
   }
 
+  console.log(rows);
+
   for (const item in rows[rowArray[0]]) {
     headArr.push(item);
   }
@@ -168,56 +170,6 @@ const DashboardTable = (props: { rows: Record<string, {}> }) => {
                 );
               })}
           </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[10, 25]}
-        component="div"
-        count={rowArray.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
-    </div>
-  );
-};
-
-const ReportsTable = (props: { rows: Record<string, {}> }) => {
-  const rowArray = [];
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [totalCost, setTotalCost] = useState(0);
-  const { rows } = props;
-
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  return (
-    <div>
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Flight Class</TableCell>
-              <TableCell>Cost</TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableRow>
-            <TableCell rowSpan={6} />
-            <TableCell align="right">Total</TableCell>
-            <TableCell>{totalCost}</TableCell>
-          </TableRow>
         </Table>
       </TableContainer>
       <TablePagination
@@ -335,9 +287,20 @@ const ReportsGrid = () => {
 
 export const DashboardPage: FC<{}> = () => {
   const itinContext = useItineraryContext();
-  const [userList, setUserList] = useState(data);
+  const [userList, setUserList] = useState<Record<string, {}>>();
+
+  const fetchData = async () => {
+    const obj = await Report.getReport();
+    setUserList(obj);
+  };
+
+  if (userList === undefined) {
+    fetchData();
+  }
 
   if (!userList) return <></>;
+
+  console.log(userList);
 
   return (
     <div>
