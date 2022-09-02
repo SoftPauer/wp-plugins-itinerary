@@ -92,6 +92,7 @@ export interface ICosting{
 }
 
 export interface ICreateCosting{
+  id:number;
   itinerary_id: number;
   section_id:number;
   listKey:string;

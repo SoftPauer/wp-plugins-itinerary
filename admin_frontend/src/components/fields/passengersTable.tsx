@@ -164,7 +164,7 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
           element.listKey === listKey
         ) {
           rows.push({
-            id: randomId(),
+            id: element.id,
             name: costingObj.units.Passenger,
             cost: costingObj.units.Price,
             fareType: costingObj.units.FareType,
@@ -194,6 +194,7 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
 
   const processRowUpdate = (newRow: GridRowModel) => {
     Costing.createCosting({
+      id: newRow.id,
       listKey: listKey ?? "",
       section_id: sectionContext.selectedSection?.id ?? 0,
       itinerary_id: itinContext.selected.id,
