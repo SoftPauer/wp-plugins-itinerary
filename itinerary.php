@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.1.0
+Version: 1.1.4
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
 
@@ -457,22 +457,40 @@ function create_new_costing(WP_REST_Request $request)
 {
   global $wpdb, $table_name_costings;
   $body = json_decode($request->get_body());
-  error_log(print_r($body,true));
-  return $wpdb->insert(
-    $table_name_costings,
-    array(
-      "itinerary_id"=>$body->itinerary_id,
-      "section_id"=>$body->section_id,
-      "listKey"=>$body->listKey,
-      "costing" => json_encode($body->costing),
-    ),
-    array(
-      '%d',
-      '%d',
-      "%s",
-      '%s',
-    )
+  $results = get_costing_value($body->id);
+  if ( count($results) > 0) {
+    $sql = "UPDATE {$table_name_costings} SET costing = %s  WHERE id = '{$results[0]->id}'";
+    $sql = $wpdb->prepare($sql,  json_encode($body->costing));
+    $data = ['updated' => $wpdb->query($sql)];
+    return json_encode($data);
+  } else {
+    return $wpdb->insert(
+      $table_name_costings,
+      array(
+        "itinerary_id"=>$body->itinerary_id,
+        "section_id"=>$body->section_id,
+        "listKey"=>$body->listKey,
+        "costing" => json_encode($body->costing),
+      ),
+      array(
+        '%d',
+        '%d',
+        "%s",
+        '%s',
+      )
+    );
+  }
+}
+
+function get_costing_value($id)
+{
+  global $wpdb, $table_name_costings;
+  $results = $wpdb->get_results(
+    "SELECT * FROM {$table_name_costings} 
+     WHERE id = {$id}",
+    OBJECT
   );
+  return $results;
 }
 
 /**

@@ -34,7 +34,7 @@ Inspect browser and print out wpApiSettings variable.
 You need to open a page with this plugin not any wp page.
 
 ```
-var wpApiSettings ={root: 'https://wp-alpine-cms.bwtsoftpauer.com/wp-json/', nonce: '80a9376a86', moodle_base_url: 'https://teamdemo.softpauer.com/\t', moodle_ws_token: '46157558776cbb8ecdf0330316009ead'};
+var wpApiSettings ={root: 'https://wp-alpine-cms.bwtsoftpauer.com/wp-json/', nonce: '80a9376a86'};
 
 ```
 navigate using url:
