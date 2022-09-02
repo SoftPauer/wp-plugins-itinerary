@@ -112,7 +112,7 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
             break;
           }
           break;
-        case "carType":
+        case "Supplier":
           setKey(`${items["mainDriver"]}`);
           break;
       }

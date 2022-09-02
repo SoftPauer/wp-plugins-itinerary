@@ -59,12 +59,27 @@ const DashboardRow = (props: {
       localStorage.setItem("items", JSON.stringify(items));
       localStorage.setItem("name", JSON.stringify(props.name));
     }
+
     if (booking && booking.includes("_")) {
       const word: string = booking;
       const replace = word.replaceAll("_", "+");
       window.location.search = "?page=itinerary-plugin-section" + replace;
     } else {
-      window.location.search = "?page=itinerary-plugin-section" + booking + "s";
+      switch (booking) {
+        case "Flight": {
+          window.location.search =
+            "?page=itinerary-plugin-section" + booking + "s";
+          break;
+        }
+        case "cars": {
+          window.location.search = "?page=itinerary-plugin-sectionHire+Cars";
+          break;
+        }
+        case "hotel": {
+          window.location.search = "?page=itinerary-plugin-sectionHotels";
+          break;
+        }
+      }
     }
   };
 
