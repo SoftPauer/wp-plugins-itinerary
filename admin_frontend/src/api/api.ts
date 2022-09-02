@@ -1,5 +1,4 @@
 import axios, { AxiosResponse } from "axios";
-import { intervalToDuration } from "date-fns";
 import { ExcelDisplayTypes } from "../fieldTypes";
 import { LooseObject } from "../utils";
 

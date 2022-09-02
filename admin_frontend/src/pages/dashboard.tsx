@@ -13,18 +13,11 @@ import {
 import {
   GridRowsProp,
   GridRowModesModel,
-  GridRowModes,
   DataGrid,
   GridColumns,
-  GridRowParams,
-  MuiEvent,
   GridToolbarContainer,
   GridActionsCellItem,
-  GridEventListener,
-  GridRowId,
   GridRowModel,
-  GridCellParams,
-  useGridApiRef,
 } from "@mui/x-data-grid";
 import { randomId } from "@mui/x-data-grid-generator";
 import { ItinerarySelection } from "../components/itinerarySelection";
@@ -235,7 +228,7 @@ const ReportsGrid = () => {
     };
     return (
       <GridToolbarContainer>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+        <Typography variant="h6" component="div" style={{ flexGrow: 1 }}>
           {`Total Cost: £${getRowsTotal()}`}
         </Typography>
       </GridToolbarContainer>
@@ -264,7 +257,7 @@ const ReportsGrid = () => {
   populateTable();
 
   return (
-    <div>
+    <div  style={{ height: 400, width: "100%" }}>
       <DataGrid
         rows={rows}
         columns={columns}
@@ -279,14 +272,13 @@ const ReportsGrid = () => {
           footer: { rows },
         }}
         experimentalFeatures={{ newEditingApi: true }}
-        style={{ height: 400, width: "100%" }}
+       
       ></DataGrid>
     </div>
   );
 };
 
 export const DashboardPage: FC<{}> = () => {
-  const itinContext = useItineraryContext();
   const [userList, setUserList] = useState<Record<string, {}>>();
 
   const fetchData = async () => {
