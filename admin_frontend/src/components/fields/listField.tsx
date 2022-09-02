@@ -1,6 +1,6 @@
 import { Button, makeStyles, Typography } from "@material-ui/core";
-import { FC, useCallback, useContext, useEffect, useState } from "react";
-import Collapsible from "react-collapsible";
+import React, { FC, useCallback, useContext, useEffect, useState } from "react";
+import Collapsible, { CollapsibleProps } from "react-collapsible";
 import { Field } from "../../api/api";
 import { ISortedField } from "../../pages/sectionValues";
 import { ModalContext } from "../../state/modals";
@@ -12,6 +12,8 @@ import { useValueContext } from "../../state/valueProvider";
 import { wsDataToValues } from "../../helpers/sheetUtils";
 import { useSheetContext } from "../../state/sheetProvider";
 import { useFieldContext } from "../../state/fieldProvider";
+import { SatelliteSharp } from "@material-ui/icons";
+import el from "date-fns/esm/locale/el/index.js";
 
 type ListProps = {
   field: ISortedField;
@@ -58,9 +60,18 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
   const [length, setLength] = useState<number>(
     Number.parseInt(preview ? "1" : "0")
   );
+
+  const handleClose = () => {
+    localStorage.removeItem("items");
+    localStorage.removeItem("name");
+  };
+
+  const states: boolean[] = [];
+
   const classes = useStyles();
   const { dispatch } = useContext(ModalContext);
   const sectionContext = useSectionContext();
+  const valueContext = useValueContext();
   const { fieldsToWsData } = useSheetContext();
   const {
     getListFieldLength,
@@ -72,10 +83,48 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
   } = useValueContext();
   const fieldContext = useFieldContext();
 
+  const [key, setKey] = useState<string>("");
+  const local = localStorage.getItem("items");
+
   useEffect(() => {
     const length = getListFieldLength(field.field, index);
     setLength(Number.parseInt(preview ? "1" : length.toString()));
+    if (local !== null) {
+      const items = JSON.parse(local);
+      const firstKey = Object.keys(items)[0];
+      switch (firstKey) {
+        case "flightDate":
+          setKey(
+            `${items["flightDate"]},${items["outboundAirportAbr"]},${items["inboundAirportAbr"]}`
+          );
+          break;
+        case "name": //hotel name
+          const nameItem = localStorage.getItem("name");
+          if (nameItem) {
+            const name = JSON.parse(nameItem);
+            for (let i = 0; i < items["guests"].length; i++) {
+              if (items["guests"][i]["name"] === name) {
+                setKey(
+                  `${items["name"]}/${name},${items["guests"][i]["checkIn"]},${items["guests"][i]["checkOut"]}`
+                );
+              }
+            }
+            break;
+          }
+          break;
+        case "carType":
+          setKey(`${items["mainDriver"]}`);
+          break;
+      }
+    }
   }, [getListFieldLength, preview, values, field.field, index]);
+
+  for (let i = 0; i < length; i++) {
+    states.push(false);
+  }
+  if (sectionContext.selectedItem !== undefined) {
+    states[sectionContext.selectedItem] = true;
+  }
 
   const addEntry = async () => {
     let val = [];
@@ -140,6 +189,7 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
             key_string += ",";
           }
         }
+
       field.children.forEach((c) => {
         fields.push(
           <FieldWrapper
@@ -147,6 +197,7 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
             index={index + "." + i.toString()}
             preview={preview}
             key={c.field.id}
+            listKey={key_string}
           ></FieldWrapper>
         );
       });
@@ -164,9 +215,19 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
           )}
         </div>
       );
+      const compareKeys = (elementKey: string, compareKey: string) => {
+        if (compareKey.includes("/")) {
+          const index = compareKey.indexOf("/");
+          const hotel = compareKey.substring(0, index);
+          const guest = compareKey.substring(index + 1);
+          return elementKey === hotel || elementKey === guest ? true : false;
+        } else {
+          return elementKey === compareKey ? true : false;
+        }
+      };
       listElements.push(
         <Collapsible
-          open={false}
+          open={local === null ? false : compareKeys(key_string, key)}
           transitionTime={250}
           trigger={
             <div className={classes.header}>
@@ -181,6 +242,10 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
               >{`(${key_string})`}</Typography>
             </div>
           }
+          className={`${i}`}
+          onClose={() => {
+            handleClose();
+          }}
         >
           <div key={i + "listElem"} className={classes.listField}>
             {fields}
@@ -188,6 +253,7 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
         </Collapsible>
       );
     }
+
     return listElements;
   };
 

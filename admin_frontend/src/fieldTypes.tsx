@@ -2,6 +2,7 @@ import { Typography } from "@material-ui/core";
 import { AppDatePicker } from "./components/fields/datePicker";
 import { GroupField } from "./components/fields/group";
 import { ListField } from "./components/fields/listField";
+import { PassengersTable } from "./components/fields/passengersTable";
 import { AppSelectField } from "./components/fields/selectField";
 import { AppTextField } from "./components/fields/textField";
 import { ISortedField } from "./pages/sectionValues";
@@ -14,6 +15,7 @@ export enum FieldTypes {
   select = "select",
   time = "time",
   dateTime = "dateTime",
+  costingTable = "costingTable",
 }
 
 export const FieldTypesList: {
@@ -34,7 +36,8 @@ export const ExcelDisplayTypesList: {
 export const renderField = (
   field: ISortedField,
   index: string = "0",
-  preview: boolean = false
+  preview: boolean = false,
+  listKey?: string
 ) => {
   if (field.field.field_type === FieldTypes.text) {
     return (
@@ -108,6 +111,17 @@ export const renderField = (
         preview={preview}
         key={field.field.id}
       ></ListField>
+    );
+  }
+
+  if (field.field.field_type === FieldTypes.costingTable) {
+    return (
+      <PassengersTable
+        index={index}
+        field={field.field}
+        preview={preview}
+        listKey={listKey}
+      />
     );
   }
 

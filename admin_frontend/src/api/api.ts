@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from "axios";
+import { intervalToDuration } from "date-fns";
 import { ExcelDisplayTypes } from "../fieldTypes";
 import { LooseObject } from "../utils";
 
@@ -20,6 +21,17 @@ interface IResponseWithHeader<T> {
 
 
 export const requestsItinerary = {
+  get: <T>(url: string) =>
+    instance.get<T>("itinerary/v1/" + url).then<T>(responseBody),
+  post: (url: string, body: {}) =>
+    instance.post("itinerary/v1/" + url, body).then(responseBody),
+  put: (url: string, body: {}) =>
+    instance.put("itinerary/v1/" + url, body).then(responseBody),
+  delete: (url: string) =>
+    instance.delete("itinerary/v1/" + url).then(responseBody),
+};
+
+export const requestsCosting = {
   get: <T>(url: string) =>
     instance.get<T>("itinerary/v1/" + url).then<T>(responseBody),
   post: (url: string, body: {}) =>
@@ -62,6 +74,41 @@ export const Itinerary = {
   // 	requests.put(`posts/${id}`, post),
   deleteItinerary: (id: number): Promise<void> =>
     requestsItinerary.delete(`itineraries/delete/${id}`),
+};
+
+export const requestsReport={
+  get: <T>(url:string)=>instance.get<T>("itinerary/v1/" + url).then<T>(responseBody),
+}
+
+export const Report = {
+  getReport: (): Promise<Record<string, {}>>=>requestsReport.get("itineraries/generateReport"),
+}
+
+export interface ICosting{
+  id: number;
+  itinerary_id: number;
+  section_id: number;
+  listKey: string;
+  costing: string;
+}
+
+export interface ICreateCosting{
+  itinerary_id: number;
+  section_id:number;
+  listKey:string;
+  costing:LooseObject;
+}
+
+export const Costing = {
+  getCosting: (id:number): Promise<ICosting[]> =>
+    requestsCosting.get(`costings`),
+  // getAPost: (id: number): Promise<PostType> => requests.get(`posts/${id}`),
+  createCosting: (post: ICreateCosting): Promise<number> =>
+    requestsItinerary.post("costings/create", post),
+  // updatePost: (post: PostType, id: number): Promise<PostType> =>
+  // 	requests.put(`posts/${id}`, post),
+  deleteCosting: (id: number): Promise<void> =>
+    requestsItinerary.delete(`costings/delete/${id}`),
 };
 
 export interface IUpdateApp {
@@ -116,6 +163,7 @@ export interface ITypeProperties {
   data_transform_properties?: string;
   excelDisplayType?: ExcelDisplayTypes;
   key_fields?: string[];// used to diplay next to the header 
+  showOnDashboard?: boolean;
 }
 export interface IDataSourceProperties {
   source?: number;

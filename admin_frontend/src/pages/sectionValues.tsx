@@ -1,5 +1,5 @@
 import { Button, makeStyles, Typography } from "@material-ui/core";
-import { FC, useContext, useState } from "react";
+import { FC, useContext, useEffect, useState } from "react";
 import { IField, Value, User, UpdateApp } from "../api/api";
 import { FieldWrapper } from "../components/fieldWrapper";
 import { ItinerarySelection } from "../components/itinerarySelection";
@@ -33,8 +33,24 @@ export const SectionValuesPage: FC = () => {
   const valueContext = useValueContext();
   const { dispatch } = useContext(ModalContext);
   const [modelState, setAddChannelModel] = useState<boolean>(false);
+ // const [items, setItems] = useState([]);
+  //const local = localStorage.getItem("item");
 
-  const fillFields = (field: ISortedField) => {
+  /* useEffect(() => {
+    if (local !== null) {
+      const items = JSON.parse(local);
+      if (items) {
+        setItems(items);
+      }
+      sectionContext.setSelectedItem(0);
+    } else {
+      sectionContext.setSelectedItem(undefined);
+    }
+  }, []); */
+
+  //Fix localhost deletion re-render issue
+
+  const fillFields = (field: ISortedField, selected?: number) => {
     if (sectionContext.selectedSection === undefined) {
       return <div key={1}></div>;
     }
