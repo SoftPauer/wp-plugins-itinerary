@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.1.3
+Version: 1.1.4
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
 
@@ -457,10 +457,8 @@ function create_new_costing(WP_REST_Request $request)
 {
   global $wpdb, $table_name_costings;
   $body = json_decode($request->get_body());
-  
-  $results = get_costing_value($body->section_id, $body->itinerary_id,$body->listKey);
-
-  if ($results && count($results) > 0) {
+  $results = get_costing_value($body->id);
+  if ( count($results) > 0) {
     $sql = "UPDATE {$table_name_costings} SET costing = %s  WHERE id = '{$results[0]->id}'";
     $sql = $wpdb->prepare($sql,  json_encode($body->costing));
     $data = ['updated' => $wpdb->query($sql)];
@@ -489,7 +487,7 @@ function get_costing_value($id)
   global $wpdb, $table_name_costings;
   $results = $wpdb->get_results(
     "SELECT * FROM {$table_name_costings} 
-     WHERE id = {$id} ",
+     WHERE id = {$id}",
     OBJECT
   );
   return $results;
