@@ -24,12 +24,12 @@ import { useItineraryContext } from "../state/itineraryProvider";
 import { FieldProvider } from "../state/fieldProvider";
 import { TrendingUpOutlined } from "@material-ui/icons";
 import { Costing, ICosting, Itinerary, Report } from "../api/api";
+import { fork } from "cluster";
 
 enum Emojis {
   "Flight" = "✈️ ",
   "hotel" = "🏠 ",
   "cars" = "🚗 ",
-  "Private" = "☑️",
 }
 
 const Emoji = (props: {
@@ -49,7 +49,11 @@ const Emoji = (props: {
   }
 };
 
-const DashboardRow = (props: { row: any; name: string }) => {
+const DashboardRow = (props: {
+  row: any;
+  name: string;
+  sections: string[];
+}) => {
   const handleEmojiClick = (booking: string, items: {}) => {
     if (items) {
       localStorage.setItem("items", JSON.stringify(items));
@@ -64,14 +68,13 @@ const DashboardRow = (props: { row: any; name: string }) => {
     }
   };
 
-  const keyArr = [];
-  var isPrivate: boolean = false;
+  let objectArr: any = {};
 
-  for (const key in props.row) {
-    if (key !== "Private") {
-      keyArr.push(key);
+  for (const key in props.sections) {
+    if (props.row[props.sections[key]] !== undefined) {
+      objectArr[props.sections[key]] = props.row[props.sections[key]];
     } else {
-      isPrivate = props.row[key][0];
+      objectArr[props.sections[key]] = [];
     }
   }
 
@@ -83,10 +86,10 @@ const DashboardRow = (props: { row: any; name: string }) => {
         }
       </style> */}
       <TableCell align="left">{props.name}</TableCell>
-      {keyArr.map((booking, index) => {
+      {props.sections.map((booking, index) => {
         return (
           <TableCell align="center">
-            {props.row[booking].map((emojiObj: {}) => {
+            {objectArr[booking].map((emojiObj: {}) => {
               return (
                 <Emoji
                   field={booking}
@@ -94,36 +97,29 @@ const DashboardRow = (props: { row: any; name: string }) => {
                   onClick={() => {
                     handleEmojiClick(booking, emojiObj);
                   }}
-                  isPrivate={isPrivate}
                 ></Emoji>
               );
             })}
           </TableCell>
         );
       })}
-      <TableCell align="center">
-        {isPrivate === true && <Emoji field={"Private"} count={1}></Emoji>}
-        {isPrivate === false && <span></span>}
-      </TableCell>
     </TableRow>
   );
 };
 
 const DashboardTable = (props: { rows: Record<string, {}> }) => {
   const rowArray = [];
-  const headArr = [];
+  const headArr: string[] = [];
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const { rows } = props;
   for (const key in rows) {
-    const value: any = rows[key];
     rowArray.push(key);
-  }
-
-  console.log(rows);
-
-  for (const item in rows[rowArray[0]]) {
-    headArr.push(item);
+    for (const section in rows[key]) {
+      if (!headArr.includes(section)) {
+        headArr.push(section);
+      }
+    }
   }
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -158,7 +154,11 @@ const DashboardTable = (props: { rows: Record<string, {}> }) => {
               .sort()
               .map((name) => {
                 return (
-                  <DashboardRow row={rows[name]} name={name}></DashboardRow>
+                  <DashboardRow
+                    row={rows[name]}
+                    name={name}
+                    sections={headArr}
+                  ></DashboardRow>
                 );
               })}
           </TableBody>
@@ -289,8 +289,6 @@ export const DashboardPage: FC<{}> = () => {
   }
 
   if (!userList) return <></>;
-
-  console.log(userList);
 
   return (
     <div>
