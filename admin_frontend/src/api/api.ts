@@ -9,7 +9,6 @@ const instance = axios.create({
   timeout: 15000,
 });
 
-
 const responseBody = <T>(response: AxiosResponse<T | any>) => response.data;
 const responseBodyWithHeaders = <T>(response: AxiosResponse<T>) => {
   return { data: response.data, headers: response.headers };

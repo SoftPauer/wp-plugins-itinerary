@@ -44,14 +44,14 @@ export const ValueProvider = (props: { children: React.ReactNode }) => {
   const itineraryContext = useItineraryContext();
   const fieldContext = useFieldContext();
   const fetchData = useCallback(async () => {
-    if (sectionContext.selectedSection && itineraryContext.selected.id !== -1) {
+    if (sectionContext.selectedSection && (itineraryContext.selected?.id ?? -1) !== -1  ) {
       const values = await Value.getValues(
         sectionContext.selectedSection.id,
         itineraryContext.selected.id
       );
       setValues(JSON.parse(values?.value ?? "{}"));
     }
-  }, [itineraryContext.selected.id, sectionContext.selectedSection]);
+  }, [itineraryContext.selected?.id, sectionContext.selectedSection]);
 
   useEffect(() => {
     fetchData();
