@@ -7,12 +7,15 @@ import {
   GridRowParams,
   MuiEvent,
   GridToolbarContainer,
-  GridActionsCellItem,
   GridEventListener,
   GridRowId,
   GridRowModel,
   GridCellParams,
   useGridApiRef,
+  GridCellEditCommitParams,
+  GridCellEditStopReasons,
+  MuiBaseEvent,
+  GridCallbackDetails,
 } from "@mui/x-data-grid";
 import { randomId } from "@mui/x-data-grid-generator";
 import { Button, Typography } from "@mui/material";
@@ -122,7 +125,6 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
   const [rows, setRows] = useState<GridRowsProp>([]);
   const [state, setState] = useState<IAppTextFieldState>();
   const [options, setOptions] = useState<IDataSourceOptions | null>(null);
-  const [passengers, setPassengers] = useState([]);
   const { dispatch } = useContext(ModalContext);
   const classes = useStyles();
   const apiRef = useGridApiRef();
@@ -155,7 +157,7 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
     const costingArr = await Costing.getCosting(itinContext.selected.id);
 
     passengers.forEach((passenger) => {
-      costingArr.some((element) => {
+      const isCostingFound = costingArr.some((element) => {
         const costingObj = JSON.parse(element.costing);
         if (
           costingObj.units.Passenger === passenger &&
@@ -167,8 +169,17 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
             cost: costingObj.units.Price,
             fareType: costingObj.units.FareType,
           });
+          return true;
         }
       });
+      if (!isCostingFound) {
+        rows.push({
+          id: randomId(),
+          name: passenger,
+          cost: "0",
+          fareType: "",
+        });
+      }
     });
 
     setRows(rows);
@@ -181,18 +192,21 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
     event.defaultMuiPrevented = true;
   };
 
-  const handleRowEditStop: GridEventListener<"rowEditStop"> = (
-    params,
-    event
-  ) => {
-    valueContext.updateValues({
-      field: field,
-      value: JSON.stringify(state),
-      index: index,
-    });
-  };
-
   const processRowUpdate = (newRow: GridRowModel) => {
+    Costing.createCosting({
+      listKey: listKey ?? "",
+      section_id: sectionContext.selectedSection?.id ?? 0,
+      itinerary_id: itinContext.selected.id,
+      costing: {
+        totalCost: newRow.cost,
+        units: {
+          Passenger: newRow.name,
+          FareType: newRow.fareType,
+          Price: newRow.cost,
+        },
+      },
+    });
+
     const updatedRow = { ...newRow, isNew: false };
     setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
     return updatedRow;
@@ -226,10 +240,6 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
     },
   ];
 
-  const handleCellEditStop = () => {
-    let row = apiRef.current.getEditRowsModel();
-    console.log(row);
-  };
   return (
     <div style={{ width: "100%" }}>
       <Collapsible
@@ -252,7 +262,6 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
           rowModesModel={rowModesModel}
           processRowUpdate={processRowUpdate}
           density="compact"
-          //onCellEditStop={handleCellEditStop}
           components={{
             Footer: TotalCost,
           }}
