@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.0.20
+Version: 1.0.23
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
 
@@ -176,7 +176,9 @@ function itinerary_install()
     passenger text NOT NULL,
     summary text NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (itinerary_id) REFERENCES $table_name_itinerary (id),) $charset_collate;";
+    FOREIGN KEY (itinerary_id) REFERENCES $table_name_itinerary (id)
+  ) $charset_collate;";
+    error_log($sql);
 
   require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
   dbDelta($sql);
@@ -443,7 +445,6 @@ add_action('rest_api_init', function () {
  */
 function get_all_costings(){
   global $wpdb, $table_name_costings;
-  $body = json_decode($request->get_body());
   $results = $wpdb->get_results("SELECT * FROM {$table_name_costings}", OBJECT);
 
   return rest_ensure_response($results);
@@ -580,10 +581,9 @@ function generate_reporting_table(WP_REST_Request $request)
 
   //get all fields with reporting enabled
   $sql = 'SELECT * FROM ' . $table_name_fields . ' WHERE type_properties LIKE ' . "'" . '%"showOnDashboard":true%' . "'";
-
+  
   // $fields_with_reporting = $wpdb->get_results("SELECT * FROM " . $table_name_fields . ` WHERE type_properties LIKE '%"showOnDashboard":true%';`);
   $fields_with_reporting = $wpdb->get_results($sql);
-
   foreach ($itineraries as $itin) {
     $tableDict = array();
     foreach ($fields_with_reporting as $field) {
@@ -591,6 +591,7 @@ function generate_reporting_table(WP_REST_Request $request)
       [$parent_field, $parent_json_key, $field_json_key] = get_field_parent($field, $field->section);
       $data = $wpdb->get_results("SELECT value FROM " . $table_name_section_values . " WHERE itinerary = " . $itin->id . " AND section =" . $field->section);
       $values = json_decode($data[0]->value);
+      error_log(json_encode($values));
       // $values = $values->$root_key;
       foreach ($values as $value) {
         foreach ($value as $section_value) {
@@ -661,6 +662,7 @@ function get_field_parent($field, $section_id)
   }
   $parent_field_to_user = $wpdb->get_results("SELECT * FROM $table_name_fields WHERE id = $field->parent AND section = $section_id");
   $parent_field_to_user = $parent_field_to_user[0];
+  error_log(json_encode($parent_field_to_user));
   //unpack type props for field to get json_key 
   $user_field_type_props = json_decode($field->type_properties, true);
   $user_field_json_key = $user_field_type_props['json_key'];
