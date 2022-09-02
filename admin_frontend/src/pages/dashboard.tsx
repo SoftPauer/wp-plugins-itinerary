@@ -1,5 +1,4 @@
 import { FC, useState, MouseEventHandler, useEffect } from "react";
-import data from "./dummyData.json";
 import {
   TableContainer,
   TablePagination,
@@ -257,7 +256,7 @@ const ReportsGrid = () => {
   populateTable();
 
   return (
-    <div  style={{ height: 400, width: "100%" }}>
+    <div style={{ height: 400, width: "100%" }}>
       <DataGrid
         rows={rows}
         columns={columns}
@@ -272,7 +271,6 @@ const ReportsGrid = () => {
           footer: { rows },
         }}
         experimentalFeatures={{ newEditingApi: true }}
-       
       ></DataGrid>
     </div>
   );
