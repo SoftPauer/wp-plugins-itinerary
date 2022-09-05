@@ -13,7 +13,7 @@ add_action('admin_menu', 'itinerary_plugin_setup_menu');
 function itinerary_plugin_setup_menu()
 {
   add_menu_page('Sections', 'Sections', 'manage_options', 'itinerary-plugin-sections', 'itinerary_init_sections');
-  add_menu_page('Dashboard', 'Dashboard', 'manage_options', 'itinerary-plugin-dashboard', 'itinerary_init_dashboard');
+  add_menu_page('Dashboard', 'Dashboard', 'eventr_manager', 'itinerary-plugin-dashboard', 'itinerary_init_dashboard');
 
 
   global $wpdb;
@@ -49,7 +49,7 @@ function itinerary_ini_section($name)
 
 
 add_action('admin_enqueue_scripts', function ($hook) {
-  $dev = true;
+  $dev = false;
   if (!substr($hook, 0, strlen('toplevel_page_itinerary-plugin')) ===  'toplevel_page_itinerary-plugin') {
     return;
   }
