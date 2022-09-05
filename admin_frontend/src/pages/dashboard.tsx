@@ -232,6 +232,9 @@ const ReportsGrid = (props: { costs: ICosting[] }) => {
     setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
     return updatedRow;
   };
+  interface TotalCostProps {
+    rows: any[];
+  }
 
   function TotalCost() {
     const getRowsTotal = () => {
