@@ -80,7 +80,7 @@ export const requestsReport={
 }
 
 export const Report = {
-  getReport: (): Promise<Record<string, {}>>=>requestsReport.get("itineraries/generateReport"),
+  getReport: (id:number): Promise<Record<string, {}>>=>requestsReport.get(`itineraries/generateReport/${id}`),
 }
 
 export interface ICosting{
@@ -101,7 +101,7 @@ export interface ICreateCosting{
 
 export const Costing = {
   getCosting: (id:number): Promise<ICosting[]> =>
-    requestsCosting.get(`costings`),
+    requestsCosting.get(`costings/${id}`),
   // getAPost: (id: number): Promise<PostType> => requests.get(`posts/${id}`),
   createCosting: (post: ICreateCosting): Promise<number> =>
     requestsItinerary.post("costings/create", post),

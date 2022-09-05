@@ -92,29 +92,25 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
     if (local !== null) {
       const items = JSON.parse(local);
       const firstKey = Object.keys(items)[0];
-      switch (firstKey) {
-        case "flightDate":
-          setKey(
-            `${items["flightDate"]},${items["outboundAirportAbr"]},${items["inboundAirportAbr"]}`
-          );
-          break;
-        case "name": //hotel name
-          const nameItem = localStorage.getItem("name");
-          if (nameItem) {
-            const name = JSON.parse(nameItem);
-            for (let i = 0; i < items["guests"].length; i++) {
-              if (items["guests"][i]["name"] === name) {
-                setKey(
-                  `${items["name"]}/${name},${items["guests"][i]["checkIn"]},${items["guests"][i]["checkOut"]}`
-                );
-              }
+
+      if (firstKey.includes("flightDate")) {
+        setKey(
+          `${items["flightDate"]},${items["outboundAirportAbr"]},${items["inboundAirportAbr"]}`
+        );
+      } else if (firstKey.includes("name")) {
+        const nameItem = localStorage.getItem("name");
+        if (nameItem) {
+          const name = JSON.parse(nameItem);
+          for (let i = 0; i < items["guests"].length; i++) {
+            if (items["guests"][i]["name"] === name) {
+              setKey(
+                `${items["name"]}/${name},${items["guests"][i]["checkIn"]},${items["guests"][i]["checkOut"]}`
+              );
             }
-            break;
           }
-          break;
-        case "Supplier":
-          setKey(`${items["mainDriver"]}`);
-          break;
+        }
+      } else if (firstKey.includes("Supplier")) {
+        setKey(`${items["mainDriver"]}`);
       }
     }
   }, [getListFieldLength, preview, values, field.field, index]);

@@ -20,7 +20,10 @@ import {
 } from "@mui/x-data-grid";
 import { randomId } from "@mui/x-data-grid-generator";
 import { ItinerarySelection } from "../components/itinerarySelection";
-import { useItineraryContext } from "../state/itineraryProvider";
+import {
+  IItineraryContext,
+  useItineraryContext,
+} from "../state/itineraryProvider";
 import { FieldProvider } from "../state/fieldProvider";
 import { TrendingUpOutlined } from "@material-ui/icons";
 import { Costing, ICosting, Itinerary, Report } from "../api/api";
@@ -150,7 +153,6 @@ const DashboardTable = (props: { rows: Record<string, {}> }) => {
 
   return (
     <div>
-      <ItinerarySelection></ItinerarySelection>
       <TableContainer>
         <Table>
           <TableHead>
@@ -192,7 +194,7 @@ const DashboardTable = (props: { rows: Record<string, {}> }) => {
   );
 };
 
-const ReportsGrid = () => {
+const ReportsGrid = (props: { costs: ICosting[] }) => {
   const [rows, setRows] = useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
   const itinContext = useItineraryContext();
@@ -230,9 +232,6 @@ const ReportsGrid = () => {
     setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
     return updatedRow;
   };
-  interface TotalCostProps {
-    rows: any[];
-  }
 
   function TotalCost() {
     const getRowsTotal = () => {
@@ -249,7 +248,7 @@ const ReportsGrid = () => {
     );
   }
 
-  const populateTable = async () => {
+  const populateTable = async (costs: ICosting[]) => {
     let rows: any[] = [];
     const costingArr = await Costing.getCosting(itinContext.selected.id);
 
@@ -268,7 +267,9 @@ const ReportsGrid = () => {
     setRows(rows);
   };
 
-  populateTable();
+  if (props.costs) {
+    populateTable(props.costs);
+  }
 
   return (
     <div style={{ height: 400, width: "100%" }}>
@@ -293,22 +294,36 @@ const ReportsGrid = () => {
 
 export const DashboardPage: FC<{}> = () => {
   const [userList, setUserList] = useState<Record<string, {}>>();
+  const [costingArray, setCostingArray] = useState<ICosting[]>([]);
+  const itinContext = useItineraryContext();
 
-  const fetchData = async () => {
-    const obj = await Report.getReport();
-    setUserList(obj);
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      const obj = await Report.getReport(itinContext.selected.id);
+      setUserList(obj);
+    };
 
-  if (userList === undefined) {
-    fetchData();
-  }
+    const fetchCosting = async () => {
+      const costObj = await Costing.getCosting(itinContext.selected.id);
+      setCostingArray(costObj);
+    };
+
+    if (costingArray.length < 1) {
+      fetchCosting;
+    }
+
+    if (itinContext.selected.id !== -1) {
+      fetchData();
+    }
+  }, [itinContext.selected.id]);
 
   if (!userList) return <></>;
 
   return (
     <div>
+      <ItinerarySelection></ItinerarySelection>
       <DashboardTable rows={userList}></DashboardTable>
-      <ReportsGrid></ReportsGrid>
+      <ReportsGrid costs={costingArray}></ReportsGrid>
     </div>
   );
 };

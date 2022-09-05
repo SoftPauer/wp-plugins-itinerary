@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.1.6
+Version: 1.1.7
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
 
@@ -227,9 +227,16 @@ add_action('rest_api_init', function () {
   ));
 
   //costings
-   register_rest_route('itinerary/v1', 'costings', array(
+   register_rest_route('itinerary/v1', 'costings/(?P<itinerary_id>\d+)', array(
     'methods' => WP_REST_Server::READABLE,
     'callback' => 'get_all_costings',
+    'args' => array(
+      'itinerary_id' => array(
+        'validate_callback' => function ($param, $request, $key) {
+          return is_numeric($param);
+        }
+      ),
+    )
   ));
   register_rest_route('itinerary/v1', 'costings/create', array(
     'methods' => WP_REST_Server::CREATABLE,
@@ -421,9 +428,16 @@ add_action('rest_api_init', function () {
     'callback' => 'get_dashboard_fields',
   ));
 
-  register_rest_route('itinerary/v1', 'itineraries/generateReport', array(
+  register_rest_route('itinerary/v1', 'itineraries/generateReport/(?P<itinerary_id>\d+)', array(
     'methods' => WP_REST_Server::READABLE,
     'callback' => 'generate_reporting_table',
+    'args' => array(
+      'itinerary_id' => array(
+        'validate_callback' => function ($param, $request, $key) {
+          return is_numeric($param);
+        }
+      ),
+    )
   ));
 
   register_rest_route('itinerary/v1', 'itineraries/addDashboardField/(?P<field_id>\d+)', array(
@@ -457,40 +471,22 @@ function create_new_costing(WP_REST_Request $request)
 {
   global $wpdb, $table_name_costings;
   $body = json_decode($request->get_body());
-  $results = get_costing_value($body->id);
-  if ( count($results) > 0) {
-    $sql = "UPDATE {$table_name_costings} SET costing = %s  WHERE id = '{$results[0]->id}'";
-    $sql = $wpdb->prepare($sql,  json_encode($body->costing));
-    $data = ['updated' => $wpdb->query($sql)];
-    return json_encode($data);
-  } else {
-    return $wpdb->insert(
-      $table_name_costings,
-      array(
-        "itinerary_id"=>$body->itinerary_id,
-        "section_id"=>$body->section_id,
-        "listKey"=>$body->listKey,
-        "costing" => json_encode($body->costing),
-      ),
-      array(
-        '%d',
-        '%d',
-        "%s",
-        '%s',
-      )
-    );
-  }
-}
-
-function get_costing_value($id)
-{
-  global $wpdb, $table_name_costings;
-  $results = $wpdb->get_results(
-    "SELECT * FROM {$table_name_costings} 
-     WHERE id = {$id}",
-    OBJECT
+  error_log(print_r($body,true));
+  return $wpdb->insert(
+    $table_name_costings,
+    array(
+      "itinerary_id"=>$body->itinerary_id,
+      "section_id"=>$body->section_id,
+      "listKey"=>$body->listKey,
+      "costing" => json_encode($body->costing),
+    ),
+    array(
+      '%d',
+      '%d',
+      "%s",
+      '%s',
+    )
   );
-  return $results;
 }
 
 /**
@@ -593,23 +589,23 @@ function generate_reporting_table(WP_REST_Request $request)
   //delete table entries 
   $wpdb->query("DELETE FROM $table_name_reporting");
 
+  $itineraryId = $request['itinerary_id'];
   //get all itineraries
   $itineraries = $wpdb->get_results("SELECT id FROM wp_itineraries");
-
 
   //get all fields with reporting enabled
   $sql = 'SELECT * FROM ' . $table_name_fields . ' WHERE type_properties LIKE ' . "'" . '%"showOnDashboard":true%' . "'";
   
   // $fields_with_reporting = $wpdb->get_results("SELECT * FROM " . $table_name_fields . ` WHERE type_properties LIKE '%"showOnDashboard":true%';`);
   $fields_with_reporting = $wpdb->get_results($sql);
-  foreach ($itineraries as $itin) {
+    
     $tableDict = array();
     foreach ($fields_with_reporting as $field) {
       $root_key = get_root_key($field);
       [$parent_field, $parent_json_key, $field_json_key] = get_field_parent($field, $field->section);
-      $data = $wpdb->get_results("SELECT value FROM " . $table_name_section_values . " WHERE itinerary = " . $itin->id . " AND section =" . $field->section);
+      $data = $wpdb->get_results("SELECT value FROM " . $table_name_section_values . " WHERE itinerary = " . $itineraryId . " AND section =" . $field->section);
       $values = json_decode($data[0]->value);
-      error_log(json_encode($values));
+      
       // $values = $values->$root_key;
       foreach ($values as $value) {
         foreach ($value as $section_value) {
@@ -620,6 +616,7 @@ function generate_reporting_table(WP_REST_Request $request)
             // error_log("passenger: " . print_r($passenger_value, true));
             // error_log(print_r($section_value, true));
             foreach ($passenger_value as $passenger) {
+              
               if (is_object($passenger)) {
 
                 $passenger_data = $passenger->{$field_json_key};
@@ -636,7 +633,9 @@ function generate_reporting_table(WP_REST_Request $request)
           } else {
             //passenger values in this case are stored in objects
             $passenger_value = $section_value->$field_json_key;
+            
             if (is_array($passenger_value)) {
+              
               foreach ($passenger_value as $passenger) {
                 add_to_array($tableDict, $passenger, $section_value, $root_key);
               }
@@ -651,7 +650,7 @@ function generate_reporting_table(WP_REST_Request $request)
     foreach ($tableDict as $passenger_name => $passenger_data) {
       update_user_in_reporting($passenger_name, $passenger_data, $itin->id);
     }
-  }
+  
 
 
 
@@ -670,6 +669,7 @@ function add_to_array(array &$tableDict, $passenger_data, $section_value, $root_
   }
   array_push($user_obj[$root_key], $section_value);
   // array_push($user_entry[$root_key], $section_value);
+  //error_log(json_encode($user_obj));
   $tableDict[$passenger_data] = $user_obj;
 }
 
@@ -680,7 +680,6 @@ function get_field_parent($field, $section_id)
   }
   $parent_field_to_user = $wpdb->get_results("SELECT * FROM $table_name_fields WHERE id = $field->parent AND section = $section_id");
   $parent_field_to_user = $parent_field_to_user[0];
-  error_log(json_encode($parent_field_to_user));
   //unpack type props for field to get json_key 
   $user_field_type_props = json_decode($field->type_properties, true);
   $user_field_json_key = $user_field_type_props['json_key'];
