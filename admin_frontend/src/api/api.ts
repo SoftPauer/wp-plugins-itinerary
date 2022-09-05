@@ -103,7 +103,7 @@ export const Costing = {
   getCosting: (id:number): Promise<ICosting[]> =>
     requestsCosting.get(`costings/${id}`),
   // getAPost: (id: number): Promise<PostType> => requests.get(`posts/${id}`),
-  createCosting: (post: ICreateCosting): Promise<number> =>
+  createCosting: (post: ICreateCosting): Promise<ICosting[]> =>
     requestsItinerary.post("costings/create", post),
   // updatePost: (post: PostType, id: number): Promise<PostType> =>
   // 	requests.put(`posts/${id}`, post),

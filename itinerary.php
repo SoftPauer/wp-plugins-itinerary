@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.1.7
+Version: 1.1.10
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
 
@@ -49,7 +49,7 @@ function itinerary_ini_section($name)
 
 
 add_action('admin_enqueue_scripts', function ($hook) {
-  $dev = false;
+  $dev = true;
   if (!substr($hook, 0, strlen('toplevel_page_itinerary-plugin')) ===  'toplevel_page_itinerary-plugin') {
     return;
   }
@@ -471,22 +471,37 @@ function create_new_costing(WP_REST_Request $request)
 {
   global $wpdb, $table_name_costings;
   $body = json_decode($request->get_body());
-  error_log(print_r($body,true));
-  return $wpdb->insert(
-    $table_name_costings,
-    array(
-      "itinerary_id"=>$body->itinerary_id,
-      "section_id"=>$body->section_id,
-      "listKey"=>$body->listKey,
-      "costing" => json_encode($body->costing),
-    ),
-    array(
-      '%d',
-      '%d',
-      "%s",
-      '%s',
-    )
+  $results = get_costing_value($body->id);
+  if ( count($results) > 0) {
+    $sql = "UPDATE {$table_name_costings} SET costing = %s  WHERE id = '{$results[0]->id}'";
+    $sql = $wpdb->prepare($sql,  json_encode($body->costing));
+    $wpdb->query($sql);
+    return get_costing_value($body->id);
+  } else {
+    $wpdb->insert(
+      $table_name_costings,
+      array(
+        "itinerary_id"=>$body->itinerary_id,
+        "section_id"=>$body->section_id,
+        "listKey"=>$body->listKey,
+        "costing" => json_encode($body->costing),
+      ),
+      array('%d','%d',"%s",'%s')
+    );
+    $id = $wpdb->insert_id;
+    return get_costing_value($id);
+  }
+}
+
+function get_costing_value($id)
+{
+  global $wpdb, $table_name_costings;
+  $results = $wpdb->get_results(
+    "SELECT * FROM {$table_name_costings} 
+     WHERE id = {$id}",
+    OBJECT
   );
+  return $results;
 }
 
 /**
@@ -495,6 +510,7 @@ function create_new_costing(WP_REST_Request $request)
 function delete_costing($data){
   
 }
+
 
 
 function get_dashboard_fields()

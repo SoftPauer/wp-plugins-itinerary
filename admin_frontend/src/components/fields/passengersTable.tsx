@@ -1,21 +1,13 @@
 import {
   GridRowsProp,
   GridRowModesModel,
-  GridRowModes,
   DataGrid,
   GridColumns,
   GridRowParams,
   MuiEvent,
   GridToolbarContainer,
-  GridEventListener,
-  GridRowId,
   GridRowModel,
-  GridCellParams,
   useGridApiRef,
-  GridCellEditCommitParams,
-  GridCellEditStopReasons,
-  MuiBaseEvent,
-  GridCallbackDetails,
 } from "@mui/x-data-grid";
 import { randomId } from "@mui/x-data-grid-generator";
 import { Button, Typography } from "@mui/material";
@@ -192,8 +184,8 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
     event.defaultMuiPrevented = true;
   };
 
-  const processRowUpdate = (newRow: GridRowModel) => {
-    Costing.createCosting({
+  const processRowUpdate = async (newRow: GridRowModel) => {
+    const newCosting = await Costing.createCosting({
       id: newRow.id,
       listKey: listKey ?? "",
       section_id: sectionContext.selectedSection?.id ?? 0,
@@ -207,8 +199,7 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
         },
       },
     });
-
-    const updatedRow = { ...newRow, isNew: false };
+    const updatedRow = { ...newRow, id: newCosting[0].id, isNew: false };
     setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
     return updatedRow;
   };
