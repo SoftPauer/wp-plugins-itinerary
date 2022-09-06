@@ -330,11 +330,12 @@ export const DashboardPage: FC<{}> = () => {
 };
 
 const DashboardHead = (props: { section: string }) => {
+  const title: string = props.section;
+  const titleCapital: string = title[0].toUpperCase() + title.substring(1);
   if (props.section.includes("_")) {
-    const word: string = props.section;
-    const replace = word.replaceAll("_", " ");
+    const replace = titleCapital.replaceAll("_", " ");
     return <TableCell align="center">{replace}</TableCell>;
   } else {
-    return <TableCell align="center">{props.section}</TableCell>;
+    return <TableCell align="center">{titleCapital}</TableCell>;
   }
 };
