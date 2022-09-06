@@ -91,7 +91,7 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
     setLength(Number.parseInt(preview ? "1" : length.toString()));
     if (local !== null) {
       const items = JSON.parse(local);
-      const firstKey = Object.keys(items)[0];
+      const firstKey = Object.keys(items);
       if (firstKey.includes("flightDate")) {
         setKey(
           `${items["flightDate"]},${items["outboundAirportAbr"]},${items["inboundAirportAbr"]}`
