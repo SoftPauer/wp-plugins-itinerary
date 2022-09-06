@@ -108,7 +108,7 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
             }
           }
         }
-      } else if (firstKey.includes("Supplier")) {
+      } else if (firstKey.includes("mainDriver")) {
         setKey(`${items["mainDriver"]}`);
       }
     }
