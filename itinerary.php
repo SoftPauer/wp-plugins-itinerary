@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.1.10
+Version: 1.1.11
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
 
@@ -49,7 +49,7 @@ function itinerary_ini_section($name)
 
 
 add_action('admin_enqueue_scripts', function ($hook) {
-  $dev = false;
+  $dev = true;
   if (!substr($hook, 0, strlen('toplevel_page_itinerary-plugin')) ===  'toplevel_page_itinerary-plugin') {
     return;
   }
@@ -457,9 +457,11 @@ add_action('rest_api_init', function () {
 /**
  * Return all costings
  */
-function get_all_costings(){
+function get_all_costings(WP_REST_Request $request){
+
   global $wpdb, $table_name_costings;
-  $results = $wpdb->get_results("SELECT * FROM {$table_name_costings}", OBJECT);
+  $itineraryId = $request['itinerary_id'];
+  $results = $wpdb->get_results("SELECT * FROM {$table_name_costings} WHERE itinerary_id = '$itineraryId'", OBJECT);
 
   return rest_ensure_response($results);
 }
@@ -554,27 +556,27 @@ function add_dashboard_field(WP_REST_Request $request)
 //   return rest_ensure_response($result);
 // }
 
-function update_user_in_reporting($passenger_name, $passenger_object, $itin_id)
-{
-  global $wpdb, $table_name_reporting;
-  $sql = "SELECT summary FROM $table_name_reporting WHERE itinerary_id = $itin_id AND passenger = '$passenger_name'";
-  $summary = $wpdb->get_results($sql);
+// function update_user_in_reporting($passenger_name, $passenger_object, $itin_id)
+// {
+//   global $wpdb, $table_name_reporting;
+//   $sql = "SELECT summary FROM $table_name_reporting WHERE itinerary_id = $itin_id AND passenger = '$passenger_name'";
+//   $summary = $wpdb->get_results($sql);
 
-  if ($summary == NULL) {
-    $wpdb->insert($table_name_reporting, array(
-      'itinerary_id' => $itin_id,
-      'passenger' => $passenger_name,
-      'summary' => json_encode($passenger_object)
-    ));
-  } else {
-    $wpdb->update($table_name_reporting, array(
-      'summary' => json_encode($passenger_object)
-    ), array(
-      'itinerary_id' => $itin_id,
-      'passenger' => $passenger_name
-    ));
-  }
-}
+//   if ($summary == NULL) {
+//     $wpdb->insert($table_name_reporting, array(
+//       'itinerary_id' => $itin_id,
+//       'passenger' => $passenger_name,
+//       'summary' => json_encode($passenger_object)
+//     ));
+//   } else {
+//     $wpdb->update($table_name_reporting, array(
+//       'summary' => json_encode($passenger_object)
+//     ), array(
+//       'itinerary_id' => $itin_id,
+//       'passenger' => $passenger_name
+//     ));
+//   }
+// }
 
 function find_root_section($field)
 {
@@ -606,8 +608,7 @@ function generate_reporting_table(WP_REST_Request $request)
   $wpdb->query("DELETE FROM $table_name_reporting");
 
   $itineraryId = $request['itinerary_id'];
-  //get all itineraries
-  $itineraries = $wpdb->get_results("SELECT id FROM wp_itineraries");
+
 
   //get all fields with reporting enabled
   $sql = 'SELECT * FROM ' . $table_name_fields . ' WHERE type_properties LIKE ' . "'" . '%"showOnDashboard":true%' . "'";
@@ -663,9 +664,9 @@ function generate_reporting_table(WP_REST_Request $request)
       }
     }
 
-    foreach ($tableDict as $passenger_name => $passenger_data) {
-      update_user_in_reporting($passenger_name, $passenger_data, $itin->id);
-    }
+    // foreach ($tableDict as $passenger_name => $passenger_data) {
+    //   update_user_in_reporting($passenger_name, $passenger_data, $itin->id);
+    // }
   
 
 

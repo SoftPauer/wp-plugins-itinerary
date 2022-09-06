@@ -194,10 +194,35 @@ const DashboardTable = (props: { rows: Record<string, {}> }) => {
   );
 };
 
-const ReportsGrid = (props: { costs: ICosting[] }) => {
+const ReportsGrid = ({ costs }: { costs: ICosting[] }) => {
   const [rows, setRows] = useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
   const itinContext = useItineraryContext();
+
+  useEffect(() => {
+    const populateTable = async (costs: ICosting[]) => {
+      let rows: any[] = [];
+
+      costs.some((element) => {
+        const costingObj = JSON.parse(element.costing);
+        if (costingObj.units.Passenger) {
+          rows.push({
+            id: randomId(),
+            name: costingObj.units.Passenger,
+            cost: costingObj.units.Price,
+            fareType: costingObj.units.FareType,
+          });
+        }
+      });
+
+      setRows(rows);
+    };
+
+    if (costs.length !== 0) {
+      populateTable(costs);
+      console.log(costs);
+    }
+  }, [costs]);
 
   const columns: GridColumns = [
     {
@@ -251,29 +276,6 @@ const ReportsGrid = (props: { costs: ICosting[] }) => {
     );
   }
 
-  const populateTable = async (costs: ICosting[]) => {
-    let rows: any[] = [];
-    const costingArr = await Costing.getCosting(itinContext.selected.id);
-
-    costingArr.some((element) => {
-      const costingObj = JSON.parse(element.costing);
-      if (costingObj.units.Passenger) {
-        rows.push({
-          id: randomId(),
-          name: costingObj.units.Passenger,
-          cost: costingObj.units.Price,
-          fareType: costingObj.units.FareType,
-        });
-      }
-    });
-
-    setRows(rows);
-  };
-
-  if (props.costs) {
-    populateTable(props.costs);
-  }
-
   return (
     <div style={{ height: 400, width: "100%" }}>
       <DataGrid
@@ -304,21 +306,17 @@ export const DashboardPage: FC<{}> = () => {
     const fetchData = async () => {
       const obj = await Report.getReport(itinContext.selected.id);
       setUserList(obj);
-    };
-
-    const fetchCosting = async () => {
       const costObj = await Costing.getCosting(itinContext.selected.id);
       setCostingArray(costObj);
     };
 
-    if (costingArray.length < 1) {
-      fetchCosting;
-    }
-
     if (itinContext.selected.id !== -1) {
       fetchData();
     }
+    console.log(itinContext.selected.id);
   }, [itinContext.selected.id]);
+
+  console.log(costingArray);
 
   if (!userList) return <></>;
 
