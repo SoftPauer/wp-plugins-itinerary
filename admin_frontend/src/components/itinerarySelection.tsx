@@ -18,10 +18,15 @@ export const ItinerarySelection = () => {
   const classes = useStyles();
   const [modelState, setModelState] = useState<boolean>(false);
 
+  const toggle = () => {
+    setModelState(!modelState);
+  };
+
   return (
     <div className={classes.itinerarySelector}>
       <CreateItineraryModal
         open={modelState}
+        toggle={() => toggle()}
         handleClose={() => setModelState(false)}
       ></CreateItineraryModal>
       {itinContext.itineraries.length > 0 && (

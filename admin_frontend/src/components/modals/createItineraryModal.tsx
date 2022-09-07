@@ -1,6 +1,17 @@
-import { Box, Button, Modal, TextField, Typography } from "@material-ui/core";
-import React, { FC, useState } from "react";
+import {
+  Box,
+  Button,
+  FormControl,
+  MenuItem,
+  Modal,
+  Select,
+  TextField,
+  Typography,
+} from "@material-ui/core";
+import React, { FC, useEffect, useState } from "react";
 import { Itinerary } from "../../api/api";
+import { useItineraryContext } from "../../state/itineraryProvider";
+import { useValueContext } from "../../state/valueProvider";
 
 const style: any = {
   position: "absolute",
@@ -16,25 +27,72 @@ const style: any = {
 
 type CreateItineraryModalProps = {
   open: boolean;
+  toggle: () => void;
   handleClose: () => void;
 };
 export const CreateItineraryModal: FC<CreateItineraryModalProps> = ({
   open,
+  toggle,
   handleClose,
 }) => {
   const [name, setName] = useState<string>("");
+  const [itinName, setItinName] = useState<string>("");
+  const [newModalToggle, setNewModalToggle] = useState(open);
+  const [copyModalToggle, setCopyModalToggle] = useState(false);
+  const itinContext = useItineraryContext();
+  const valueContext = useValueContext();
+
+  useEffect(() => {
+    if (open !== newModalToggle) {
+      setNewModalToggle(open);
+    }
+  }, [open]);
+
+  const handdleNewClick = () => {
+    setCopyModalToggle(false);
+    setNewModalToggle(true);
+    toggle();
+  };
+
+  const handdleCopyClick = () => {
+    handleClose();
+    setCopyModalToggle(true);
+  };
+
+  const handleCopy = (name: string) => {
+    console.log("create new itin");
+    Itinerary.createItinerary({ name });
+    console.log("copy to itin");
+    copyValuesFromLastItin();
+  };
+
+  const copyValuesFromLastItin = () => {
+    valueContext.copyValuesFromLastItin(itinContext.selected.id);
+  };
+
   return (
     <div>
       <Modal
-        open={open}
+        open={newModalToggle}
         onClose={() => {
           handleClose();
         }}
       >
         <Box sx={style}>
-          <Typography variant="h6" component="h2">
-            New itinerary
-          </Typography>
+          <Button>
+            <Typography variant="h6" component="h2">
+              New Itinerary
+            </Typography>
+          </Button>
+          <Button
+            onClick={(e) => {
+              handdleCopyClick();
+            }}
+          >
+            <Typography variant="h6" component="h2">
+              Copy Itinerary
+            </Typography>
+          </Button>
           <TextField
             required
             label="New itinerary"
@@ -48,6 +106,72 @@ export const CreateItineraryModal: FC<CreateItineraryModalProps> = ({
             }}
           >
             Add itinerary
+          </Button>
+        </Box>
+      </Modal>
+      <Modal
+        open={copyModalToggle}
+        onClose={() => {
+          setCopyModalToggle(false);
+        }}
+      >
+        <Box sx={style}>
+          <Button
+            onClick={(e) => {
+              handdleNewClick();
+            }}
+          >
+            <Typography variant="h6" component="h2">
+              New Itinerary
+            </Typography>
+          </Button>
+          <Button>
+            <Typography variant="h6" component="h2">
+              Copy Itinerary
+            </Typography>
+          </Button>
+          <TextField
+            required
+            label="Copy itinerary name"
+            placeholder="Itinerary name"
+            onChange={(val) => setName(val.target.value)}
+            value={name}
+          />
+          <div>
+            <FormControl>
+              <Select
+                label="Choose an itinerary to copy"
+                onChange={(e) => {
+                  const itin = itinContext.itineraries.find(
+                    (i) => i.id === e.target.value
+                  );
+                  if (itin) {
+                    itinContext.setSelectedItin(itin);
+                  } else {
+                    console.error("didn't find itinerary");
+                  }
+                }}
+                value={
+                  itinContext.selected?.id ??
+                  itinContext.itineraries[itinContext.itineraries.length - 1].id
+                }
+              >
+                {itinContext.itineraries.map((i, n) => {
+                  return (
+                    <MenuItem key={n} value={i.id}>
+                      {i.name}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
+          </div>
+          <Button
+            onClick={() => {
+              handleCopy(name);
+            }}
+          >
+            Copy itinerary
           </Button>
         </Box>
       </Modal>

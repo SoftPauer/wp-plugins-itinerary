@@ -220,7 +220,6 @@ const ReportsGrid = ({ costs }: { costs: ICosting[] }) => {
 
     if (costs.length !== 0) {
       populateTable(costs);
-      console.log(costs);
     }
   }, [costs]);
 
@@ -313,10 +312,7 @@ export const DashboardPage: FC<{}> = () => {
     if (itinContext.selected.id !== -1) {
       fetchData();
     }
-    console.log(itinContext.selected.id);
   }, [itinContext.selected.id]);
-
-  console.log(costingArray);
 
   if (!userList) return <></>;
 
