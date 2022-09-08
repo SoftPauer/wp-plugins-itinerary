@@ -60,10 +60,9 @@ export const CreateItineraryModal: FC<CreateItineraryModalProps> = ({
   };
 
   const handleCopy = (name: string) => {
-    console.log("create new itin");
     Itinerary.createItinerary({ name });
-    console.log("copy to itin");
     copyValuesFromSelectedItin();
+    window.location.reload();
   };
 
   const copyValuesFromSelectedItin = () => {
@@ -101,8 +100,12 @@ export const CreateItineraryModal: FC<CreateItineraryModalProps> = ({
             value={name}
           />
           <Button
+            style={{ marginLeft: "10px" }}
+            color="secondary"
+            variant="contained"
             onClick={() => {
               Itinerary.createItinerary({ name });
+              window.location.reload();
             }}
           >
             Add itinerary
@@ -167,6 +170,9 @@ export const CreateItineraryModal: FC<CreateItineraryModalProps> = ({
             </FormControl>
           </div>
           <Button
+            style={{ marginLeft: "10px" }}
+            color="secondary"
+            variant="contained"
             onClick={() => {
               handleCopy(name);
             }}

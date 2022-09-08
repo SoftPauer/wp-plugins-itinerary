@@ -8,6 +8,7 @@ import {
   TableHead,
   TableRow,
   Typography,
+  Tooltip,
 } from "@material-ui/core";
 import {
   GridRowsProp,
@@ -109,6 +110,7 @@ const DashboardRow = (props: {
           <TableCell align="center">
             {objectArr[booking].map((emojiObj: {}) => {
               return (
+                //<Tooltip children={Emoji}>
                 <Emoji
                   field={booking}
                   count={props.row[booking].length}
@@ -116,6 +118,7 @@ const DashboardRow = (props: {
                     handleEmojiClick(booking, emojiObj);
                   }}
                 ></Emoji>
+                //</Tooltip>
               );
             })}
           </TableCell>
@@ -131,6 +134,7 @@ const DashboardTable = (props: { rows: Record<string, {}> }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const { rows } = props;
+
   for (const key in rows) {
     rowArray.push(key);
     for (const section in rows[key]) {

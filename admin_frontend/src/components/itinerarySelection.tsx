@@ -70,6 +70,7 @@ export const ItinerarySelection = () => {
         onClick={(e) => {
           if (itinContext.selected)
             Itinerary.deleteItinerary(itinContext.selected.id);
+          window.location.reload();
         }}
       >
         Delete itinerary
