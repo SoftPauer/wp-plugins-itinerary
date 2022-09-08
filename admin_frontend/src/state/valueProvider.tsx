@@ -15,6 +15,7 @@ import { useSectionContext } from "./sectionProvider";
 interface IValueContext {
   values: any;
   copyValuesFromLastItin: (section: number) => void;
+  copyValuesFromSelectedItin: (section: number) => void;
   fetchData: () => void;
   updateValues: (value: IUpdateValue) => void;
   getValue: (field: IField, index?: string) => any;
@@ -32,6 +33,7 @@ const ValueContext = createContext<IValueContext>({
   updateValues: (value: IUpdateValue) => {},
   values: {},
   copyValuesFromLastItin: (section) => {},
+  copyValuesFromSelectedItin: (section) => {},
   fetchData: () => {},
   getValue: (field, index) => {},
   deleteItem: (field, index) => {},
@@ -44,7 +46,10 @@ export const ValueProvider = (props: { children: React.ReactNode }) => {
   const itineraryContext = useItineraryContext();
   const fieldContext = useFieldContext();
   const fetchData = useCallback(async () => {
-    if (sectionContext.selectedSection && (itineraryContext.selected?.id ?? -1) !== -1  ) {
+    if (
+      sectionContext.selectedSection &&
+      (itineraryContext.selected?.id ?? -1) !== -1
+    ) {
       const values = await Value.getValues(
         sectionContext.selectedSection.id,
         itineraryContext.selected.id
@@ -61,6 +66,14 @@ export const ValueProvider = (props: { children: React.ReactNode }) => {
     Value.copyLastItin(itineraryContext.selected.id, section).then((res) => {
       fetchData();
     });
+  };
+
+  const copyValuesFromSelectedItin = (section: number) => {
+    Value.copySelectedItin(itineraryContext.selected.id, section).then(
+      (res) => {
+        fetchData();
+      }
+    );
   };
 
   const deleteItemFromList = async (field: IField, index?: string) => {
@@ -386,6 +399,7 @@ export const ValueProvider = (props: { children: React.ReactNode }) => {
         updateValues: updateValues,
         values: values,
         copyValuesFromLastItin: copyValuesFromLastItin,
+        copyValuesFromSelectedItin: copyValuesFromSelectedItin,
         fetchData: fetchData,
       }}
     >

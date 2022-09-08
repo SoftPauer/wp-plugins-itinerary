@@ -249,6 +249,8 @@ export const Value = {
     requestsItinerary.delete(`values/delete/${id}`),
   copyLastItin: (id: number, section: number): Promise<string> =>
     requestsItinerary.post(`values/copyLast/${id}`, { section }),
+  copySelectedItin: (id: number, section: number): Promise<string> =>
+    requestsItinerary.post(`values/copyItinerary/${id}`, { section })
 };
 
 export interface IUser {

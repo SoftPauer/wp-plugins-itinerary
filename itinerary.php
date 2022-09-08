@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.1.15
+Version: 1.2.0
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
 
@@ -349,6 +349,18 @@ add_action('rest_api_init', function () {
     )
   ));
 
+  register_rest_route('itinerary/v1', 'values/copyItinerary/(?P<itin_id>\d+)', array(
+    'methods' => WP_REST_Server::EDITABLE,
+    'callback' => 'copy_all_values_from_selected_itinerary',
+    'args' => array(
+      'itin_id' => array(
+        'validate_callback' => function ($param, $request, $key) {
+          return is_numeric($param);
+        }
+      ),
+    )
+  ));
+
   register_rest_route('itinerary/v1', 'itineraries/updateApp', array(
     'methods' => WP_REST_Server::EDITABLE,
     'callback' => 'update_entry_in_db',
@@ -459,9 +471,14 @@ add_action('rest_api_init', function () {
  */
 function get_all_costings(WP_REST_Request $request){
 
-  global $wpdb, $table_name_costings;
+  global $wpdb, $table_name_costings,$table_name_sections, $table_name_itinerary;
   $itineraryId = $request['itinerary_id'];
   $results = $wpdb->get_results("SELECT * FROM {$table_name_costings} WHERE itinerary_id = '$itineraryId'", OBJECT);
+
+  // $sql = "SELECT * FROM {$table_name_itinerary} where id = (select max(id) from wp_itineraries);";
+  // $currItin = $wpdb->get_row($sql);
+
+  // error_log('Result: ' . json_encode($currItin));
 
   return rest_ensure_response($results);
 }
@@ -893,10 +910,16 @@ function create_new_itinerary(WP_REST_Request $request)
  */
 function delete_itinerary($data)
 {
-  global $wpdb, $table_name_itinerary, $table_name_section_values,  $table_name_itinerary_data;
+  global $wpdb, $table_name_itinerary, $table_name_section_values,  $table_name_itinerary_data, $table_name_costings;
 
   $wpdb->delete(
     $table_name_itinerary_data,
+    ['itinerary_id' => $data['itinerary_id']],
+    ['%d'],
+  );
+
+  $wpdb->delete(
+    $table_name_costings,
     ['itinerary_id' => $data['itinerary_id']],
     ['%d'],
   );
@@ -1119,6 +1142,59 @@ function delete_value($data)
   );
   return $wpdb->query($sql);
 }
+
+function copy_all_values_from_selected_itinerary(WP_REST_Request $request){
+  global $wpdb, $table_name_itinerary, $table_name_section_values,$table_name_sections,$table_name_costings;
+  error_log("function accessed");
+
+  
+  // Get new itinerary
+  $sql = "SELECT * FROM {$table_name_itinerary} where id = (select max(id) from wp_itineraries);";
+  $copyItin = $wpdb->get_row($sql);
+   error_log('current: '. json_encode($copyItin->id));
+  
+
+  //get itinerary to copy
+  $prevItin = $request['itin_id'];
+  error_log('prev: '. json_encode($prevItin));
+  $sections = $wpdb->get_results("SELECT * FROM {$table_name_sections}", OBJECT);
+  
+
+  foreach($sections as $section){
+    
+    // error_log('section: '. json_encode($section->id));
+    // $wpdb->query("DELETE from {$table_name_section_values} where itinerary = {$copyItin->id} and section = {$section->id}");
+
+    // get previous values
+    $prevRes = $wpdb->get_results(
+      "SELECT * FROM {$table_name_section_values} 
+      WHERE  itinerary = {$prevItin} AND section = {$section->id}",
+      OBJECT
+    );
+    error_log('previous values: '. json_encode($prevRes));
+
+    //insert prev values into new itin
+    $sql = "INSERT INTO 
+    {$table_name_section_values} (section,itinerary,value) 
+     VALUES ({$section->id}, $copyItin->id,'{$prevRes[0]->value}')";
+    $sql = $wpdb->prepare($sql);
+    $wpdb->query($sql);
+  }
+
+  $costings = $wpdb->get_results("SELECT * FROM {$table_name_costings} WHERE itinerary_id = {$prevItin} ", OBJECT);
+  error_log('costing values: '. json_encode($costings));
+
+  foreach($costings as $costing){
+    error_log('costing: '. json_encode($costing));
+    $sql = "INSERT INTO 
+    {$table_name_costings} (itinerary_id,section_id,listkey,costing) 
+     VALUES ($copyItin->id, $costing->section_id, '{$costing->listKey}','{$costing->costing}')";
+     error_log('sql: '. json_encode($sql));
+    $sql = $wpdb->prepare($sql);
+    $wpdb->query($sql);
+  }
+}
+
 
 function copy_values_from_last_itin(WP_REST_Request $request)
 {

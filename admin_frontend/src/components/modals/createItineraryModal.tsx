@@ -63,11 +63,11 @@ export const CreateItineraryModal: FC<CreateItineraryModalProps> = ({
     console.log("create new itin");
     Itinerary.createItinerary({ name });
     console.log("copy to itin");
-    copyValuesFromLastItin();
+    copyValuesFromSelectedItin();
   };
 
-  const copyValuesFromLastItin = () => {
-    valueContext.copyValuesFromLastItin(itinContext.selected.id);
+  const copyValuesFromSelectedItin = () => {
+    valueContext.copyValuesFromSelectedItin(itinContext.selected.id);
   };
 
   return (

@@ -33,7 +33,7 @@ export const SectionValuesPage: FC = () => {
   const valueContext = useValueContext();
   const { dispatch } = useContext(ModalContext);
   const [modelState, setAddChannelModel] = useState<boolean>(false);
- // const [items, setItems] = useState([]);
+  // const [items, setItems] = useState([]);
   //const local = localStorage.getItem("item");
 
   /* useEffect(() => {
@@ -171,7 +171,7 @@ export const SectionValuesPage: FC = () => {
           copyValuesFromLastItin();
         }}
       >
-        Copy last values
+        Copy Section
       </Button>
       {/* {doesContainUserType() ? (
         <Button
