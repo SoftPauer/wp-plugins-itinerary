@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Itinerary } from "../api/api";
 import { useItineraryContext } from "../state/itineraryProvider";
 import { CreateItineraryModal } from "./modals/createItineraryModal";
+import { DeleteValidationModal } from "./modals/deleteValidationModal";
 
 const useStyles = makeStyles((theme) => ({
   itinerarySelector: { display: "flex", alignItems: "center" },
@@ -17,6 +18,7 @@ export const ItinerarySelection = () => {
   const itinContext = useItineraryContext();
   const classes = useStyles();
   const [modelState, setModelState] = useState<boolean>(false);
+  const [deleteModelState, setDeleteModelState] = useState<boolean>(false);
 
   const toggle = () => {
     setModelState(!modelState);
@@ -29,6 +31,17 @@ export const ItinerarySelection = () => {
         toggle={() => toggle()}
         handleClose={() => setModelState(false)}
       ></CreateItineraryModal>
+      <DeleteValidationModal
+        open={deleteModelState}
+        handleClose={() => {
+          setDeleteModelState(false);
+        }}
+        handleDelet={() => {
+          if (itinContext.selected)
+            Itinerary.deleteItinerary(itinContext.selected.id);
+          window.location.reload();
+        }}
+      ></DeleteValidationModal>
       {itinContext.itineraries.length > 0 && (
         <FormControl>
           <Select
@@ -68,9 +81,7 @@ export const ItinerarySelection = () => {
       </Button>
       <Button
         onClick={(e) => {
-          if (itinContext.selected)
-            Itinerary.deleteItinerary(itinContext.selected.id);
-          window.location.reload();
+          setDeleteModelState(true);
         }}
       >
         Delete itinerary
