@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.2.3
+Version: 1.2.4
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
 
@@ -1145,18 +1145,15 @@ function delete_value($data)
 
 function copy_all_values_from_selected_itinerary(WP_REST_Request $request){
   global $wpdb, $table_name_itinerary, $table_name_section_values,$table_name_sections,$table_name_costings;
-  error_log("function accessed");
 
   
   // Get new itinerary
   $sql = "SELECT * FROM {$table_name_itinerary} where id = (select max(id) from wp_itineraries);";
   $copyItin = $wpdb->get_row($sql);
-   error_log('current: '. json_encode($copyItin->id));
   
 
   //get itinerary to copy
   $prevItin = $request['itin_id'];
-  error_log('prev: '. json_encode($prevItin));
   $sections = $wpdb->get_results("SELECT * FROM {$table_name_sections}", OBJECT);
   
 
@@ -1171,21 +1168,22 @@ function copy_all_values_from_selected_itinerary(WP_REST_Request $request){
       WHERE  itinerary = {$prevItin} AND section = {$section->id}",
       OBJECT
     );
-    error_log('previous values: '. json_encode($prevRes));
+    error_log('previous values: '. json_encode($prevRes[0]->value));
 
     //insert prev values into new itin
-    $sql = "INSERT INTO 
+    if($prevRes[0]->value){
+      $sql = "INSERT INTO 
     {$table_name_section_values} (section,itinerary,value) 
      VALUES ({$section->id}, $copyItin->id,'{$prevRes[0]->value}')";
     $sql = $wpdb->prepare($sql);
     $wpdb->query($sql);
+    }
+    
   }
 
   $costings = $wpdb->get_results("SELECT * FROM {$table_name_costings} WHERE itinerary_id = {$prevItin} ", OBJECT);
-  error_log('costing values: '. json_encode($costings));
 
   foreach($costings as $costing){
-    error_log('costing: '. json_encode($costing));
     $sql = "INSERT INTO 
     {$table_name_costings} (itinerary_id,section_id,listkey,costing) 
      VALUES ($copyItin->id, $costing->section_id, '{$costing->listKey}','{$costing->costing}')";

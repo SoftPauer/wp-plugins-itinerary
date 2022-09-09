@@ -59,13 +59,13 @@ export const CreateItineraryModal: FC<CreateItineraryModalProps> = ({
     setCopyModalToggle(true);
   };
 
-  const handleCopy = (name: string) => {
-    Itinerary.createItinerary({ name });
+  const handleCopy = async (name: string) => {
+    await Itinerary.createItinerary({ name });
     copyValuesFromSelectedItin();
     window.location.reload();
   };
 
-  const copyValuesFromSelectedItin = () => {
+  const copyValuesFromSelectedItin = async () => {
     valueContext.copyValuesFromSelectedItin(itinContext.selected.id);
   };
 
