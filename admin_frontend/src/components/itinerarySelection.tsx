@@ -5,7 +5,7 @@ import {
   MenuItem,
   Select,
 } from "@material-ui/core";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Itinerary } from "../api/api";
 import { useItineraryContext } from "../state/itineraryProvider";
 import { CreateItineraryModal } from "./modals/createItineraryModal";
@@ -22,6 +22,15 @@ export const ItinerarySelection = () => {
 
   const toggle = () => {
     setModelState(!modelState);
+  };
+
+  const onItineraryChanged = (value: number) => {
+    const itin = itinContext.itineraries.find((i) => i.id === value);
+    if (itin) {
+      itinContext.setSelectedItin(itin);
+    } else {
+      console.error("didn't find itinerary");
+    }
   };
 
   return (
@@ -46,14 +55,7 @@ export const ItinerarySelection = () => {
         <FormControl>
           <Select
             onChange={(e) => {
-              const itin = itinContext.itineraries.find(
-                (i) => i.id === e.target.value
-              );
-              if (itin) {
-                itinContext.setSelectedItin(itin);
-              } else {
-                console.error("didn't find itinerary");
-              }
+              onItineraryChanged(e.target.value as number);
             }}
             label="Itinerary"
             value={
