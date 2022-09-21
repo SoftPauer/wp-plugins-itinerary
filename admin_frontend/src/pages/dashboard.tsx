@@ -29,6 +29,8 @@ import { FieldProvider } from "../state/fieldProvider";
 import { TrendingUpOutlined } from "@material-ui/icons";
 import { Costing, ICosting, Itinerary, Report } from "../api/api";
 import { fork } from "cluster";
+import { CostSelection } from "../components/costSelection";
+import { useSectionContext } from "../state/sectionProvider";
 
 enum Emojis {
   "Flight" = "✈️ ",
@@ -281,6 +283,7 @@ const ReportsGrid = ({ costs }: { costs: ICosting[] }) => {
 
   return (
     <div style={{ height: 400, width: "100%" }}>
+      <CostSelection sections={costs}></CostSelection>
       <DataGrid
         rows={rows}
         columns={columns}
@@ -317,6 +320,8 @@ export const DashboardPage: FC<{}> = () => {
       fetchData();
     }
   }, [itinContext.selected.id]);
+
+  const sectionContext = useSectionContext();
 
   if (!userList) return <></>;
 

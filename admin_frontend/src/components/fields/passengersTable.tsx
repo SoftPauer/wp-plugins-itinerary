@@ -25,6 +25,9 @@ import styles from "./table.module.css";
 import { Theme, makeStyles } from "@material-ui/core";
 import Collapsible from "react-collapsible";
 import { useItineraryContext } from "../../state/itineraryProvider";
+import { useFieldContext } from "../../state/fieldProvider";
+import { FieldTypes } from "../../fieldTypes";
+import { findChildren } from "../../utils";
 
 type costingTableFieldProps = {
   field: IField;
@@ -126,6 +129,7 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
   const sectionContext = useSectionContext();
   const valueContext = useValueContext();
   const dataSourceContext = useDataSourceContext();
+
   useEffect(() => {
     const initFieldValue = valueContext.getValue(field, index);
 
@@ -231,7 +235,6 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
       valueFormatter: ({ value }) => currencyFormatter.format(value),
     },
   ];
-
   return (
     <div style={{ width: "100%" }}>
       <Collapsible

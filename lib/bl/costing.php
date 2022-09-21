@@ -12,6 +12,10 @@ function get_all_costings(WP_REST_Request $request){
  return rest_ensure_response($results);
 }
 
+function update_costings_from_values(){
+  global $wpdb, $table_name_costings, $vtable_name_section_values
+  
+}
 /**
 * adds a new costing
 */

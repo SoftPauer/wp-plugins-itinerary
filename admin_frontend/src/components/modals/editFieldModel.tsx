@@ -92,6 +92,11 @@ export const EditFieldModal: FC<EditFieldModalProps> = ({
       (g) => g.field_type === FieldTypes.select && g.id !== field?.id
     ) ?? [];
 
+  const textFields =
+    fieldContext.fields.filter(
+      (g) => g.field_type === FieldTypes.text && g.id !== field?.id
+    ) ?? [];
+
   const membersList = (field?: IField) => {
     if (field) {
       const children = findChildren(field, fieldContext.fields);
@@ -104,7 +109,6 @@ export const EditFieldModal: FC<EditFieldModalProps> = ({
     }
     return [];
   };
-
   /**
    *  Get Fields required specified data source
    * @param sourceType
@@ -155,6 +159,36 @@ export const EditFieldModal: FC<EditFieldModalProps> = ({
               }
             >
               {selectFields.map((g, n) => {
+                return (
+                  <MenuItem key={n} value={g.id}>
+                    {g.field_name}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </FormControl>
+        );
+      case DataSourceTypes.element:
+        return (
+          <FormControl>
+            <InputLabel>Source</InputLabel>
+            <Select
+              style={{ width: "100px" }}
+              label="Source"
+              value={state.properties?.data_source_properties?.source}
+              onChange={(val) =>
+                setState({
+                  ...state,
+                  properties: {
+                    ...state.properties,
+                    data_source_properties: {
+                      source: val.target.value as number,
+                    },
+                  },
+                })
+              }
+            >
+              {textFields.map((g, n) => {
                 return (
                   <MenuItem key={n} value={g.id}>
                     {g.field_name}

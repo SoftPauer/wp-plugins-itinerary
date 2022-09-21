@@ -8,6 +8,7 @@ export enum DataSourceTypes {
   users = "users",
   parent = "parent",
   timezones = "timezones",
+  element = "element",
 }
 
 export const DataSourceTypesList: {
@@ -72,10 +73,10 @@ export const DataSourceProvider = (props: { children: React.ReactNode }) => {
             labelPlural: "No options found",
           };
         }
+
         const field = fieldContext.getFieldById(sourceProps?.source);
         if (field) {
           const val = valuesContext.getValue(field, index);
-
           if (val) {
             return {
               options: val,
@@ -101,6 +102,39 @@ export const DataSourceProvider = (props: { children: React.ReactNode }) => {
           options: timezones.map((t) => t.text),
           label: "Timezone",
           labelPlural: "Timezones",
+        };
+      case DataSourceTypes.element:
+        if (!sourceProps?.source) {
+          return {
+            options: [],
+            label: "Missing source",
+            labelPlural: "No options found",
+          };
+        }
+        const field2 = fieldContext.getFieldById(sourceProps?.source);
+        console.log(JSON.stringify(field2));
+        if (field2) {
+          const val = valuesContext.getValue(field2, index);
+          console.log(index);
+          if (val) {
+            return {
+              options: val,
+              label: "Guest",
+              labelPlural: "Guests",
+            };
+          } else {
+            return {
+              options: [],
+              label: "No options found",
+              labelPlural: "No options found",
+            };
+          }
+        }
+
+        return {
+          options: [],
+          label: "No options found",
+          labelPlural: "No options found",
         };
       default:
         return { options: [], label: "Missing", labelPlural: "Missing" };
