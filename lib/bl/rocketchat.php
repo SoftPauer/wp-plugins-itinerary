@@ -1,4 +1,3 @@
-
 <?php
 function create_rocket_channel(WP_REST_Request $request)
 {
