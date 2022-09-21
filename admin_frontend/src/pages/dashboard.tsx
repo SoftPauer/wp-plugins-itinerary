@@ -26,7 +26,7 @@ import {
   useItineraryContext,
 } from "../state/itineraryProvider";
 import { FieldProvider } from "../state/fieldProvider";
-import { TrendingUpOutlined } from "@material-ui/icons";
+import { EmojiObjects, EmojiSymbols, TrendingUpOutlined } from "@material-ui/icons";
 import { Costing, ICosting, Itinerary, Report } from "../api/api";
 import { fork } from "cluster";
 import { CostSelection } from "../components/costSelection";
@@ -38,22 +38,42 @@ enum Emojis {
   "cars" = "🚗 ",
 }
 
+
+
 const Emoji = (props: {
   field: string;
   count: number;
+  object: {};
   onClick?: () => void;
   isPrivate?: boolean;
 }) => {
+
   if (props.count >= 1) {
+    let tooltipPhrase = ("")
+    if (props.field === "Flight"){
+       tooltipPhrase = (JSON.stringify(`${props.object["flightDate"]}`) +", " + JSON.stringify(`${props.object["outboundAirportAbr"]}`) + ", " +  JSON.stringify(`${props.object["inboundAirportAbr"]}`));
+    }else if (props.field === "cars"){
+
+       tooltipPhrase = (JSON.stringify(`${props.object["pickUp"]}`) +", " + JSON.stringify(`${props.object["return"]}`) + ", " +  JSON.stringify(`${props.object["carType"]}`));
+
+    }else{
+       tooltipPhrase = (JSON.stringify(`${props.object["name"]}`) +", " + JSON.stringify(`${props.object["city"]}`) + ", " +  JSON.stringify(`${props.object["postcode"]}`));
+    }
     return (
+      <Tooltip title= {tooltipPhrase.replace(/['"]+/g, '')} placement = "top" arrow>
       <span onClick={props.onClick}>
         {Emojis[props.field as keyof typeof Emojis]}
       </span>
+      </Tooltip>
     );
   } else {
     return <span></span>;
   }
 };
+
+
+
+
 
 const DashboardRow = (props: {
   row: any;
@@ -88,6 +108,10 @@ const DashboardRow = (props: {
       }
     }
   };
+  
+
+
+
 
   let objectArr: any = {};
 
@@ -109,18 +133,19 @@ const DashboardRow = (props: {
       <TableCell align="left">{props.name}</TableCell>
       {props.sections.map((booking, index) => {
         return (
+          
           <TableCell align="center">
             {objectArr[booking].map((emojiObj: {}) => {
               return (
-                //<Tooltip children={Emoji}>
                 <Emoji
                   field={booking}
                   count={props.row[booking].length}
+                  object={emojiObj}
                   onClick={() => {
                     handleEmojiClick(booking, emojiObj);
                   }}
                 ></Emoji>
-                //</Tooltip>
+                
               );
             })}
           </TableCell>

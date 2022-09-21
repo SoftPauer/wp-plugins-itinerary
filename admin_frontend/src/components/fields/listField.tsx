@@ -14,6 +14,7 @@ import { useSheetContext } from "../../state/sheetProvider";
 import { useFieldContext } from "../../state/fieldProvider";
 import { SatelliteSharp } from "@material-ui/icons";
 import el from "date-fns/esm/locale/el/index.js";
+import { ClearListValidationModal } from "../modals/clearListValidationModal";
 
 type ListProps = {
   field: ISortedField;
@@ -85,6 +86,7 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
 
   const [key, setKey] = useState<string>("");
   const local = localStorage.getItem("items");
+  const [clearModelState, setClearModelState] = useState<boolean>(false);
 
   useEffect(() => {
     const length = getListFieldLength(field.field, index);
@@ -318,22 +320,36 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
         </div>
         <div>{fillFields()}</div>
       </div>
+
+      <ClearListValidationModal
+        open={clearModelState}
+        handleClose={() => {
+          setClearModelState(false);
+        }}
+        handleDelete={() => {
+          updateValues({
+            index: index,           
+            field: field.field,
+            value: "[]",
+          });
+          setClearModelState(false);
+          fetchData();           
+      }}
+
+      ></ClearListValidationModal>
+
       {!preview && (
         <div className={classes.controls}>
           <Button
             color="secondary"
             variant="contained"
-            onClick={() => {
-              updateValues({
-                index: index,
-                field: field.field,
-                value: "[]",
-              });
-              fetchData();
-            }}
+            onClick={(e) => {
+              setClearModelState(true);
+            }}                                   
           >
             Clear list
           </Button>
+
           <Button
             style={{ marginLeft: "10px" }}
             color="primary"

@@ -9,12 +9,15 @@ import { useFieldContext } from "../state/fieldProvider";
 import { useSectionContext } from "../state/sectionProvider";
 import { sortFields } from "../utils";
 import { ISortedField } from "./sectionValues";
+import { DeleteValidationModal } from "../components/modals/deleteValidationModal";
 
 export const SectionsPage: FC<{}> = () => {
   const [modelState, setaddSectionModel] = useState<boolean>(false);
   const [newFieldModelState, setNewFieldModelState] = useState<boolean>(false);
   const sectionContext = useSectionContext();
   const fieldContext = useFieldContext();
+
+  const [deleteModelState, setDeleteModelState] = useState<boolean>(false);
 
 
   const addSection = () => {
@@ -50,6 +53,19 @@ export const SectionsPage: FC<{}> = () => {
           selectedSection={sectionContext.editSection?.id ?? 0}
           handleChange={onSectionChange}
         ></SectionSelection>
+
+        <DeleteValidationModal
+          open={deleteModelState}
+          handleClose={() => {
+            setDeleteModelState(false);
+          }}
+          handleDelet={() => {
+            if (sectionContext.editSection) Section.deleteSection(sectionContext.editSection?.id);
+            setDeleteModelState(false);
+            window.location.reload();
+            
+          }}
+      ></DeleteValidationModal>
         <Button
           onClick={() => {
             addSection();
@@ -58,8 +74,10 @@ export const SectionsPage: FC<{}> = () => {
           Add section
         </Button>
         <Button
-          onClick={() => {
-            if (sectionContext.editSection) Section.deleteSection(sectionContext.editSection?.id);
+          onClick={(e) => {
+            setDeleteModelState(true);
+
+            //if (sectionContext.editSection) Section.deleteSection(sectionContext.editSection?.id);
           }}
         >
           Delete section
