@@ -31,15 +31,15 @@ import {
   EmojiSymbols,
   TrendingUpOutlined,
 } from "@material-ui/icons";
-import { Costing, ICosting, Itinerary, Report } from "../api/api";
+import { Costing, ICosting, ISection, Itinerary, Report } from "../api/api";
 import { fork } from "cluster";
 import { CostSelection } from "../components/costSelection";
 import { useSectionContext } from "../state/sectionProvider";
 
 enum Emojis {
-  "Flight" = "✈️ ",
-  "hotel" = "🏠 ",
-  "cars" = "🚗 ",
+  "flights" = "✈️ ",
+  "hotels" = "🏠 ",
+  "hire_cars" = "🚗 ",
 }
 
 const Emoji = (props: {
@@ -51,14 +51,14 @@ const Emoji = (props: {
 }) => {
   if (props.count >= 1) {
     let tooltipPhrase = "";
-    if (props.field === "Flight") {
+    if (props.field === "flights") {
       tooltipPhrase =
         JSON.stringify(`${props.object["flightDate"]}`) +
         ", " +
         JSON.stringify(`${props.object["outboundAirportAbr"]}`) +
         ", " +
         JSON.stringify(`${props.object["inboundAirportAbr"]}`);
-    } else if (props.field === "cars") {
+    } else if (props.field === "hire_cars") {
       tooltipPhrase =
         JSON.stringify(`${props.object["pickUp"]}`) +
         ", " +
@@ -103,19 +103,25 @@ const DashboardRow = (props: {
     if (booking && booking.includes("_")) {
       const word: string = booking;
       const replace = word.replaceAll("_", "+");
-      window.location.search = "?page=itinerary-plugin-section" + replace;
+      const index = replace.indexOf("+");
+      const searchword =
+        replace[0].toUpperCase() +
+        replace.substring(1, index) +
+        replace[index] +
+        replace[index + 1].toLocaleUpperCase() +
+        replace.substring(index + 2);
+      window.location.search = "?page=itinerary-plugin-section" + searchword;
     } else {
       switch (booking) {
-        case "Flight": {
-          window.location.search =
-            "?page=itinerary-plugin-section" + booking + "s";
+        case "flights": {
+          window.location.search = "?page=itinerary-plugin-sectionFlights";
           break;
         }
-        case "cars": {
+        case "hire_cars": {
           window.location.search = "?page=itinerary-plugin-sectionHire+Cars";
           break;
         }
-        case "hotel": {
+        case "hotels": {
           window.location.search = "?page=itinerary-plugin-sectionHotels";
           break;
         }
@@ -235,8 +241,9 @@ const DashboardTable = (props: { rows: Record<string, {}> }) => {
 
 const ReportsGrid = ({ costs }: { costs: ICosting[] }) => {
   const [rows, setRows] = useState<GridRowsProp>([]);
+  const [costSection, setCostSection] = useState<ISection>();
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
-  const itinContext = useItineraryContext();
+  const sectionContext = useSectionContext();
 
   useEffect(() => {
     const populateTable = async (costs: ICosting[]) => {
@@ -244,7 +251,17 @@ const ReportsGrid = ({ costs }: { costs: ICosting[] }) => {
 
       costs.some((element) => {
         const costingObj = JSON.parse(element.costing);
-        if (costingObj.units.Passenger) {
+        if (costingObj.units.Passenger && costSection?.id === undefined) {
+          rows.push({
+            id: randomId(),
+            name: costingObj.units.Passenger,
+            cost: costingObj.units.Price,
+            fareType: costingObj.units.FareType,
+          });
+        } else if (
+          costingObj.units.Passenger &&
+          element.section_id === costSection?.id
+        ) {
           rows.push({
             id: randomId(),
             name: costingObj.units.Passenger,
@@ -260,7 +277,13 @@ const ReportsGrid = ({ costs }: { costs: ICosting[] }) => {
     if (costs.length !== 0) {
       populateTable(costs);
     }
-  }, [costs]);
+  }, [costs, costSection]);
+
+  const handleChange = (e: any) => {
+    setCostSection(
+      sectionContext.sections.find((s) => s.name === e.target.value)
+    );
+  };
 
   const columns: GridColumns = [
     {
@@ -270,11 +293,21 @@ const ReportsGrid = ({ costs }: { costs: ICosting[] }) => {
     },
     {
       field: "fareType",
-      headerName: "Fare Type",
+      headerName: "Type",
       width: 200,
       editable: true,
       type: "singleSelect",
-      valueOptions: ["Business Class", "Economy Class", "First Class"],
+      valueOptions: [
+        "Business Class",
+        "Economy Class",
+        "First Class",
+        "Single Room",
+        "Double Room",
+        "Twin Room",
+        "5 Seater",
+        "6 Seater",
+        "12 Seater",
+      ],
     },
     {
       field: "cost",
@@ -316,7 +349,10 @@ const ReportsGrid = ({ costs }: { costs: ICosting[] }) => {
 
   return (
     <div style={{ height: 400, width: "100%" }}>
-      <CostSelection sections={costs}></CostSelection>
+      <CostSelection
+        sections={costs}
+        handleChange={handleChange}
+      ></CostSelection>
       <DataGrid
         rows={rows}
         columns={columns}

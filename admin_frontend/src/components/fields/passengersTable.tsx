@@ -166,6 +166,17 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
             fareType: costingObj.units.FareType,
           });
           return true;
+        } else if (
+          costingObj.units.Passenger === passenger &&
+          element.listKey === sectionContext.selectedSection?.name
+        ) {
+          rows.push({
+            id: element.id,
+            name: costingObj.units.Passenger,
+            cost: costingObj.units.Price,
+            fareType: costingObj.units.FareType,
+          });
+          return true;
         }
       });
       if (!isCostingFound) {
@@ -189,29 +200,58 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
   };
 
   const processRowUpdate = async (newRow: GridRowModel) => {
-    const newCosting = await Costing.createCosting({
-      id: newRow.id,
-      listKey: listKey ?? "",
-      section_id: sectionContext.selectedSection?.id ?? 0,
-      itinerary_id: itinContext.selected.id,
-      costing: {
-        totalCost: newRow.cost,
-        units: {
-          Passenger: newRow.name,
-          FareType: newRow.fareType,
-          Price: newRow.cost,
+    if (sectionContext.selectedSection?.name) {
+      const newCosting = await Costing.createCosting({
+        id: newRow.id,
+        listKey: listKey ?? sectionContext.selectedSection?.name,
+        section_id: sectionContext.selectedSection?.id ?? 0,
+        itinerary_id: itinContext.selected.id,
+        costing: {
+          totalCost: newRow.cost,
+          units: {
+            Passenger: newRow.name,
+            FareType: newRow.fareType,
+            Price: newRow.cost,
+          },
         },
-      },
-    });
-    const updatedRow = { ...newRow, id: newCosting[0].id, isNew: false };
-    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-    return updatedRow;
+      });
+      const updatedRow = { ...newRow, id: newCosting[0].id, isNew: false };
+      setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+      return updatedRow;
+    }
   };
 
   const currencyFormatter = new Intl.NumberFormat("en-GB", {
     style: "currency",
     currency: "GBP",
   });
+
+  let type: string = " ";
+  let valueOptions: string[] = [];
+
+  const setColumns = (id: number) => {
+    switch (+id) {
+      case 2:
+        type = "Fare Type";
+        valueOptions = ["Business Class", "Economy Class", "First Class"];
+        break;
+      case 3:
+        type = "Room Type";
+        valueOptions = ["Single Room", "Double Room", "Twin Room"];
+        break;
+      case 4:
+        type = "Vehicle Type";
+        valueOptions = ["5 Seater", "6 Seater", "12 Seater"];
+        break;
+    }
+  };
+
+  if (
+    sectionContext.selectedSection?.id &&
+    sectionContext.selectedSection?.id !== -1
+  ) {
+    setColumns(sectionContext.selectedSection?.id);
+  }
 
   const columns: GridColumns = [
     {
@@ -221,11 +261,11 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
     },
     {
       field: "fareType",
-      headerName: "Fare Type",
+      headerName: type,
       width: 200,
       editable: true,
       type: "singleSelect",
-      valueOptions: ["Business Class", "Economy Class", "First Class"],
+      valueOptions: valueOptions,
     },
     {
       field: "cost",

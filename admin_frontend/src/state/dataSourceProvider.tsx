@@ -1,8 +1,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { IDataSourceProperties, IUser, User } from "../api/api";
+import { IDataSourceProperties, IUser, IValues, User, Value } from "../api/api";
 import { useFieldContext } from "./fieldProvider";
 import { useValueContext } from "./valueProvider";
 import timezones from "../assets/timezones.json";
+import { useSectionContext } from "./sectionProvider";
+import { useItineraryContext } from "./itineraryProvider";
+import { getValue } from "@mui/system";
 
 export enum DataSourceTypes {
   users = "users",
@@ -43,15 +46,36 @@ const DataSourceContext = createContext<IDataSourceContext>({
 
 export const DataSourceProvider = (props: { children: React.ReactNode }) => {
   const [users, setUsers] = useState<IUser[]>([]);
+  const [value, setValue] = useState<IValues>();
   const valuesContext = useValueContext();
   const fieldContext = useFieldContext();
+  const sectionContext = useSectionContext();
+  const itinContext = useItineraryContext();
+  const [section, setSection] = useState(sectionContext.selectedSection?.id);
+  const sectionKey = sectionContext.selectedSection?.name.toLowerCase();
 
   useEffect(() => {
     async function fetchData() {
       setUsers(await User.getUsers());
     }
+
     fetchData();
-  }, []);
+  }, [sectionContext.selectedSection?.id]);
+
+  async function getSectionValue() {
+    if (
+      sectionContext.selectedSection?.id &&
+      sectionContext.selectedSection?.id !== -1
+    ) {
+      const sectionVal = await Value.getValues(
+        sectionContext.selectedSection?.id,
+        itinContext.selected.id
+      );
+      if (sectionVal) {
+        setValue(sectionVal);
+      }
+    }
+  }
 
   const resolveDataSource = (
     sourceType: string,
@@ -111,14 +135,46 @@ export const DataSourceProvider = (props: { children: React.ReactNode }) => {
             labelPlural: "No options found",
           };
         }
-        const field2 = fieldContext.getFieldById(sourceProps?.source);
-        console.log(JSON.stringify(field2));
-        if (field2) {
-          const val = valuesContext.getValue(field2, index);
-          console.log(index);
-          if (val) {
+        const elementField = fieldContext.getFieldById(sourceProps?.source);
+        if (elementField) {
+          let valList = [];
+          const val = valuesContext.getValue(elementField, index);
+          if (section !== sectionContext.selectedSection?.id) {
+            setSection(sectionContext.selectedSection?.id);
+            getSectionValue();
+          }
+
+          const fieldProps = elementField.type_properties;
+          if (value) {
+            const sectionVal = JSON.parse(value?.value);
+            let list = [];
+            list =
+              sectionVal[
+                sectionContext.selectedSection?.name
+                  .toLowerCase()
+                  .replace(" ", "_") ?? " "
+              ];
+
+            if (index?.includes("0.")) {
+              if (elementField.type_properties?.data_transform_properties) {
+                list =
+                  list[index.charAt(index.length - 1) as unknown as number][
+                    elementField.type_properties?.data_transform_properties
+                  ];
+              }
+            }
+            for (const item in list) {
+              if (elementField.type_properties?.json_key) {
+                valList.push(
+                  list[item][elementField.type_properties?.json_key]
+                );
+              }
+            }
+          }
+
+          if (valList) {
             return {
-              options: val,
+              options: valList,
               label: "Guest",
               labelPlural: "Guests",
             };

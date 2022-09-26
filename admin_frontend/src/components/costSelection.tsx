@@ -11,25 +11,30 @@ import { useSectionContext } from "../state/sectionProvider";
 
 type CostSelectionProps = {
   sections: ICosting[];
-  // handleChange: (
-  //   event: React.ChangeEvent<{
-  //     name?: string | undefined;
-  //     value: unknown;
-  //   }>,
-  //   child: React.ReactNode
-  // ) => void;
+  handleChange: (
+    event: React.ChangeEvent<{
+      name?: string | undefined;
+      value: unknown;
+    }>,
+    child: React.ReactNode
+  ) => void;
 };
 export const CostSelection: FC<CostSelectionProps> = ({
   sections,
-  // handleChange,
+  handleChange,
 }) => {
   const sectionContext = useSectionContext();
 
   const sectionArray = (costs: ICosting[]) => {
     let sections: string[] = [];
+
+    if (costs.length > 1) {
+      sections.push("All");
+    }
+
     for (const cost in costs) {
       const section = sectionContext.sections.find(
-        (element) => element.id === costs[cost]["section_id"]
+        (section) => section.id === costs[cost]["section_id"]
       )?.name;
 
       if (section && !sections.includes(section)) {
@@ -45,23 +50,19 @@ export const CostSelection: FC<CostSelectionProps> = ({
     <div className="costingSelection">
       <FormControl>
         <InputLabel id="demo-simple-select-label">Section</InputLabel>
-        <Select label="section" defaultValue="">
+        <Select label="section" defaultValue="All" onChange={handleChange}>
           {sectionArr.length === 0 && (
             <MenuItem value={"Empty"}>Empty</MenuItem>
           )}
+
           {sectionArr.length === 1 && (
-            <MenuItem value={0}>{sectionArr[0]}</MenuItem>
+            <MenuItem value={sectionArr[0]}>{sectionArr[0]}</MenuItem>
           )}
-          {sectionArr.length >= 1 && (
-            <div>
-              <MenuItem value={"All"}>All</MenuItem>
-              <div>
-                {sectionArr?.map((section, index) => {
-                  <MenuItem value={index}>{section}</MenuItem>;
-                })}
-              </div>
-            </div>
-          )}
+
+          {sectionArr.length > 1 &&
+            sectionArr?.map((section) => {
+              return <MenuItem value={section}>{section}</MenuItem>;
+            })}
         </Select>
       </FormControl>
       <Button>Export Costings</Button>
