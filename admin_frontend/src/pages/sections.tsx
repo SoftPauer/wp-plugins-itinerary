@@ -1,6 +1,6 @@
 import { Button, Typography } from "@material-ui/core";
-import { FC,useState } from "react";
-import { Section} from "../api/api";
+import { FC, useState } from "react";
+import { Section } from "../api/api";
 import { FieldWrapper } from "../components/fieldWrapper";
 import { CreateSectionModal } from "../components/modals/createSectionModal";
 import { EditFieldModal } from "../components/modals/editFieldModel";
@@ -19,30 +19,23 @@ export const SectionsPage: FC<{}> = () => {
 
   const [deleteModelState, setDeleteModelState] = useState<boolean>(false);
 
-
   const addSection = () => {
     setaddSectionModel(true);
   };
 
   const onSectionChange = async (e: any) => {
-    sectionContext.setEditSection(sectionContext.sections.find((s) => s.id === e.target.value));
+    sectionContext.setEditSection(
+      sectionContext.sections.find((s) => s.id === e.target.value)
+    );
     fieldContext.loadFields(e.target.value as number);
   };
 
-
-
   const fillFields = (field: ISortedField) => {
-
     if (sectionContext.editSection === undefined) {
       return;
     }
 
-    return (
-      <FieldWrapper
-        field={field}
-        preview={true}
-      ></FieldWrapper>
-    );
+    return <FieldWrapper field={field} preview={true}></FieldWrapper>;
   };
 
   return (
@@ -60,12 +53,12 @@ export const SectionsPage: FC<{}> = () => {
             setDeleteModelState(false);
           }}
           handleDelet={() => {
-            if (sectionContext.editSection) Section.deleteSection(sectionContext.editSection?.id);
+            if (sectionContext.editSection)
+              Section.deleteSection(sectionContext.editSection?.id);
             setDeleteModelState(false);
             window.location.reload();
-            
           }}
-      ></DeleteValidationModal>
+        ></DeleteValidationModal>
         <Button
           onClick={() => {
             addSection();
@@ -82,7 +75,7 @@ export const SectionsPage: FC<{}> = () => {
         >
           Delete section
         </Button>
-        <CreateSectionModal 
+        <CreateSectionModal
           open={modelState}
           handleClose={() => setaddSectionModel(false)}
         ></CreateSectionModal>

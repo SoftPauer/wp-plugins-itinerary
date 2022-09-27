@@ -105,7 +105,7 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
         if (nameItem) {
           const name = JSON.parse(nameItem);
           for (let i = 0; i < items["guests"].length; i++) {
-            if (items["guests"][i]["name"] === name) {
+            if (items["guests"][i]["guestName"] === name) {
               setKey(
                 `${items["name"]}/${name},${items["guests"][i]["checkIn"]},${items["guests"][i]["checkOut"]}`
               );
@@ -344,15 +344,19 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
         }}
         handleDelete={() => {
           updateValues({
-            index: index,           
+            index: index,
             field: field.field,
             value: "[]",
           });
           setClearModelState(false);
           fetchData();
+<<<<<<< HEAD
                  
       }}
 
+=======
+        }}
+>>>>>>> 0940cae7a57eb671067c4b00599ef121e28fa813
       ></ClearListValidationModal>
 
       {!preview && (
@@ -362,7 +366,7 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
             variant="contained"
             onClick={(e) => {
               setClearModelState(true);
-            }}                                   
+            }}
           >
             Clear list
           </Button>
