@@ -4,6 +4,8 @@ import { Field, IField } from "../../api/api";
 import { useSectionContext } from "../../state/sectionProvider";
 import { ModalContext } from "../../state/modals";
 import { useValueContext } from "../../state/valueProvider";
+import { DeleteValidationModal } from "../modals/deleteValidationModal";
+
 
 type AppDatePickerProps = {
   field: IField;
@@ -29,6 +31,8 @@ export const AppDatePicker: FC<AppDatePickerProps> = ({
   const classes = useStyles();
   const sectionContext = useSectionContext();
   const valueContext = useValueContext();
+  const [deleteModelState, setDeleteModelState] = useState<boolean>(false);
+
   
   useEffect(() => {
     setState({ inputString: valueContext.getValue(field,index) });
@@ -55,11 +59,23 @@ export const AppDatePicker: FC<AppDatePickerProps> = ({
           });
         }}
       />
+      <DeleteValidationModal
+        open={deleteModelState}
+        handleClose={() => {
+          setDeleteModelState(false);
+        }}
+        handleDelet={() => {
+          Field.deleteField(field.id);
+          setDeleteModelState(false);
+          window.location.reload();
+        }}
+      ></DeleteValidationModal>
       {preview && (
         <div>
           <Button
-            onClick={() => {
-              Field.deleteField(field.id);
+            onClick={(e) => {
+              setDeleteModelState(true);
+              //Field.deleteField(field.id);
             }}
           >
             remove

@@ -1,10 +1,12 @@
 import { Button, makeStyles, Typography } from "@material-ui/core";
-import { FC, useContext } from "react";
+import { FC, useContext, useState } from "react";
 import { Field } from "../../api/api";
 import { ISortedField } from "../../pages/sectionValues";
 import { ModalContext } from "../../state/modals";
 import { useSectionContext } from "../../state/sectionProvider";
 import { FieldWrapper } from "../fieldWrapper";
+import { DeleteValidationModal } from "../modals/deleteValidationModal";
+
 
 type GroupProps = {
   field: ISortedField;
@@ -51,9 +53,24 @@ export const GroupField: FC<GroupProps> = ({
   };
   const { dispatch } = useContext(ModalContext);
   const sectionContext  = useSectionContext();
+  const [deleteModelState, setDeleteModelState] = useState<boolean>(false);
+
 
   return (
     <div className={classes.groupField}>
+
+      <DeleteValidationModal
+        open={deleteModelState}
+        handleClose={() => {
+          setDeleteModelState(false);
+        }}
+        handleDelet={() => {
+          Field.deleteField(field.field.id);
+          setDeleteModelState(false);
+          window.location.reload();
+        }}
+      ></DeleteValidationModal>
+      
       <div className={classes.header}>
         <div className={classes.groupInd}></div>
         <Typography variant="h5" component="h3">
@@ -62,8 +79,9 @@ export const GroupField: FC<GroupProps> = ({
         {preview && (
           <div>
             <Button
-              onClick={() => {
-                Field.deleteField(field.field.id);
+              onClick={(e) => {
+                setDeleteModelState(true);
+                //Field.deleteField(field.field.id);
               }}
             >
               remove

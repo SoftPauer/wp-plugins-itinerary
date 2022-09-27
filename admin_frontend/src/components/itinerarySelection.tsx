@@ -40,6 +40,7 @@ export const ItinerarySelection = () => {
         toggle={() => toggle()}
         handleClose={() => setModelState(false)}
       ></CreateItineraryModal>
+      
       <DeleteValidationModal
         open={deleteModelState}
         handleClose={() => {
@@ -51,6 +52,7 @@ export const ItinerarySelection = () => {
           window.location.reload();
         }}
       ></DeleteValidationModal>
+
       {itinContext.itineraries.length > 0 && (
         <FormControl>
           <Select

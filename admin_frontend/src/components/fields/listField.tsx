@@ -1,6 +1,6 @@
 import { Button, makeStyles, Typography } from "@material-ui/core";
-import React, { FC, useCallback, useContext, useEffect, useState } from "react";
-import Collapsible, { CollapsibleProps } from "react-collapsible";
+import { FC, useCallback, useContext, useEffect, useState } from "react";
+import Collapsible from "react-collapsible";
 import { Field } from "../../api/api";
 import { ISortedField } from "../../pages/sectionValues";
 import { ModalContext } from "../../state/modals";
@@ -12,9 +12,9 @@ import { useValueContext } from "../../state/valueProvider";
 import { wsDataToValues } from "../../helpers/sheetUtils";
 import { useSheetContext } from "../../state/sheetProvider";
 import { useFieldContext } from "../../state/fieldProvider";
-import { SatelliteSharp } from "@material-ui/icons";
-import el from "date-fns/esm/locale/el/index.js";
 import { ClearListValidationModal } from "../modals/clearListValidationModal";
+import { DeleteValidationModal } from "../modals/deleteValidationModal";
+
 
 type ListProps = {
   field: ISortedField;
@@ -68,6 +68,8 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
   };
 
   const states: boolean[] = [];
+  const [deleteModelState, setDeleteModelState] = useState<boolean>(false);
+
 
   const classes = useStyles();
   const { dispatch } = useContext(ModalContext);
@@ -146,7 +148,7 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
   };
 
   const onDrop = useCallback(
-    async (acceptedFiles) => {
+    async (acceptedFiles: { arrayBuffer: () => any; }[]) => {
       const data = await acceptedFiles[0].arrayBuffer();
       const workbook = XLSX.read(data);
       const values = wsDataToValues(
@@ -205,6 +207,7 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
               onClick={() => {
                 deleteItem(field.field, index + "." + i.toString());
                 fetchData();
+                window.location.reload();
               }}
             >
               Remove
@@ -289,14 +292,27 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
   };
 
   return (
+    
     <div>
+      <DeleteValidationModal
+        open={deleteModelState}
+        handleClose={() => {
+          setDeleteModelState(false);
+        }}
+        handleDelet={() => {
+          Field.deleteField(field.field.id);
+          setDeleteModelState(false);
+          window.location.reload();
+        }}
+      ></DeleteValidationModal>
       <div>
         <div style={{ display: "flex" }}>
           {preview && (
             <div>
               <Button
-                onClick={() => {
-                  Field.deleteField(field.field.id);
+                onClick={(e) => {
+                  setDeleteModelState(true);
+                  //Field.deleteField(field.field.id);
                 }}
               >
                 remove
@@ -333,7 +349,8 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
             value: "[]",
           });
           setClearModelState(false);
-          fetchData();           
+          fetchData();
+                 
       }}
 
       ></ClearListValidationModal>

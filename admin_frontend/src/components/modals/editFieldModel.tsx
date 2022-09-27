@@ -12,6 +12,7 @@ import {
   FormControlLabel,
   Typography,
 } from "@material-ui/core";
+import { TransgenderTwoTone } from "@mui/icons-material";
 import { FC, useEffect, useState } from "react";
 import { Field, IField, ITypeProperties } from "../../api/api";
 import {
@@ -71,6 +72,7 @@ export const EditFieldModal: FC<EditFieldModalProps> = ({
     parent: field?.parent,
     properties: field?.type_properties,
   });
+  const checked = state.properties?.showOnDashboard;
   useEffect(() => {
     setState({
       name: field?.field_name ?? "",
@@ -114,15 +116,16 @@ export const EditFieldModal: FC<EditFieldModalProps> = ({
    * @param sourceType
    */
   const getDataSourceExtraFields = () => {
-    switch (state.properties?.data_source) {
-      case DataSourceTypes.users:
+    switch (state.properties?.data_source) {    
+      case DataSourceTypes.users:       
         return (
           <div>
-            <FormControl>
+            <FormControl>           
               <FormControlLabel
                 control={
                   <Checkbox
-                    onChange={(val) =>
+                  checked ={checked}                 
+                  onChange={(val) =>                     
                       setState({
                         ...state,
                         properties: {

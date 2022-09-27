@@ -9,6 +9,9 @@ import {
 import { ModalContext } from "../../state/modals";
 import { useSectionContext } from "../../state/sectionProvider";
 import { useValueContext } from "../../state/valueProvider";
+import { DeleteValidationModal } from "../modals/deleteValidationModal";
+
+
 
 type AppSelectFieldProps = {
   field: IField;
@@ -29,6 +32,8 @@ export const AppSelectField: FC<AppSelectFieldProps> = ({
   const sectionContext = useSectionContext();
   const valueContext = useValueContext();
   const dataSourceContext = useDataSourceContext();
+  const [deleteModelState, setDeleteModelState] = useState<boolean>(false);
+
   const classes = useStyles();
   useEffect(() => {
     let state;
@@ -71,11 +76,25 @@ export const AppSelectField: FC<AppSelectFieldProps> = ({
           }}
         />
       </FormControl>
+
+      <DeleteValidationModal
+        open={deleteModelState}
+        handleClose={() => {
+          setDeleteModelState(false);
+        }}
+        handleDelet={() => {
+          Field.deleteField(field.id);
+          setDeleteModelState(false);
+          window.location.reload();
+        }}
+      ></DeleteValidationModal>
+
       {preview && (
         <div>
           <Button
-            onClick={() => {
-              Field.deleteField(field.id);
+            onClick={(e) => {
+              setDeleteModelState(true);
+              //Field.deleteField(field.id);
             }}
           >
             remove
