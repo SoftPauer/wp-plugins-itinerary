@@ -41,11 +41,11 @@ add_action('rest_api_init', function () {
     'methods' => WP_REST_Server::CREATABLE,
     'callback' => 'create_new_costing',
   ));
-  register_rest_route('itinerary/v1', 'costings/delete/(?P<costing_id>\d+)', array(
+  register_rest_route('itinerary/v1', 'costings/delete/(?P<itinerary_id>\d+)', array(
     'methods' => WP_REST_Server::DELETABLE,
     'callback' => 'delete_costing',
     'args' => array(
-      'costing_id' => array(
+      'itinerary_id' => array(
         'validate_callback' => function ($param, $request, $key) {
           return is_numeric($param);
         }

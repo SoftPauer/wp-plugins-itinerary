@@ -132,7 +132,10 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
 
   useEffect(() => {
     const initFieldValue = valueContext.getValue(field, index);
-
+    // Costing.deleteCosting(21, {
+    //   name: "Joachim Arthey",
+    //   list_key: "Hire Cars",
+    // });
     setState({ inputString: initFieldValue });
     setOptions(
       dataSourceContext.resolveDataSource(

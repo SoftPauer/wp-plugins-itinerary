@@ -37,8 +37,8 @@ export const requestsCosting = {
     instance.post("itinerary/v1/" + url, body).then(responseBody),
   put: (url: string, body: {}) =>
     instance.put("itinerary/v1/" + url, body).then(responseBody),
-  delete: (url: string) =>
-    instance.delete("itinerary/v1/" + url).then(responseBody),
+  delete: (url: string, post:IDeleteCosting) =>
+    instance.delete("itinerary/v1/" + url,{params:{name:post.name, list_key: post.list_key}}).then(responseBody),
 };
 
 export const requestsCoreWP = {
@@ -99,6 +99,11 @@ export interface ICreateCosting{
   costing:LooseObject;
 }
 
+export interface IDeleteCosting{
+  name:string;
+  list_key: string;
+}
+
 export const Costing = {
   getCosting: (id:number): Promise<ICosting[]> =>
     requestsCosting.get(`costings/${id}`),
@@ -107,8 +112,8 @@ export const Costing = {
     requestsItinerary.post("costings/create", post),
   // updatePost: (post: PostType, id: number): Promise<PostType> =>
   // 	requests.put(`posts/${id}`, post),
-  deleteCosting: (id: number): Promise<void> =>
-    requestsItinerary.delete(`costings/delete/${id}`),
+  deleteCosting: (id: number, post:IDeleteCosting): Promise<void> =>
+    requestsCosting.delete(`costings/delete/${id}`, post),
 };
 
 export interface IUpdateApp {
