@@ -350,13 +350,7 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
           });
           setClearModelState(false);
           fetchData();
-<<<<<<< HEAD
-                 
       }}
-
-=======
-        }}
->>>>>>> 0940cae7a57eb671067c4b00599ef121e28fa813
       ></ClearListValidationModal>
 
       {!preview && (
