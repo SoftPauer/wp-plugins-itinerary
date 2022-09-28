@@ -26,7 +26,6 @@ import { Theme, makeStyles } from "@material-ui/core";
 import Collapsible from "react-collapsible";
 import { useItineraryContext } from "../../state/itineraryProvider";
 import { DeleteValidationModal } from "../modals/deleteValidationModal";
-
 import { useFieldContext } from "../../state/fieldProvider";
 import { FieldTypes } from "../../fieldTypes";
 import { findChildren } from "../../utils";
@@ -133,7 +132,6 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
   const dataSourceContext = useDataSourceContext();
   const [deleteModelState, setDeleteModelState] = useState<boolean>(false);
 
-
   useEffect(() => {
     const initFieldValue = valueContext.getValue(field, index);
 
@@ -153,20 +151,21 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
 
   const populateTable = async () => {
     let rows: any[] = [];
-    let fareTypePrices = {economyClass: '', buisnessClass: '', firstClass: '' }
+    let fareTypePrices = {
+      economyClass: "",
+      buisnessClass: "",
+      firstClass: "",
+    };
 
     const passengers = options?.options ?? [];
     const costingArr = await Costing.getCosting(itinContext.selected.id);
-    
+
     passengers.forEach((passenger) => {
       const isCostingFound = costingArr.some((element) => {
         const costingObj = JSON.parse(element.costing);
-        
-
         if (
           costingObj.units.Passenger === passenger &&
           element.listKey === listKey
-           
         ) {
           rows.push({
             id: element.id,
@@ -174,13 +173,11 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
             cost: costingObj.units.Price,
             fareType: costingObj.units.FareType,
           });
-          return true;    
+          return true;
         } else if (
-          
           costingObj.units.Passenger === passenger &&
           element.listKey === sectionContext.selectedSection?.name
-        
-          ) {
+        ) {
           rows.push({
             id: element.id,
             name: costingObj.units.Passenger,
@@ -225,19 +222,13 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
             Price: newRow.cost,
           },
         },
-
       });
-      
       const updatedRow = { ...newRow, id: newCosting[0].id, isNew: false };
       setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-      
       return updatedRow;
     }
-    
   };
-  
 
-  
   const currencyFormatter = new Intl.NumberFormat("en-GB", {
     style: "currency",
     currency: "GBP",
@@ -308,14 +299,11 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
         }
         classParentString={styles.tableColapse}
       >
-       
-
         <DataGrid
           rows={rows}
           columns={columns}
           rowModesModel={rowModesModel}
           processRowUpdate={processRowUpdate}
-          costingUpdates = {costingUpdates}
           density="compact"
           components={{
             Footer: TotalCost,
@@ -332,23 +320,20 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
           <Button
             onClick={(e) => {
               setDeleteModelState(true);
-              //Field.deleteField(field.id);
             }}
           >
             remove
           </Button>
-
           <DeleteValidationModal
-          open={deleteModelState}
-           handleClose={() => {
-           setDeleteModelState(false);
-          }}
-          handleDelet={() => {
-            Field.deleteField(field.id);
-            window.location.reload();
-          }}
+            open={deleteModelState}
+            handleClose={() => {
+              setDeleteModelState(false);
+            }}
+            handleDelet={() => {
+              Field.deleteField(field.id);
+              window.location.reload();
+            }}
           ></DeleteValidationModal>
-
           <Button
             onClick={() => {
               dispatch({
@@ -368,4 +353,3 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
     </div>
   );
 };
-
