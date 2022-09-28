@@ -74,7 +74,6 @@ function delete_costing($data){
     $units = $costing->units;
     $passenger = $units->Passenger;
     if($passenger == $name){
-      
       $wpdb->delete(
       $table_name_costings,
       ['id' => $cost->id],

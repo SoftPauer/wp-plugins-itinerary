@@ -56,6 +56,7 @@ export const renderField = (
         index={index}
         preview={preview}
         key={field.field.id}
+        listKey={listKey}
       ></AppSelectField>
     );
   }
@@ -110,6 +111,7 @@ export const renderField = (
         field={field}
         preview={preview}
         key={field.field.id}
+        listKey={listKey}
       ></ListField>
     );
   }
