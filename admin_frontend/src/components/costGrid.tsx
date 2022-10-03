@@ -9,13 +9,15 @@ import {
   GridToolbarDensitySelector,
   GridToolbarExport,
 } from "@mui/x-data-grid";
-import * as docx from "docx";
 import { randomId } from "@mui/x-data-grid-generator";
 import { FC, useEffect, useState } from "react";
 import { ICosting, ISection } from "../api/api";
 import { useSectionContext } from "../state/sectionProvider";
 import { CostSelection } from "./costSelection";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import { Document, HeadingLevel, Packer, Paragraph } from "docx";
+import { saveAs } from "file-saver";
+import { DocumentCreator } from "./docxGenerator";
 
 export const ReportsGrid: FC<{ costs: ICosting[] }> = ({
   costs,
@@ -70,10 +72,20 @@ export const ReportsGrid: FC<{ costs: ICosting[] }> = ({
   }, [costs, costSection]);
 
   const handleChange = (e: any) => {
-    console.log(e.target.value);
     setCostSection(
       sectionContext.sections.find((s) => s.name === e.target.value)
     );
+  };
+
+  const generate = (docName: string, docList: ICosting[]) => {
+    const documentCreator = new DocumentCreator();
+
+    Packer.toBlob(
+      documentCreator.create(docList, sectionContext.sections)
+    ).then((blob) => {
+      saveAs(blob, docName + ".docx");
+      console.log("Document created successfully");
+    });
   };
 
   const columns: GridColumns = [
@@ -136,15 +148,8 @@ export const ReportsGrid: FC<{ costs: ICosting[] }> = ({
     rows: any[];
   }
 
-  function groupArrayOfObjects(list: ICosting[], key: keyof ICosting) {
-    return list.reduce(function (rv: any, x: ICosting) {
-      (rv[x[key]] = rv[x[key]] || []).push(x);
-      return rv;
-    }, {});
-  }
-
   const handleCLick = () => {
-    const groups: any = groupArrayOfObjects(costs, "section_id");
+    generate("Costing Report", costs);
   };
 
   function TotalCost() {
