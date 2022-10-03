@@ -233,8 +233,9 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
       
       const updatedRow = { ...newRow, id: newCosting[0].id, isNew: false };
       setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-      
+      populateTable();
       return updatedRow;
+    
     }
     
   };
@@ -309,8 +310,20 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
             </Typography>
           </div>
         }
+
         classParentString={styles.tableColapse}
       >
+      <DeleteValidationModal
+        open={deleteModelState}
+        handleClose={() => {
+          setDeleteModelState(false);
+        }}
+        handleDelet={() => {
+          Field.deleteField(field.id);
+          window.location.reload();
+        }}
+      ></DeleteValidationModal>
+      
        
 
         <DataGrid
@@ -318,7 +331,6 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
           columns={columns}
           rowModesModel={rowModesModel}
           processRowUpdate={processRowUpdate}
-          costingUpdates = {costingUpdates}
           density="compact"
           components={{
             Footer: TotalCost,
@@ -341,16 +353,7 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
             remove
           </Button>
 
-          <DeleteValidationModal
-          open={deleteModelState}
-           handleClose={() => {
-           setDeleteModelState(false);
-          }}
-          handleDelet={() => {
-            Field.deleteField(field.id);
-            window.location.reload();
-          }}
-          ></DeleteValidationModal>
+          
 
           <Button
             onClick={() => {

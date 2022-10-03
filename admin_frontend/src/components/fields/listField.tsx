@@ -202,12 +202,24 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
       });
       fields.push(
         <div key={i + "buttons"}>
+        <DeleteValidationModal
+          open={deleteModelState}
+          handleClose={() => {
+          setDeleteModelState(false);
+          }}
+          handleDelet={() => {
+            deleteItem(field.field, index + "." + i.toString());
+            fetchData();
+            setDeleteModelState(false);
+        }}
+      ></DeleteValidationModal>
+
           {!preview && (
             <Button
-              onClick={() => {
-                deleteItem(field.field, index + "." + i.toString());
-                fetchData();
-                window.location.reload();
+              onClick={(e) => {
+                setDeleteModelState(true);
+                //deleteItem(field.field, index + "." + i.toString());
+                //fetchData();
               }}
             >
               Remove
@@ -294,25 +306,15 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
   return (
     
     <div>
-      <DeleteValidationModal
-        open={deleteModelState}
-        handleClose={() => {
-          setDeleteModelState(false);
-        }}
-        handleDelet={() => {
-          Field.deleteField(field.field.id);
-          setDeleteModelState(false);
-          window.location.reload();
-        }}
-      ></DeleteValidationModal>
+      
       <div>
         <div style={{ display: "flex" }}>
           {preview && (
             <div>
               <Button
-                onClick={(e) => {
-                  setDeleteModelState(true);
-                  //Field.deleteField(field.field.id);
+                onClick={() => {
+                  //setDeleteModelState(true);
+                  Field.deleteField(field.field.id);
                 }}
               >
                 remove
