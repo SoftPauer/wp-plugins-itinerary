@@ -91,6 +91,12 @@ export interface ICosting{
   costing: string;
 }
 
+export interface IUnits{
+  Passenger: string,
+  FareType: string,
+  Price: number,
+}
+
 export interface ICreateCosting{
   id:number;
   itinerary_id: number;

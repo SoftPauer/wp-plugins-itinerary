@@ -10,7 +10,8 @@ import { Itinerary } from "../api/api";
 import { useItineraryContext } from "../state/itineraryProvider";
 import { CreateItineraryModal } from "./modals/createItineraryModal";
 import { DeleteValidationModal } from "./modals/deleteValidationModal";
-
+import AddIcon from "@mui/icons-material/Add";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 const useStyles = makeStyles((theme) => ({
   itinerarySelector: { display: "flex", alignItems: "center" },
 }));
@@ -40,7 +41,7 @@ export const ItinerarySelection = () => {
         toggle={() => toggle()}
         handleClose={() => setModelState(false)}
       ></CreateItineraryModal>
-      
+
       <DeleteValidationModal
         open={deleteModelState}
         handleClose={() => {
@@ -77,6 +78,7 @@ export const ItinerarySelection = () => {
       )}
 
       <Button
+        startIcon={<AddIcon color="secondary"></AddIcon>}
         onClick={(e) => {
           setModelState(true);
         }}
@@ -84,6 +86,7 @@ export const ItinerarySelection = () => {
         Create itinerary
       </Button>
       <Button
+        startIcon={<DeleteOutlineIcon color="secondary"></DeleteOutlineIcon>}
         onClick={(e) => {
           setDeleteModelState(true);
         }}

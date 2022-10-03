@@ -1,7 +1,7 @@
 import { Button, makeStyles, Typography } from "@material-ui/core";
 import { FC, useCallback, useContext, useEffect, useState } from "react";
 import Collapsible from "react-collapsible";
-import { Field } from "../../api/api";
+import { Costing, Field } from "../../api/api";
 import { ISortedField } from "../../pages/sectionValues";
 import { ModalContext } from "../../state/modals";
 import { useSectionContext } from "../../state/sectionProvider";
@@ -14,12 +14,15 @@ import { useSheetContext } from "../../state/sheetProvider";
 import { useFieldContext } from "../../state/fieldProvider";
 import { ClearListValidationModal } from "../modals/clearListValidationModal";
 import { DeleteValidationModal } from "../modals/deleteValidationModal";
-
+import useId from "@mui/material/utils/useId";
+import { useItineraryContext } from "../../state/itineraryProvider";
+import { isTabKey } from "@mui/x-data-grid/utils/keyboardUtils";
 
 type ListProps = {
   field: ISortedField;
   preview?: boolean;
   index: string | undefined;
+  listKey: string | undefined;
 };
 const useStyles = makeStyles((theme) => ({
   listField: {
@@ -57,7 +60,12 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: "10px",
   },
 }));
-export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
+export const ListField: FC<ListProps> = ({
+  field,
+  index,
+  preview = false,
+  listKey,
+}) => {
   const [length, setLength] = useState<number>(
     Number.parseInt(preview ? "1" : "0")
   );
@@ -70,11 +78,10 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
   const states: boolean[] = [];
   const [deleteModelState, setDeleteModelState] = useState<boolean>(false);
 
-
   const classes = useStyles();
   const { dispatch } = useContext(ModalContext);
   const sectionContext = useSectionContext();
-  const valueContext = useValueContext();
+  const itinContext = useItineraryContext();
   const { fieldsToWsData } = useSheetContext();
   const {
     getListFieldLength,
@@ -147,8 +154,17 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
     fetchData(); // react not working very well... useEffect not firing after values change
   };
 
+  const nameFromKey = (key: string) => {
+    let name: string;
+    if (key.includes(",")) {
+      name = key.substring(0, key.indexOf(","));
+      return name;
+    }
+    return key;
+  };
+
   const onDrop = useCallback(
-    async (acceptedFiles: { arrayBuffer: () => any; }[]) => {
+    async (acceptedFiles: { arrayBuffer: () => any }[]) => {
       const data = await acceptedFiles[0].arrayBuffer();
       const workbook = XLSX.read(data);
       const values = wsDataToValues(
@@ -216,10 +232,20 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
 
           {!preview && (
             <Button
-              onClick={(e) => {
-                setDeleteModelState(true);
-                //deleteItem(field.field, index + "." + i.toString());
-                //fetchData();
+              onClick={() => {
+                if (listKey) {
+                  Costing.deleteCosting(itinContext.selected.id, {
+                    name: nameFromKey(key_string),
+                    list_key: listKey,
+                  });
+                } else {
+                  if (sectionContext.selectedSection?.name) {
+                    Costing.deleteCosting(itinContext.selected.id, {
+                      name: nameFromKey(key_string),
+                      list_key: sectionContext.selectedSection?.name,
+                    });
+                  }
+                }
               }}
             >
               Remove
@@ -268,7 +294,6 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
 
     return listElements;
   };
-
   const generateUploadTemplate = () => {
     var workBook = XLSX.utils.book_new();
     var ws_name = "SheetJS";
@@ -304,7 +329,6 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
   };
 
   return (
-    
     <div>
       
       <div>
@@ -352,7 +376,7 @@ export const ListField: FC<ListProps> = ({ field, index, preview = false }) => {
           });
           setClearModelState(false);
           fetchData();
-      }}
+        }}
       ></ClearListValidationModal>
 
       {!preview && (

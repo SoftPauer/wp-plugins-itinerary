@@ -49,8 +49,7 @@ export const CostSelection: FC<CostSelectionProps> = ({
   return (
     <div className="costingSelection">
       <FormControl>
-        <InputLabel id="demo-simple-select-label">Section</InputLabel>
-        <Select label="section" defaultValue="All" onChange={handleChange}>
+        <Select label="section" defaultValue={"All"} onChange={handleChange}>
           {sectionArr.length === 0 && (
             <MenuItem value={"Empty"}>Empty</MenuItem>
           )}
@@ -60,12 +59,15 @@ export const CostSelection: FC<CostSelectionProps> = ({
           )}
 
           {sectionArr.length > 1 &&
-            sectionArr?.map((section) => {
-              return <MenuItem value={section}>{section}</MenuItem>;
+            sectionArr?.map((section, index) => {
+              return (
+                <MenuItem key={index} value={section}>
+                  {section}
+                </MenuItem>
+              );
             })}
         </Select>
       </FormControl>
-      <Button>Export Costings</Button>
     </div>
   );
 };
