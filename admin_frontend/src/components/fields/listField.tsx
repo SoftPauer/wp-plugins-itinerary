@@ -216,20 +216,9 @@ export const ListField: FC<ListProps> = ({
           ></FieldWrapper>
         );
       });
+
       fields.push(
         <div key={i + "buttons"}>
-        <DeleteValidationModal
-          open={deleteModelState}
-          handleClose={() => {
-          setDeleteModelState(false);
-          }}
-          handleDelet={() => {
-            deleteItem(field.field, index + "." + i.toString());
-            fetchData();
-            setDeleteModelState(false);
-        }}
-      ></DeleteValidationModal>
-
           {!preview && (
             <Button
               onClick={() => {
@@ -246,6 +235,9 @@ export const ListField: FC<ListProps> = ({
                     });
                   }
                 }
+                deleteItem(field.field, index + "." + i.toString());
+                fetchData();
+                window.location.reload();
               }}
             >
               Remove
@@ -330,15 +322,25 @@ export const ListField: FC<ListProps> = ({
 
   return (
     <div>
-      
+      <DeleteValidationModal
+        open={deleteModelState}
+        handleClose={() => {
+          setDeleteModelState(false);
+        }}
+        handleDelet={() => {
+          Field.deleteField(field.field.id);
+          setDeleteModelState(false);
+          window.location.reload();
+        }}
+      ></DeleteValidationModal>
       <div>
         <div style={{ display: "flex" }}>
           {preview && (
             <div>
               <Button
-                onClick={() => {
-                  //setDeleteModelState(true);
-                  Field.deleteField(field.field.id);
+                onClick={(e) => {
+                  setDeleteModelState(true);
+                  //Field.deleteField(field.field.id);
                 }}
               >
                 remove

@@ -9,15 +9,17 @@ import {
   GridToolbarDensitySelector,
   GridToolbarExport,
 } from "@mui/x-data-grid";
-import { randomId } from "@mui/x-data-grid-generator";
 import { FC, useEffect, useState } from "react";
-import { ICosting, ISection } from "../api/api";
+import {Costing, ICosting, ISection } from "../api/api";
 import { useSectionContext } from "../state/sectionProvider";
 import { CostSelection } from "./costSelection";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { Document, HeadingLevel, Packer, Paragraph } from "docx";
+import { Document, HeadingLevel, Packer, Paragraph, SectionProperties } from "docx";
 import { saveAs } from "file-saver";
 import { DocumentCreator } from "./docxGenerator";
+import { useItineraryContext } from "./../state/itineraryProvider";
+import { Class } from "@mui/icons-material";
+
 
 export const ReportsGrid: FC<{ costs: ICosting[] }> = ({
   costs,
@@ -28,49 +30,48 @@ export const ReportsGrid: FC<{ costs: ICosting[] }> = ({
   const [costSection, setCostSection] = useState<ISection>();
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
   const sectionContext = useSectionContext();
+  const itinContext = useItineraryContext();
 
   useEffect(() => {
-    const populateTable = async (costs: ICosting[]) => {
-      let rows: any[] = [];
+    populateTable(costs)
+  }, [costs,costSection]);
 
-      costs.some((element) => {
-        const costingObj = JSON.parse(element.costing);
-        if (costingObj.units.Passenger && costSection?.id === undefined) {
-          rows.push({
-            id: randomId(),
-            name: costingObj.units.Passenger,
-            class: sectionContext.sections.find(
-              (s) => s.id === element.section_id
-            )?.name,
-            key: element.listKey,
-            cost: costingObj.units.Price,
-            fareType: costingObj.units.FareType,
-          });
-        } else if (
-          costingObj.units.Passenger &&
-          element.section_id === costSection?.id
-        ) {
-          rows.push({
-            id: randomId(),
-            name: costingObj.units.Passenger,
-            class: sectionContext.sections.find(
-              (s) => s.id === element.section_id
-            )?.name,
-            key: element.listKey,
-            cost: costingObj.units.Price,
-            fareType: costingObj.units.FareType,
-          });
-        }
-      });
+  const populateTable = async (costs: ICosting[]) => {
+    let rows: any[] = [];
 
-      setRows(rows);
-    };
+    costs.some((element) => {
+      const costingObj = JSON.parse(element.costing);
+      if (costingObj.units.Passenger && costSection?.id === undefined) {
+        rows.push({
+          id: element.id,
+          name: costingObj.units.Passenger,
+          class: sectionContext.sections.find(
+            (s) => s.id === element.section_id
+          )?.name,
+          key: element.listKey,
+          cost: costingObj.units.Price,
+          fareType: costingObj.units.FareType,
+        });
+      } else if (
+        costingObj.units.Passenger &&
+        element.section_id === costSection?.id
+      ) {
+        rows.push({
+          id: element.id,
+          name: costingObj.units.Passenger,
+          class: sectionContext.sections.find(
+            (s) => s.id === element.section_id
+          )?.name,
+          key: element.listKey,
+          cost: costingObj.units.Price,
+          fareType: costingObj.units.FareType,
+        });
+      }
+    });
 
-    if (costs.length !== 0) {
-      populateTable(costs);
-    }
-  }, [costs, costSection]);
-
+    setRows(rows);
+  };
+  
   const handleChange = (e: any) => {
     setCostSection(
       sectionContext.sections.find((s) => s.name === e.target.value)
@@ -139,10 +140,27 @@ export const ReportsGrid: FC<{ costs: ICosting[] }> = ({
     currency: "GBP",
   });
 
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-    return updatedRow;
+  const processRowUpdate = async (newRow: GridRowModel) => {
+    const newCosting = await Costing.createCosting({
+      id: newRow.id,
+      listKey: newRow.key ?? sectionContext.selectedSection?.name,
+      section_id: (newRow.section_id)?? 0,
+      itinerary_id: itinContext.selected.id,
+      costing: {
+        totalCost: newRow.cost,
+        units: {
+          Passenger: newRow.name,
+          FareType: newRow.fareType,
+          Price: newRow.cost,
+        },
+      },
+    });
+  const updatedRow = { ...newRow,id: newCosting[0].id, isNew: false };
+  setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+  const costingArr = await Costing.getCosting(itinContext.selected.id);
+  populateTable(costingArr)
+  return updatedRow;
+  
   };
   interface TotalCostProps {
     rows: any[];

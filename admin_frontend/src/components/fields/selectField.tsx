@@ -63,7 +63,6 @@ export const AppSelectField: FC<AppSelectFieldProps> = ({
   const handleChange = (stateList: string[]) => {
     state.filter((element) => {
       if (!stateList.includes(element)) {
-        console.log(element);
         if (listKey) {
           Costing.deleteCosting(itinContext.selected.id, {
             name: element,
@@ -92,6 +91,7 @@ export const AppSelectField: FC<AppSelectFieldProps> = ({
               value: JSON.stringify(state),
               index: index,
             });
+            valueContext.fetchData();
           }}
         />
       </FormControl>
