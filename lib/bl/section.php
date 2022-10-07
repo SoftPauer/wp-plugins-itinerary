@@ -53,6 +53,11 @@ function delete_section($data)
     ['%d'],
   );
   $wpdb->delete(
+    $table_name_costings,
+    ['section_id' => $data['section_id']],
+    ['%d'],
+  );
+  $wpdb->delete(
     $table_name_section_values,
     ['section' => $data['section_id']],
     ['%d'],

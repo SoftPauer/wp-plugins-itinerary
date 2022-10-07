@@ -19,7 +19,10 @@ export const DashboardPage: FC<{}> = () => {
       setCostingArray(costObj);
     };
 
-    if (itinContext.selected.id !== -1) {
+    if (
+      itinContext.selected.id !== -1 &&
+      itinContext.selected.id !== undefined
+    ) {
       fetchData();
     }
   }, [itinContext.selected.id]);
