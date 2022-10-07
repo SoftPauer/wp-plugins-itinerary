@@ -18,7 +18,6 @@ import {
 } from "../../state/dataSourceProvider";
 import { useSectionContext } from "../../state/sectionProvider";
 import { useValueContext } from "../../state/valueProvider";
-
 import { Costing, Field, IField } from "../../api/api";
 import { ModalContext } from "../../state/modals";
 import styles from "./table.module.css";
@@ -120,12 +119,12 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
 }) => {
   const [rows, setRows] = useState<GridRowsProp>([]);
   const [state, setState] = useState<IAppTextFieldState>();
+
   const [options, setOptions] = useState<IDataSourceOptions | null>(null);
   const { dispatch } = useContext(ModalContext);
   const classes = useStyles();
   const apiRef = useGridApiRef();
   const itinContext = useItineraryContext();
-
   const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
   const sectionContext = useSectionContext();
   const valueContext = useValueContext();
@@ -133,33 +132,29 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
   const [deleteModelState, setDeleteModelState] = useState<boolean>(false);
 
   useEffect(() => {
-    const initFieldValue = valueContext.getValue(field, index);
+      setOptions(
+        dataSourceContext.resolveDataSource(
+          field.type_properties?.data_source ?? "",
+          field.type_properties?.data_source_properties,
+          index
+        )
+      );
+      
+  }, [index, field, dataSourceContext, valueContext]);
 
-    setState({ inputString: initFieldValue });
-    setOptions(
-      dataSourceContext.resolveDataSource(
-        field.type_properties?.data_source ?? "",
-        field.type_properties?.data_source_properties,
-        index
-      )
-    );
-  }, [valueContext.values, field, dataSourceContext, index, valueContext]);
-
-  useEffect(() => {
-    populateTable();
+   useEffect(() => { 
+    populateTable()
   }, [options]);
 
-  const populateTable = async () => {
+    const populateTable = async () => {
     let rows: any[] = [];
     let fareTypePrices = {
       economyClass: "",
       buisnessClass: "",
       firstClass: "",
     };
-
     const passengers = options?.options ?? [];
     const costingArr = await Costing.getCosting(itinContext.selected.id);
-
     passengers.forEach((passenger) => {
       const isCostingFound = costingArr.some((element) => {
         const costingObj = JSON.parse(element.costing);
@@ -225,7 +220,9 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
       });
       const updatedRow = { ...newRow, id: newCosting[0].id, isNew: false };
       setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+      populateTable();
       return updatedRow;
+    
     }
   };
 
@@ -297,8 +294,20 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
             </Typography>
           </div>
         }
+
         classParentString={styles.tableColapse}
       >
+      <DeleteValidationModal
+        open={deleteModelState}
+        handleClose={() => {
+          setDeleteModelState(false);
+        }}
+        handleDelet={() => {
+          Field.deleteField(field.id);
+          window.location.reload();
+        }}
+      ></DeleteValidationModal>
+
         <DataGrid
           rows={rows}
           columns={columns}
@@ -324,16 +333,6 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
           >
             remove
           </Button>
-          <DeleteValidationModal
-            open={deleteModelState}
-            handleClose={() => {
-              setDeleteModelState(false);
-            }}
-            handleDelet={() => {
-              Field.deleteField(field.id);
-              window.location.reload();
-            }}
-          ></DeleteValidationModal>
           <Button
             onClick={() => {
               dispatch({

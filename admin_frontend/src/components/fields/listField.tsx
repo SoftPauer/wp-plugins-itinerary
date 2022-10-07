@@ -216,7 +216,6 @@ export const ListField: FC<ListProps> = ({
           ></FieldWrapper>
         );
       });
-      console.log(listKey);
 
       fields.push(
         <div key={i + "buttons"}>
