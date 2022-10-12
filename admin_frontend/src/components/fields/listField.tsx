@@ -17,6 +17,9 @@ import { DeleteValidationModal } from "../modals/deleteValidationModal";
 import useId from "@mui/material/utils/useId";
 import { useItineraryContext } from "../../state/itineraryProvider";
 import { isTabKey } from "@mui/x-data-grid/utils/keyboardUtils";
+import {
+  useDataSourceContext,
+} from "../../state/dataSourceProvider";
 
 type ListProps = {
   field: ISortedField;
@@ -77,7 +80,7 @@ export const ListField: FC<ListProps> = ({
 
   const states: boolean[] = [];
   const [deleteModelState, setDeleteModelState] = useState<boolean>(false);
-
+  const dataSourceContext = useDataSourceContext();
   const classes = useStyles();
   const { dispatch } = useContext(ModalContext);
   const sectionContext = useSectionContext();
@@ -96,6 +99,7 @@ export const ListField: FC<ListProps> = ({
   const [key, setKey] = useState<string>("");
   const local = localStorage.getItem("items");
   const [clearModelState, setClearModelState] = useState<boolean>(false);
+  const valueContext = useValueContext();
 
   useEffect(() => {
     const length = getListFieldLength(field.field, index);
@@ -104,11 +108,14 @@ export const ListField: FC<ListProps> = ({
       const items = JSON.parse(local);
       const firstKey = Object.keys(items);
       if (firstKey.includes("flightDate")) {
+        
         setKey(
           `${items["flightDate"]},${items["outboundAirportAbr"]},${items["inboundAirportAbr"]}`
         );
       } else if (firstKey.includes("name")) {
+
         const nameItem = localStorage.getItem("name");
+        
         if (nameItem) {
           const name = JSON.parse(nameItem);
           for (let i = 0; i < items["guests"].length; i++) {
@@ -136,14 +143,14 @@ export const ListField: FC<ListProps> = ({
     let val = [];
     try {
       const v = getValue(field.field, index);
-      console.log(v);
+
       if (typeof v === "string") {
         val = JSON.parse(getValue(field.field, index)) ?? [];
       } else {
         val = v;
       }
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
     val.push({});
     updateValues({
@@ -185,9 +192,11 @@ export const ListField: FC<ListProps> = ({
 
   const fillFields = () => {
     const listElements: JSX.Element[] = [];
+    
     for (let i = 0; i < length; i++) {
       const fields: JSX.Element[] = [];
       let key_string = "";
+      
       if (field.field.type_properties?.key_fields)
         for (
           let j = 0;
@@ -221,23 +230,33 @@ export const ListField: FC<ListProps> = ({
         <div key={i + "buttons"}>
           {!preview && (
             <Button
-              onClick={() => {
+              onClick={() => {               
+                deleteItem(field.field, index + "." + i.toString());
                 if (listKey) {
                   Costing.deleteCosting(itinContext.selected.id, {
                     name: nameFromKey(key_string),
                     list_key: listKey,
                   });
+                } else if (sectionContext.selectedSection?.name && field.field.field_name == 'Car'){
+                  Costing.deleteCosting(itinContext.selected.id, {
+                    name: nameFromKey(key_string),
+                    list_key: sectionContext.selectedSection?.name,
+                  });
+                }else if (sectionContext.selectedSection?.name &&  field.field.field_name == 'Flight'){
+                  Costing.deleteCosting(itinContext.selected.id, {
+                    name: key_string,
+                    list_key: key_string,
+                  });
                 } else {
                   if (sectionContext.selectedSection?.name) {
                     Costing.deleteCosting(itinContext.selected.id, {
                       name: nameFromKey(key_string),
-                      list_key: sectionContext.selectedSection?.name,
+                      list_key: nameFromKey(key_string),
                     });
                   }
-                }
-                deleteItem(field.field, index + "." + i.toString());
-                fetchData();
-                window.location.reload();
+                }           
+                valueContext.fetchData();
+
               }}
             >
               Remove
@@ -371,6 +390,18 @@ export const ListField: FC<ListProps> = ({
           setClearModelState(false);
         }}
         handleDelete={() => {
+          if (sectionContext.selectedSection?.id && !listKey){
+            Costing.deleteCosting(itinContext.selected.id, {
+              name: "",
+              list_key: "",
+              sectionId: sectionContext.selectedSection?.id,
+          });
+        }else if (listKey){
+          Costing.deleteCosting(itinContext.selected.id, {
+            name: nameFromKey(listKey),
+            list_key: listKey,
+        })
+      }
           updateValues({
             index: index,
             field: field.field,

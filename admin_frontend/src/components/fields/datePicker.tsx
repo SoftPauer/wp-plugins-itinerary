@@ -57,6 +57,7 @@ export const AppDatePicker: FC<AppDatePickerProps> = ({
             field: field,
             value: state?.inputString ?? "",
           });
+          valueContext.fetchData()
         }}
       />
       <DeleteValidationModal

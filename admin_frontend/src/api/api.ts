@@ -38,7 +38,7 @@ export const requestsCosting = {
   put: (url: string, body: {}) =>
     instance.put("itinerary/v1/" + url, body).then(responseBody),
   delete: (url: string, post:IDeleteCosting) =>
-    instance.delete("itinerary/v1/" + url,{params:{name:post.name, list_key: post.list_key}}).then(responseBody),
+    instance.delete("itinerary/v1/" + url,{params:{name:post.name, list_key: post.list_key, sectionId:post.sectionId}}).then(responseBody),
 };
 
 export const requestsCoreWP = {
@@ -108,6 +108,7 @@ export interface ICreateCosting{
 export interface IDeleteCosting{
   name:string;
   list_key: string;
+  sectionId?: number;
 }
 
 export const Costing = {
