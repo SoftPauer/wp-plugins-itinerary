@@ -67,6 +67,7 @@ export const DataSourceProvider = (props: { children: React.ReactNode }) => {
       sectionContext.selectedSection?.id &&
       sectionContext.selectedSection?.id !== -1
     ) {
+      console.log(itinContext.selected.id)
       const sectionVal = await Value.getValues(
         sectionContext.selectedSection?.id,
         itinContext.selected.id
@@ -76,6 +77,9 @@ export const DataSourceProvider = (props: { children: React.ReactNode }) => {
       }
     }
   }
+  useEffect(()=> {
+    getSectionValue()
+  },[itinContext, sectionContext,valuesContext])
 
   const resolveDataSource = (
     sourceType: string,
@@ -135,17 +139,18 @@ export const DataSourceProvider = (props: { children: React.ReactNode }) => {
             labelPlural: "No options found",
           };
         }
+        
         const elementField = fieldContext.getFieldById(sourceProps?.source);
+        
         if (elementField) {
           let valList = [];
           const val = valuesContext.getValue(elementField, index);
           if (section !== sectionContext.selectedSection?.id) {
             setSection(sectionContext.selectedSection?.id);
-            getSectionValue();
           }
-
           const fieldProps = elementField.type_properties;
-          if (value) {
+          if (value) {   
+            console.log(value)
             const sectionVal = JSON.parse(value?.value);
             let list = [];
             list =
@@ -154,9 +159,8 @@ export const DataSourceProvider = (props: { children: React.ReactNode }) => {
                   .toLowerCase()
                   .replace(" ", "_") ?? " "
               ];
-
             if (index?.includes("0.")) {
-              if (elementField.type_properties?.data_transform_properties) {
+              if (elementField.type_properties?.data_transform_properties  && index.charAt(index.length - 1) < list.length) { 
                 list =
                   list[index.charAt(index.length - 1) as unknown as number][
                     elementField.type_properties?.data_transform_properties

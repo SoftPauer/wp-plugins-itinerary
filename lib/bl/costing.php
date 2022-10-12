@@ -120,19 +120,22 @@ function get_costing_value($id)
 */
 function delete_costing($data){
   global $wpdb, $table_name_costings;
-
   $itin = $data["itinerary_id"];
   $name = $data["name"];
   $key = $data["list_key"];
+  $section = $data["sectionId"];
+  if ($section){
+    $costs = $wpdb->get_results("SELECT * FROM {$table_name_costings} WHERE itinerary_id = '$itin' AND section_id = '$section' ", OBJECT);
+  }else{
+    $costs = $wpdb->get_results("SELECT * FROM {$table_name_costings} WHERE itinerary_id = '$itin' AND listKey = '$key' ", OBJECT);
+  }
 
-  $costs = $wpdb->get_results("SELECT * FROM {$table_name_costings} WHERE itinerary_id = '$itin' AND listKey = '$key' ", OBJECT);
-  
   foreach( $costs as $cost){
     $costing = $cost->costing;
     $costing = json_decode($costing);
     $units = $costing->units;
     $passenger = $units->Passenger;
-    if($passenger == $name){
+    if($passenger == $name || $name == $key ){
       $wpdb->delete(
       $table_name_costings,
       ['id' => $cost->id],
@@ -142,3 +145,7 @@ function delete_costing($data){
     
   }
   }
+
+
+
+  

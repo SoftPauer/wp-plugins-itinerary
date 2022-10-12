@@ -72,6 +72,7 @@ export const AppSelectField: FC<AppSelectFieldProps> = ({
       }
     });
     setState(stateList);
+    
   };
 
   return (
@@ -81,6 +82,7 @@ export const AppSelectField: FC<AppSelectFieldProps> = ({
           value={state}
           onChange={(e) => {
             handleChange(e);
+            
           }}
           options={options?.options ?? []}
           labelPlural={options?.labelPlural}
@@ -104,7 +106,7 @@ export const AppSelectField: FC<AppSelectFieldProps> = ({
         handleDelet={() => {
           Field.deleteField(field.id);
           setDeleteModelState(false);
-          window.location.reload();
+          valueContext.fetchData();
         }}
       ></DeleteValidationModal>
 

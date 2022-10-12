@@ -98,6 +98,7 @@ export const AppTextField: FC<AppTextFieldProps> = ({
                 value: state?.inputString ?? "",
                 index: index,
               });
+              valueContext.fetchData()
             }}
           >
             <MenuItem value={undefined}>None</MenuItem>

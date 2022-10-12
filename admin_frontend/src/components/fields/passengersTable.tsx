@@ -18,7 +18,7 @@ import {
 } from "../../state/dataSourceProvider";
 import { useSectionContext } from "../../state/sectionProvider";
 import { useValueContext } from "../../state/valueProvider";
-import { Costing, Field, IField } from "../../api/api";
+import { Costing, Field, IField,IValues, Value } from "../../api/api";
 import { ModalContext } from "../../state/modals";
 import styles from "./table.module.css";
 import { Theme, makeStyles } from "@material-ui/core";
@@ -119,7 +119,7 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
 }) => {
   const [rows, setRows] = useState<GridRowsProp>([]);
   const [state, setState] = useState<IAppTextFieldState>();
-
+  const [value, setValue] = useState<IValues>();
   const [options, setOptions] = useState<IDataSourceOptions | null>(null);
   const { dispatch } = useContext(ModalContext);
   const classes = useStyles();
@@ -131,16 +131,15 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
   const dataSourceContext = useDataSourceContext();
   const [deleteModelState, setDeleteModelState] = useState<boolean>(false);
 
-  useEffect(() => {
-      setOptions(
-        dataSourceContext.resolveDataSource(
-          field.type_properties?.data_source ?? "",
-          field.type_properties?.data_source_properties,
-          index
-        )
-      );
-      
-  }, [index, field, dataSourceContext, valueContext]);
+  useEffect(() => { 
+    setOptions(
+      dataSourceContext.resolveDataSource(
+        field.type_properties?.data_source ?? "",
+        field.type_properties?.data_source_properties,
+        index
+      )
+    );
+  }, [valueContext.values, field, dataSourceContext, index, valueContext]);
 
    useEffect(() => { 
     populateTable()
