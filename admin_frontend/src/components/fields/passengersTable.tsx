@@ -132,21 +132,20 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
   const [deleteModelState, setDeleteModelState] = useState<boolean>(false);
 
   useEffect(() => {
-      setOptions(
-        dataSourceContext.resolveDataSource(
-          field.type_properties?.data_source ?? "",
-          field.type_properties?.data_source_properties,
-          index
-        )
-      );
-      
+    setOptions(
+      dataSourceContext.resolveDataSource(
+        field.type_properties?.data_source ?? "",
+        field.type_properties?.data_source_properties,
+        index
+      )
+    );
   }, [index, field, dataSourceContext, valueContext]);
 
-   useEffect(() => { 
-    populateTable()
+  useEffect(() => {
+    populateTable();
   }, [options]);
 
-    const populateTable = async () => {
+  const populateTable = async () => {
     let rows: any[] = [];
     let fareTypePrices = {
       economyClass: "",
@@ -222,7 +221,6 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
       setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
       populateTable();
       return updatedRow;
-    
     }
   };
 
@@ -294,19 +292,18 @@ export const PassengersTable: FC<costingTableFieldProps> = ({
             </Typography>
           </div>
         }
-
         classParentString={styles.tableColapse}
       >
-      <DeleteValidationModal
-        open={deleteModelState}
-        handleClose={() => {
-          setDeleteModelState(false);
-        }}
-        handleDelet={() => {
-          Field.deleteField(field.id);
-          window.location.reload();
-        }}
-      ></DeleteValidationModal>
+        <DeleteValidationModal
+          open={deleteModelState}
+          handleClose={() => {
+            setDeleteModelState(false);
+          }}
+          handleDelet={() => {
+            Field.deleteField(field.id);
+            window.location.reload();
+          }}
+        ></DeleteValidationModal>
 
         <DataGrid
           rows={rows}
