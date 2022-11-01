@@ -8,7 +8,7 @@ import {
   TextField,
 } from "@material-ui/core";
 import { FC, useEffect, useState, useContext } from "react";
-import { Field, IField } from "../../api/api";
+import { Field, IField, Costing } from "../../api/api";
 import {
   IDataSourceOptions,
   useDataSourceContext,
@@ -17,12 +17,15 @@ import { ModalContext } from "../../state/modals";
 import { useSectionContext } from "../../state/sectionProvider";
 import { useValueContext } from "../../state/valueProvider";
 import { DeleteValidationModal } from "../modals/deleteValidationModal";
+import { useItineraryContext } from "../../state/itineraryProvider";
+import { FieldProvider } from "../../state/fieldProvider";
 
 
 type AppTextFieldProps = {
   field: IField;
   preview: boolean;
   index: string | undefined;
+  listKey?: string;
 };
 interface IAppTextFieldState {
   inputString?: string;
@@ -36,6 +39,7 @@ export const AppTextField: FC<AppTextFieldProps> = ({
   field,
   index,
   preview,
+  listKey,
 }) => {
   const [state, setState] = useState<IAppTextFieldState>();
   const [options, setOptions] = useState<IDataSourceOptions | null>(null);
@@ -45,6 +49,7 @@ export const AppTextField: FC<AppTextFieldProps> = ({
   const valueContext = useValueContext();
   const dataSourceContext = useDataSourceContext();
   const [deleteModelState, setDeleteModelState] = useState<boolean>(false);
+  const itinContext = useItineraryContext();
 
   useEffect(() => {
     const initFieldValue = valueContext.getValue(field, index);
@@ -59,10 +64,27 @@ export const AppTextField: FC<AppTextFieldProps> = ({
     );
   }, [valueContext.values, field, dataSourceContext, index]);
 
+  function getKeys(newValue: any,oldValue:any,id: any){
+    if (oldValue){
+      const oldListKey = listKey
+      const newListKey = oldListKey?.replace(oldValue,newValue)  
+      processListKeyUpdate(newListKey, oldListKey, id)
+  }}
+
+  const processListKeyUpdate = async (newListkey:string| undefined,oldListKey:string| undefined, id:any) => {
+    if (newListkey && oldListKey){
+    const newCosting = await Costing.updateCosting({
+      newListKey: newListkey,
+      ogListKey: oldListKey,
+      id: id
+    })
+  }};
+
   return (
     <div className={classes.appTextField}>
       {!field.type_properties?.data_source && (
         <TextField
+          style={{ width: "300px", marginRight: "20px" }}
           label={field.field_name}
           onChange={(val) =>
             setState({ ...state, inputString: val.target.value })
@@ -73,11 +95,15 @@ export const AppTextField: FC<AppTextFieldProps> = ({
           placeholder="value"
           value={state?.inputString}
           onBlur={() => {
+            const ogListKey = valueContext.getValue(field, index)
             valueContext.updateValues({
               field: field,
               value: state?.inputString ?? "",
               index: index,
             });
+            valueContext.fetchData()
+            console.log()
+            getKeys(state?.inputString, ogListKey, itinContext.selected.id)
           }}
         />
       )}
@@ -98,10 +124,9 @@ export const AppTextField: FC<AppTextFieldProps> = ({
                 value: state?.inputString ?? "",
                 index: index,
               });
-              valueContext.fetchData()
             }}
           >
-            <MenuItem value={undefined}>None</MenuItem>
+            <MenuItem defaultValue={""}>None</MenuItem>
             {(options?.options ?? []).map((i, n) => {
               return (
                 <MenuItem key={n} value={i}>

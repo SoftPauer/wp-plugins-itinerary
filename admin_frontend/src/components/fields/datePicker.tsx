@@ -1,10 +1,11 @@
 import { Button, makeStyles, TextField } from "@material-ui/core";
 import { FC, useContext, useEffect, useState } from "react";
-import { Field, IField } from "../../api/api";
+import { Field, IField,Costing} from "../../api/api";
 import { useSectionContext } from "../../state/sectionProvider";
 import { ModalContext } from "../../state/modals";
 import { useValueContext } from "../../state/valueProvider";
 import { DeleteValidationModal } from "../modals/deleteValidationModal";
+import { useItineraryContext } from "../../state/itineraryProvider";
 
 
 type AppDatePickerProps = {
@@ -12,6 +13,7 @@ type AppDatePickerProps = {
   index: string | undefined;
   preview: boolean;
   type: "time" | "date" | "datetime-local";
+  listKey?: string;
 };
 interface IAppDatePickerState {
   inputString?: string;
@@ -25,12 +27,14 @@ export const AppDatePicker: FC<AppDatePickerProps> = ({
   preview,
   type,
   index,
+  listKey,
 }) => {
   const [state, setState] = useState<IAppDatePickerState>();
   const { dispatch } = useContext(ModalContext);
   const classes = useStyles();
   const sectionContext = useSectionContext();
   const valueContext = useValueContext();
+  const itinContext = useItineraryContext();
   const [deleteModelState, setDeleteModelState] = useState<boolean>(false);
 
   
@@ -38,6 +42,20 @@ export const AppDatePicker: FC<AppDatePickerProps> = ({
     setState({ inputString: valueContext.getValue(field,index) });
   }, [valueContext,field,index]);
 
+  function getKeys(newValue: any,oldValue:any, id:any){
+    const oldListKey = listKey
+    const newListKey = oldListKey?.replace(oldValue,newValue)
+    processListKeyUpdate(newListKey, oldListKey, id)
+  }
+
+  const processListKeyUpdate = async (newListkey:string| undefined,oldListKey:string| undefined, id:any) => {
+    if (newListkey && oldListKey){
+    const newCosting = await Costing.updateCosting({
+      newListKey: newListkey,
+      ogListKey: oldListKey,
+      id: id
+    })
+  }};
 
   return (
     <div className={classes.appDateField}>
@@ -52,11 +70,13 @@ export const AppDatePicker: FC<AppDatePickerProps> = ({
         }
         value={state?.inputString}
         onBlur={() => {
+          const ogListKey = valueContext.getValue(field, index)
           valueContext.updateValues({
             index: index,
             field: field,
             value: state?.inputString ?? "",
-          });
+          });              
+          getKeys(state?.inputString, ogListKey, itinContext.selected.id)
           valueContext.fetchData()
         }}
       />

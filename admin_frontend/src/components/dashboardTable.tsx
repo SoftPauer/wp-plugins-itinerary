@@ -206,7 +206,7 @@ export const DashboardTable: FC<{ rows: Record<string, {}> }> = (props: {
                   <DashboardRow
                     row={rows[name]}
                     name={name}
-                    sections={headArr}
+                    sections={headArr}                   
                   ></DashboardRow>
                 );
               })}

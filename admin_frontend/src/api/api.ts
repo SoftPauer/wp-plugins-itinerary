@@ -105,6 +105,12 @@ export interface ICreateCosting{
   costing:LooseObject;
 }
 
+export interface IUpdateCosting{
+  newListKey:string;
+  ogListKey:string;
+  id:any;
+}
+
 export interface IDeleteCosting{
   name:string;
   list_key: string;
@@ -112,6 +118,8 @@ export interface IDeleteCosting{
 }
 
 export const Costing = {
+  updateCosting: (post: IUpdateCosting): Promise<ICosting[]> =>
+  requestsItinerary.post("costings/update", post),
   getCosting: (id:number): Promise<ICosting[]> =>
     requestsCosting.get(`costings/${id}`),
   // getAPost: (id: number): Promise<PostType> => requests.get(`posts/${id}`),

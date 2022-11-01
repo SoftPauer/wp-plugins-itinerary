@@ -26,6 +26,12 @@ add_action('rest_api_init', function () {
   ));
 
   //costings
+
+  register_rest_route('itinerary/v1', 'costings/update', array(
+    'methods' => WP_REST_Server::CREATABLE,
+    'callback' => 'updating_listKey',
+  ));
+  
    register_rest_route('itinerary/v1', 'costings/(?P<itinerary_id>\d+)', array(
     'methods' => WP_REST_Server::READABLE,
     'callback' => 'get_all_costings',

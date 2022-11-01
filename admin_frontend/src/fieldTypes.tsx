@@ -46,6 +46,7 @@ export const renderField = (
         index={index}
         preview={preview}
         key={field.field.id}
+        listKey = {listKey}
       ></AppTextField>
     );
   }
@@ -69,6 +70,7 @@ export const renderField = (
         preview={preview}
         type="date"
         key={field.field.id}
+        listKey={listKey}
       ></AppDatePicker>
     );
   }
