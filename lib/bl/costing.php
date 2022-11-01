@@ -4,28 +4,26 @@ function updating_listKey(WP_REST_Request $request){
   global $wpdb, $table_name_costings,$table_name_sections, $table_name_itinerary;
   $newListKey = $request['newListKey'];
   $oldListKey = $request['ogListKey'];
-  $sql = "UPDATE {$table_name_costings} SET listKey = '$newListKey'  WHERE listKey = '$oldListKey'";
+  $id = $request['id'];
+  $sql = "UPDATE {$table_name_costings} SET listKey = '$newListKey'  WHERE listKey = '$oldListKey' AND itinerary_id = '$id' ";
   $sql = $wpdb->prepare($sql);
 
   $wpdb->query($sql);
 }
 
 /**
-* Return all costings
-*/
+ * Return all costings
+ */
+
 function get_all_costings(WP_REST_Request $request){
-
- global $wpdb, $table_name_costings;
- $itineraryId = $request['itinerary_id'];
- $results = $wpdb->get_results("SELECT * FROM {$table_name_costings} WHERE itinerary_id = '$itineraryId'", OBJECT);
-
- return rest_ensure_response($results);
-}
-
-function update_costings_from_values(){
-  global $wpdb, $table_name_costings, $vtable_name_section_values;
   
+  global $wpdb, $table_name_costings,$table_name_sections, $table_name_itinerary;
+  $itineraryId = $request['itinerary_id'];
+  $results = $wpdb->get_results("SELECT * FROM {$table_name_costings} WHERE itinerary_id = '$itineraryId'", OBJECT);
+
+  return rest_ensure_response($results);
 }
+
 /**
  * adds a new costing
  */
@@ -38,7 +36,7 @@ function create_new_costing(WP_REST_Request $request)
   $sameListType = $wpdb->get_results("SELECT * FROM {$table_name_costings} WHERE listKey = '{$body->listKey}'");
   if ( count($results) > 0) {
     $originalEntry = $wpdb->get_results("SELECT costing FROM {$table_name_costings} WHERE id = '{$results[0]->id}'");
-    $originalPrice = json_decode($originalEntry[0]->costing);
+    $originalPrice = json_decode($originalEntry[0]->costing); 
 
     $sql = "UPDATE {$table_name_costings} SET costing = %s  WHERE id = '{$results[0]->id}'";
     $sql = $wpdb->prepare($sql,  json_encode($body->costing));
@@ -51,7 +49,7 @@ function create_new_costing(WP_REST_Request $request)
     return get_costing_value($body->id);  
   } 
   else {
-    //updating_listKey($body,$results);
+
     $wpdb->insert(
       $table_name_costings,
       array(
@@ -67,21 +65,13 @@ function create_new_costing(WP_REST_Request $request)
     $newEntryElement = $newEntry[0];
     $newEntryCosting = json_decode($newEntryElement->costing);
     $newEntryElement->costing = $newEntryCosting;
-    //updating_listKey($body, $results)
+    
     create_costing_stringFareType($sameListType,$newEntryElement,$newEntryElement->costing->units->FareType);
     return get_costing_value($id);
   }
 }
 
-function updating_listKey($body, $results){
-  global $wpdb, $table_name_costings;
-  $originalListKey = $wpdb->get_results("SELECT listKey FROM {$table_name_costings} WHERE id = '{$results[0]->id}'");
-  if ($originalListKey != $body->listKey){
-    $sql = "UPDATE {$table_name_costings} SET listKey = '{$body->listKey}' WHERE listKey = '{$originalListKey}'";
-    $sql = $wpdb->prepare($sql);
-    $wpdb->query($sql);
-  }
-}
+
 
 function create_costing_stringFareType($sameListType,$body,$newFareType){
   global $wpdb, $table_name_costings;
