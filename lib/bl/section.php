@@ -12,7 +12,7 @@ function get_all_sections()
 }
 
 /**
- * CREATE section
+ * CREATE or UPDATE section
  */
 function create_new_section(WP_REST_Request $request)
 {
@@ -24,21 +24,31 @@ function create_new_section(WP_REST_Request $request)
   if (!property_exists($body, "name")) {
     return new WP_Error('400', esc_html__('Missing body parameter name', 'text_domain'), array('status' => 400));
   }
-  return $wpdb->insert(
-    $table_name_sections,
-    array(
-      'time_created' => current_time('mysql'),
-      'time_updated' => current_time('mysql'),
-      'name' => $body->name,
-      'properties' => json_encode($body->properties),
-    ),
-    array(
-      '%s',
-      '%s',
-      '%s',
-      '%s',
-    )
-  );
+  
+  $results = get_section_by_name($body->name);
+  if($results && count($results) > 0){
+    $sql = "UPDATE {$table_name_sections} SET properties = %s  WHERE id = '{$results[0]->id}'";
+    $sql = $wpdb->prepare($sql,$body->properties);
+    $data = ['updated' => $wpdb->query($sql)];
+    return json_encode($data);
+  }else{
+    return $wpdb->insert(
+      $table_name_sections,
+      array(
+        'time_created' => current_time('mysql'),
+        'time_updated' => current_time('mysql'),
+        'name' => $body->name,
+        'properties' => json_encode($body->properties),
+      ),
+      array(
+        '%s',
+        '%s',
+        '%s',
+        '%s',
+      )
+    );
+  }
+
 }
 
 /**
@@ -67,4 +77,16 @@ function delete_section($data)
     ['id' => $data['section_id']],
     ['%d'],
   );
+}
+
+
+function get_section_by_name($section_name)
+{
+  global $wpdb, $table_name_sections;
+  $results = $wpdb->get_results(
+    "SELECT * FROM {$table_name_sections} 
+     WHERE name = {$section_name}",
+    OBJECT
+  );
+  return $results;
 }

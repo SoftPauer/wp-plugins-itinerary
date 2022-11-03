@@ -68,6 +68,7 @@ add_action('rest_api_init', function () {
     'methods' => WP_REST_Server::CREATABLE,
     'callback' => 'create_new_section',
   ));
+  
   register_rest_route('itinerary/v1', 'sections/delete/(?P<section_id>\d+)', array(
     'methods' => WP_REST_Server::DELETABLE,
     'callback' => 'delete_section',
@@ -79,6 +80,7 @@ add_action('rest_api_init', function () {
       ),
     )
   ));
+
   //fields
   register_rest_route('itinerary/v1', 'fields/(?P<section_id>\d+)', array(
     'methods' => WP_REST_Server::READABLE,
