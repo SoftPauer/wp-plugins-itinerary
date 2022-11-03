@@ -28,7 +28,7 @@ function create_new_section(WP_REST_Request $request)
   $results = get_section_by_name($body->name);
   if($results && count($results) > 0){
     $sql = "UPDATE {$table_name_sections} SET properties = %s  WHERE id = '{$results[0]->id}'";
-    $sql = $wpdb->prepare($sql,$body->properties);
+    $sql = $wpdb->prepare($sql,json_encode($body->properties));
     $data = ['updated' => $wpdb->query($sql)];
     return json_encode($data);
   }else{
@@ -50,7 +50,6 @@ function create_new_section(WP_REST_Request $request)
   }
 
 }
-
 /**
  * DELETE section 
  */
@@ -85,7 +84,7 @@ function get_section_by_name($section_name)
   global $wpdb, $table_name_sections;
   $results = $wpdb->get_results(
     "SELECT * FROM {$table_name_sections} 
-     WHERE name = {$section_name}",
+     WHERE name = '{$section_name}'",
     OBJECT
   );
   return $results;
