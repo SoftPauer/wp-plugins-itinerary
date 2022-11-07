@@ -27,7 +27,7 @@ function create_new_section(WP_REST_Request $request)
   if (property_exists($body, "id")) {
     $results = get_section_by_id($body->id);
     if ($results && count($results) > 0) {
-      $sql = "UPDATE {$table_name_sections} SET properties = %s AND name = %s WHERE id = '{$results[0]->id}'";
+      $sql = "UPDATE {$table_name_sections} SET properties = %s , name = %s WHERE id = '{$results[0]->id}'";
       $sql = $wpdb->prepare($sql, json_encode($body->properties), $body->name);
       $data = ['updated' => $wpdb->query($sql)];
       return json_encode($data);

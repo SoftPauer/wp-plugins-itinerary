@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.2.30
+Version: 1.2.31
 
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
