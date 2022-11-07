@@ -24,14 +24,17 @@ function create_new_section(WP_REST_Request $request)
   if (!property_exists($body, "name")) {
     return new WP_Error('400', esc_html__('Missing body parameter name', 'text_domain'), array('status' => 400));
   }
-  
-  $results = get_section_by_name($body->name);
-  if($results && count($results) > 0){
-    $sql = "UPDATE {$table_name_sections} SET properties = %s  WHERE id = '{$results[0]->id}'";
-    $sql = $wpdb->prepare($sql,json_encode($body->properties));
-    $data = ['updated' => $wpdb->query($sql)];
-    return json_encode($data);
-  }else{
+  if (property_exists($body, "id")) {
+    $results = get_section_by_id($body->id);
+    if ($results && count($results) > 0) {
+      $sql = "UPDATE {$table_name_sections} SET properties = %s AND name = %s WHERE id = '{$results[0]->id}'";
+      $sql = $wpdb->prepare($sql, json_encode($body->properties), $body->name);
+      $data = ['updated' => $wpdb->query($sql)];
+      return json_encode($data);
+    } else {
+      return new WP_Error('404', esc_html__("Section with id {$body->id}  not found", 'text_domain'), array('status' => 404));
+    }
+  } else {
     return $wpdb->insert(
       $table_name_sections,
       array(
@@ -48,7 +51,6 @@ function create_new_section(WP_REST_Request $request)
       )
     );
   }
-
 }
 /**
  * DELETE section 
@@ -79,12 +81,12 @@ function delete_section($data)
 }
 
 
-function get_section_by_name($section_name)
+function get_section_by_id($section_Id)
 {
   global $wpdb, $table_name_sections;
   $results = $wpdb->get_results(
     "SELECT * FROM {$table_name_sections} 
-     WHERE name = '{$section_name}'",
+     WHERE id = '{$section_Id}'",
     OBJECT
   );
   return $results;
