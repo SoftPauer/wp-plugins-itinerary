@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.2.31
+Version: 1.2.32
 
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
@@ -16,6 +16,7 @@ require_once __DIR__.'/lib/bl/itinerary.php';
 require_once __DIR__.'/lib/bl/rocketchat.php';
 require_once __DIR__.'/lib/bl/section.php';
 require_once __DIR__.'/lib/bl/value.php';
+require_once __DIR__.'/lib/bl/flights.php';
 
 require_once __DIR__.'/lib/db_creation.php';
 
