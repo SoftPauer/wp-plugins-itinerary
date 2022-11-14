@@ -270,10 +270,11 @@ add_action('rest_api_init', function () {
       ),
     )
   ));
+  
+  register_rest_route('itinerary/v1', 'itineraries/updateFlightData', array(
+    'methods' => WP_REST_Server::EDITABLE,
+    'callback' => 'update_flight_data',
+  ));
 
 });
 
-register_rest_route('itinerary/v1', 'itineraries/updateFlightData', array(
-  'methods' => WP_REST_Server::EDITABLE,
-  'callback' => 'update_flight_data',
-));
