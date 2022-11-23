@@ -16,7 +16,9 @@ require_once __DIR__.'/lib/bl/itinerary.php';
 require_once __DIR__.'/lib/bl/rocketchat.php';
 require_once __DIR__.'/lib/bl/section.php';
 require_once __DIR__.'/lib/bl/value.php';
-// require_once __DIR__.'/lib/bl/flights.php';
+require_once __DIR__.'/lib/bl/flights.php';
+require_once __DIR__.'/lib/bl/flightWeebhook.php';
+require_once __DIR__.'/lib/bl/flightWeebhookData.php';
 
 require_once __DIR__.'/lib/db_creation.php';
 
