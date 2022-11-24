@@ -38,7 +38,7 @@ function get_itin_data(WP_REST_Request $request)
   global $wpdb, $table_name_itinerary_data;
   $id = $request['itin_id'];
   $result = $wpdb->get_results("SELECT * FROM $table_name_itinerary_data WHERE id = $id");
-  return (json_decode($result[0]->json_data));
+  return (json_decode( trim($result[0]->json_data,'"')));
 }
 
 
