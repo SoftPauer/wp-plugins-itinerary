@@ -11,7 +11,7 @@ function get_race_map()
   $raceData = $wpdb->get_results("select t.* from wp_itinerary_data t where t.time_updated = (select max(t1.time_updated) from wp_itinerary_data t1 where t1.itinerary_id = t.itinerary_id);");
 
   foreach ($raceData as $race) {
-    $jsonData = json_decode($race->json_data);
+    $jsonData = json_decode( trim($race->json_data, '"'));
     $start_time = strtotime($jsonData->general_info->startDate);
     $end_time = strtotime($jsonData->general_info->endDate);
     $id = $race->itinerary_id;
