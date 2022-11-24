@@ -51,7 +51,7 @@ function update_entry_in_db(WP_REST_Request $request)
   global $wpdb, $table_name_itinerary_data;
   $params = $request->get_json_params();
   $itinerary_id = $params['itinId'];
-  $json_data = $params['json_data'];
+  $json_data = json_encode( $params['json_data']);
   $time_updated = $params['time_updated'];
   $results = $wpdb->get_results(" INSERT INTO $table_name_itinerary_data (itinerary_id, time_updated, json_data) VALUES ($itinerary_id, $time_updated, '$json_data') ");
   return rest_ensure_response($results);
