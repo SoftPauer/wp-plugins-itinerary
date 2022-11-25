@@ -60,7 +60,7 @@
                             $values[$ke]["flights"][$x]["departure"]["dep_time"] = $dep_time;
                             $values[$ke]["flights"][$x]["departure"]["dep_estimated"] = $post_data["flights"][0]["departure"]["actualTimeLocal"] ? str_replace(" ", "T",substr($post_data["flights"][0]["departure"]["actualTimeLocal"], 0,16)) : $dep_time;
                             $values[$ke]["flights"][$x]["departure"]["dep_terminal"] = $post_data["flights"][0]["departure"]["terminal"];
-                            
+                            $values[$ke]["flights"][$x]["departure"]["dep_name"] = $post_data["flights"][0]["departure"]["airport"]["name"];
                         }
                         
                         if($values[$ke]["flights"][$x]["arrival"]){
@@ -70,6 +70,7 @@
                             $values[$ke]["flights"][$x]["arrival"]["arr_estimated"] = $post_data["flights"][0]["arrival"]["actualTimeLocal"] ? str_replace(" ", "T",substr($post_data["flights"][0]["arrival"]["actualTimeLocal"], 0,16)) : $arr_time;
                             $values[$ke]["flights"][$x]["arrival"]["arr_terminal"] = $post_data["flights"][0]["arrival"]["terminal"];
                             $values[$ke]["flights"][$x]["arrival"]["status"] = $post_data["flights"][0]["arrival"]["status"];
+                            $values[$ke]["flights"][$x]["arrival"]["arr_name"] = $post_data["flights"][0]["arrival"]["airport"]["name"];
                         }
                         
                         if(!$flight_departs){
