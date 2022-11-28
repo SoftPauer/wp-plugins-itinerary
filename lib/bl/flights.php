@@ -52,6 +52,7 @@ function request_future_flight_data($data){
                         $values[$ke]["flights"][$x]["departure"]["dep_estimated"] = $post_data[0]["departure"]["actualTimeLocal"] ? str_replace(" ", "T",substr($post_data[0]["departure"]["actualTimeLocal"], 0,16)) : $dep_time;
                         $values[$ke]["flights"][$x]["departure"]["dep_terminal"] = $post_data[0]["departure"]["terminal"];
                         $values[$ke]["flights"][$x]["departure"]["dep_name"] = $post_data[0]["departure"]["airport"]["name"];
+                        $values[$ke]["flights"][$x]["departure"]["dep_gate"] = $post_data[0]["departure"]["gate"];
                     }
                     
                     if($values[$ke]["flights"][$x]["arrival"]){
@@ -69,7 +70,7 @@ function request_future_flight_data($data){
                     if(!$flight_departs){
                         $dep_time = str_replace(" ", "T",substr($post_data[0]["departure"]["scheduledTimeLocal"], 0,16));
                         echo($dep_time);
-                        $values[$ke]["flights"][$x]["departure"] = (object) array("dep_time" => $dep_time, "dep_estimated" => $post_data[0]["departure"]["actualTimeLocal"] ? str_replace(" ", "T",substr($post_data[0]["departure"]["actualTimeLocal"], 0,16)) : $dep_time, "dep_terminal" => $post_data[0]["departure"]["terminal"]);
+                        $values[$ke]["flights"][$x]["departure"] = (object) array("dep_time" => $dep_time, "dep_estimated" => $post_data[0]["departure"]["actualTimeLocal"] ? str_replace(" ", "T",substr($post_data[0]["departure"]["actualTimeLocal"], 0,16)) : $dep_time, "dep_terminal" => $post_data[0]["departure"]["terminal"], "dep_gate" => $post_data[0]["departure"]["gate"]);
                     }
                     if(!$flight_arrives){
                         $arr_time = str_replace(" ", "T",substr($post_data[0]["arrival"]["scheduledTimeLocal"], 0,16));
