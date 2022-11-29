@@ -1,10 +1,40 @@
 <?php
+
+    function update_value2($request){
+        global $wpdb,$table_name_itinerary_data;
+        $wpdb->show_errors(); 
+        $id = $request['itin_id'];
+        $json = (object)array("v2" => []);
+        $results = $wpdb->get_results("SELECT section, value FROM {$wpdb->prefix}itinerary_values where itinerary = {$id}", OBJECT);
+        $sections = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}itinerary_sections", OBJECT);
+        foreach($sections as $x => $v){
+        $name = strtolower(str_replace(" ", "_", $v->name));
+        $result = $wpdb->get_results("SELECT value FROM {$wpdb->prefix}itinerary_values where section = {intval($v->id)}", OBJECT);
+        $json->$name = json_decode($result[0]->value);
+        }
+        $users = [];
+        $user_result = $wpdb->get_results("SELECT id, user_login, user_email  FROM {$wpdb->prefix}users", OBJECT);
+        foreach($user_result as $x=>$v){
+        $firstName = $wpdb->get_results("SELECT meta_value FROM {$wpdb->prefix}usermeta where user_id = {intval($v->id)} and meta_key = 'first_name'", OBJECT);
+        $surname = $wpdb->get_results("SELECT meta_value FROM {$wpdb->prefix}usermeta where user_id = {intval($v->id)} and meta_key ='last_name'", OBJECT);
+        $department = $wpdb->get_results("SELECT meta_value FROM {$wpdb->prefix}usermeta where user_id = {intval($v->id)} and meta_key = 'department'", OBJECT);
+        $users[] = (object)array("id" => $v->id, "firstName" =>$firstName[0]->meta_value, "surname" => $surname[0]->meta_value, "department" => $department[0]->meta_value, "email" =>$v->user_email, "userName"=>$v->user_login);
+        }
+        $json->users = $users;
+        $format = '%Y-%m-%dT%H:%M:%S.%VZ';
+        $strf = strftime($format);
+        $json->updatedAt = $strf;
+        $encoded = json_encode($json);
+        $strf = substr(str_replace("T", " ", $strf), 0, 19);
+        $outcome = $wpdb->get_results(" INSERT INTO {$wpdb->prefix}itinerary_data (itinerary_id, time_updated, json_data) VALUES ($id, '$strf', '$encoded') ");
+        return($json);
+    
+    }
+  
     function flight_data_webhook_post($data) {
 
-        //currently only works for if one flights info is sent back 
-        //if multiple are sent back at a time need to subset 43 into a for loop. 
-        //need this to go through like it is a loop i 
         global $wpdb;
+
         $post_data = $data->get_json_params();
 
         try {
@@ -30,7 +60,8 @@
         //echo($date);
 
 
-        $id = str_replace(" ", "" , $post_data["subscription"]["subject"]["id"]);
+        //$id = str_replace(" ", "" , $post_data["subscription"]["subject"]["id"]);
+        $id = str_replace(" ", "" , $post_data["flights"][0]["number"]);
         $results = $wpdb->get_results("SELECT itinerary, value FROM {$wpdb->prefix}itinerary_values where section = 2" , OBJECT);
         $values = [];
 
@@ -62,7 +93,6 @@
                             $values[$ke]["flights"][$x]["departure"]["dep_terminal"] = $post_data["flights"][0]["departure"]["terminal"];
                             $values[$ke]["flights"][$x]["departure"]["dep_name"] = $post_data["flights"][0]["departure"]["airport"]["name"];
                             $values[$ke]["flights"][$x]["departure"]["dep_gate"] = $post_data["flights"][0]["departure"]["gate"];
-
                         }
                         
                         if($values[$ke]["flights"][$x]["arrival"]){
@@ -87,30 +117,22 @@
                     }
                 }
             }
-            /*            
-            $info = $va->flights;
-            foreach($info as $key =>$val){
-                //at this level we are now ino each flight, need to compare bookref and date
-                if($val->bookref && $val->bookref === $id){
-                    //need to check date 
-                    if($val->flightDate && $val->flightDate === $date){
-                        //now we are here we update for that date 
-                    }
-                }
-            */
 
             }
-        
-        //$date = str_replace(" ", "T", )
-        //echo("    " . $values[3]["flights"][1]["departure"]["dep_time"]);
-        //echo($values[3]["flights"][1]["departure"]["dep_estimated"]);
+    
         $data2 = [];
         foreach($values as $ke=>$va){
             $val = json_encode($va);
             $sql = "UPDATE wp_itinerary_values SET value = %s  WHERE section = 2 and itinerary = {$ke}";
             $sql = $wpdb->prepare($sql,  $val);
-            $data2[$ke] = $wpdb->query($sql);
+            $ans = $wpdb->query($sql);
+            $data2[$ke] = $ans;
+            if($ans){
+                $responses = update_value2(['itin_id' => $ke]);
+            }
+            
         }
 
-        return [$id, $date ,$post_data["flights"], $values, $data2];
+        //return [$id, $id2, $date ,$post_data["flights"], $values, $data2, $responses];
+        return($data2);
     }

@@ -33,6 +33,37 @@ function get_race_map()
   return ($raceMap);
 }
 
+//does the same as updateApp but all on the backend 
+function update_value(WP_REST_Request $request){
+  global $wpdb,$table_name_itinerary_data;
+  $wpdb->show_errors(); 
+  $id = $request['itin_id'];
+  $json = (object)array("v2" => []);
+  $results = $wpdb->get_results("SELECT section, value FROM {$wpdb->prefix}itinerary_values where itinerary = {$id}", OBJECT);
+  $sections = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}itinerary_sections", OBJECT);
+  foreach($sections as $x => $v){
+    $name = strtolower(str_replace(" ", "_", $v->name));
+    $result = $wpdb->get_results("SELECT value FROM {$wpdb->prefix}itinerary_values where section = {intval($v->id)}", OBJECT);
+    $json->$name = json_decode($result[0]->value);
+  }
+  $users = [];
+  $user_result = $wpdb->get_results("SELECT id, user_login, user_email  FROM {$wpdb->prefix}users", OBJECT);
+  foreach($user_result as $x=>$v){
+    $firstName = $wpdb->get_results("SELECT meta_value FROM {$wpdb->prefix}usermeta where user_id = {intval($v->id)} and meta_key = 'first_name'", OBJECT);
+    $surname = $wpdb->get_results("SELECT meta_value FROM {$wpdb->prefix}usermeta where user_id = {intval($v->id)} and meta_key ='last_name'", OBJECT);
+    $department = $wpdb->get_results("SELECT meta_value FROM {$wpdb->prefix}usermeta where user_id = {intval($v->id)} and meta_key = 'department'", OBJECT);
+    $users[] = (object)array("id" => $v->id, "firstName" =>$firstName[0]->meta_value, "surname" => $surname[0]->meta_value, "department" => $department[0]->meta_value, "email" =>$v->user_email, "userName"=>$v->user_login);
+  }
+  $json->users = $users;
+  $format = '%Y-%m-%dT%H:%M:%S.%VZ';
+  $strf = strftime($format);
+  $json->updatedAt = $strf;
+  $encoded = json_encode($json);
+  $strf = substr(str_replace("T", " ", $strf), 0, 19);
+  $outcome = $wpdb->get_results(" INSERT INTO {$wpdb->prefix}itinerary_data (itinerary_id, time_updated, json_data) VALUES ($id, '$strf', '$encoded') ");
+  return($outcome);
+}
+
 function get_itin_data(WP_REST_Request $request)
 {
   global $wpdb, $table_name_itinerary_data;

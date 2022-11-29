@@ -192,6 +192,18 @@ add_action('rest_api_init', function () {
     )
   ));
 
+  register_rest_route('itinerary/v1', 'itineraries/updateValues', array(
+    'methods' => WP_REST_Server::EDITABLE,
+    'callback' => 'update_value',
+    'args' => array(
+      'itinId' => array(
+        'validate_callback' => function ($param, $request, $key) {
+          return is_numeric($param);
+        }
+      ),
+    )
+  ));
+
   register_rest_route('itinerary/v1', 'raceMap', array(
     'methods' => WP_REST_Server::READABLE,
     'callback' => 'get_race_map',
