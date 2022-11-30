@@ -52,14 +52,7 @@ function get_ical_for_user(WP_REST_Request $request)
       }
     }
   }
-  $eventsForTheFlights = [];
-  foreach ($flightsForTheUser as $flight) {
-    foreach ($flight->events as $event) {
-      if (in_array($display_name, $event->appliesFor)) {
-        array_push($eventsForTheFlights, $event);
-      }
-    }
-  }
+  
 
   $ical = "BEGIN:VCALENDAR
 PRODID:-//Google Inc//Google Calendar 70.9054//EN
@@ -70,15 +63,15 @@ X-WR-CALNAME:Eventr Calendar
 X-WR-TIMEZONE:UTC
 X-WR-CALDESC:Eventr Calendar
 ";
-  foreach ($eventsForTheFlights as $event) {
+  foreach ($flightsForTheUser as $event) {
     $ical .= "BEGIN:VEVENT
-DTSTART:" . getIcalDate($event->time, $event->timezone) . "
-DTEND:" . getIcalDate($event->time, $event->timezone) . "
+DTSTART:" . getIcalDate($event->departure->dep_time, false) . "
+DTEND:" . getIcalDate($event->arrival->arr_time, false) . "
 DTSTAMP:" . date('Ymd' . '\THis', time()) . "Z
-UID:" . str_replace(" ", "_", $event->time . $event->description) . "
-SUMMARY:" . $event->description . "
+UID:" . str_replace(" ", "_", $event->actualBookingRef . $event->bookref) . "
+SUMMARY:" . $event->bookref. "
 STATUS:CONFIRMED
-DESCRIPTION:" . $event->description . "
+DESCRIPTION:" . str_replace("Flight ",$event->bookref) . "
 END:VEVENT
 ";
   }
