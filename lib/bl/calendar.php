@@ -42,8 +42,9 @@ function get_ical_for_user(WP_REST_Request $request)
   $lastItinsJson = array_map(fn ($itin) => json_decode($itin->json_data), $lastItins);
   // echo $lastItinsJson;
   //find all flight events 
-  $flights = array_map(fn ($itin) => $itin->flights->fligths, $lastItinsJson);
-
+  $flights = array_map(fn ($itin) => $itin->flights->flights, $lastItinsJson);
+  $eventDays = array_map(fn(itin) => $itin->event_calendar->eventDays, $lastItinsJson);
+  
   $flightsForTheUser = [];
   foreach ($flights as $flight) {
     foreach ($flight as $flightItem) {
@@ -52,6 +53,16 @@ function get_ical_for_user(WP_REST_Request $request)
       }
     }
   }
+
+  $eventsForTheUser = [];
+  foreach ($eventsDays as $eventDay) {
+    foreach ($eventDay->events as $event) {
+      if (in_array($display_name, $event->attendees)) {
+        array_push($flightsForTheUser, $event);
+      }
+    }
+  }
+
   
 
   $ical = "BEGIN:VCALENDAR
