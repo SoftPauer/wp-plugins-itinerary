@@ -42,7 +42,7 @@ function get_ical_for_user(WP_REST_Request $request)
   $lastItinsJson = array_map(fn ($itin) => json_decode($itin->json_data), $lastItins);
   // echo $lastItinsJson;
   //find all flight events 
-  $flights = array_map(fn ($itin) => $itin->flights->Flight, $lastItinsJson);
+  $flights = array_map(fn ($itin) => $itin->flights->fligths, $lastItinsJson);
 
   $flightsForTheUser = [];
   foreach ($flights as $flight) {
