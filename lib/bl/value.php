@@ -39,11 +39,11 @@ function update_value(WP_REST_Request $request){
   $wpdb->show_errors(); 
   $id = $request['itin_id'];
   $json = (object)array("v2" => []);
-  $results = $wpdb->get_results("SELECT section, value FROM {$wpdb->prefix}itinerary_values where itinerary = {$id}", OBJECT);
+  //$results = $wpdb->get_results("SELECT section, value FROM {$wpdb->prefix}itinerary_values where itinerary = {$id}", OBJECT);
   $sections = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}itinerary_sections", OBJECT);
   foreach($sections as $x => $v){
     $name = strtolower(str_replace(" ", "_", $v->name));
-    $result = $wpdb->get_results("SELECT value FROM {$wpdb->prefix}itinerary_values where section = {intval($v->id)}", OBJECT);
+    $result = $wpdb->get_results("SELECT value FROM {$wpdb->prefix}itinerary_values where section = {intval($v->id)} and itinerary = {$id}", OBJECT);
     $json->$name = json_decode($result[0]->value);
   }
   $users = [];
@@ -58,9 +58,9 @@ function update_value(WP_REST_Request $request){
   $format = '%Y-%m-%dT%H:%M:%S.%VZ';
   $strf = strftime($format);
   $json->updatedAt = $strf;
-  $encoded = json_encode($json);
+  $encoded = json_encode(json_encode($json));
   $strf = substr(str_replace("T", " ", $strf), 0, 19);
-  $outcome = $wpdb->get_results(" INSERT INTO {$wpdb->prefix}itinerary_data (itinerary_id, time_updated, json_data) VALUES ($id, '$strf', '$encoded') ");
+  $outcome = $wpdb->get_results(" INSERT INTO {$wpdb->prefix}itinerary_data (itinerary_id, time_updated, json_data) VALUES ($id, '$strf', $encoded) ");
   return($outcome);
 }
 

@@ -5,12 +5,12 @@
         $wpdb->show_errors(); 
         $id = $request['itin_id'];
         $json = (object)array("v2" => []);
-        $results = $wpdb->get_results("SELECT section, value FROM {$wpdb->prefix}itinerary_values where itinerary = {$id}", OBJECT);
+        //$results = $wpdb->get_results("SELECT section, value FROM {$wpdb->prefix}itinerary_values where itinerary = {$id}", OBJECT);
         $sections = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}itinerary_sections", OBJECT);
         foreach($sections as $x => $v){
-        $name = strtolower(str_replace(" ", "_", $v->name));
-        $result = $wpdb->get_results("SELECT value FROM {$wpdb->prefix}itinerary_values where section = {intval($v->id)}", OBJECT);
-        $json->$name = json_decode($result[0]->value);
+            $name = strtolower(str_replace(" ", "_", $v->name));
+            $result = $wpdb->get_results("SELECT value FROM {$wpdb->prefix}itinerary_values where section = {intval($v->id)} and itinerary = {$id}", OBJECT);
+            $json->$name = json_decode($result[0]->value);
         }
         $users = [];
         $user_result = $wpdb->get_results("SELECT id, user_login, user_email  FROM {$wpdb->prefix}users", OBJECT);
@@ -24,10 +24,10 @@
         $format = '%Y-%m-%dT%H:%M:%S.%VZ';
         $strf = strftime($format);
         $json->updatedAt = $strf;
-        $encoded = json_encode($json);
+        $encoded = json_encode(json_encode($json));
         $strf = substr(str_replace("T", " ", $strf), 0, 19);
-        $outcome = $wpdb->get_results(" INSERT INTO {$wpdb->prefix}itinerary_data (itinerary_id, time_updated, json_data) VALUES ($id, '$strf', '$encoded') ");
-        return($json);
+        $outcome = $wpdb->get_results(" INSERT INTO {$wpdb->prefix}itinerary_data (itinerary_id, time_updated, json_data) VALUES ($id, '$strf', $encoded) ");
+        return([$id, $json]);
     
     }
   
@@ -76,12 +76,11 @@
             $no_of_flights = count($values[$ke]["flights"]);
             for($x = 0; $x < $no_of_flights; $x++){
                 if($values[$ke]["flights"][$x]["bookref"] && $values[$ke]["flights"][$x]["bookref"] === $id){
-                    //need to check date 
-                    //echo($values[$ke]["flights"][$x]["flightDate"]);
+                    
                     if($values[$ke]["flights"][$x]["flightDate"] && $values[$ke]["flights"][$x]["flightDate"] === $date){
-                        //now we are here we update for that date  
                         $flight_departs = false; 
                         $flight_arrives = false; 
+                        
 
                         if($values[$ke]["flights"][$x]["departure"] ){
 
@@ -96,6 +95,7 @@
                         }
                         
                         if($values[$ke]["flights"][$x]["arrival"]){
+                            echo("wooooooo");
                             $flight_arrives = true;
                             $arr_time = str_replace(" ", "T",substr($post_data["flights"][0]["arrival"]["scheduledTimeLocal"], 0,16));
                             $values[$ke]["flights"][$x]["arrival"]["arr_time"] = $arr_time;
@@ -107,11 +107,11 @@
                         
                         if(!$flight_departs){
                             $dep_time = str_replace(" ", "T",substr($post_data["flights"][0]["departure"]["scheduledTimeLocal"], 0,16));
-                            $values[$ke]["flights"][$x]["departure"] = (object) array("dep_time" => $dep_time, "dep_estimated" => $post_data["flights"][0]["departure"]["actualTimeLocal"] ? str_replace(" ", "T",substr($post_data["flights"][0]["departure"]["actualTimeLocal"], 0,16)) : $dep_time, "dep_terminal" => $post_data["flights"][0]["departure"]["terminal"]);
+                            $values[$ke]["flights"][$x]["departure"] = (object) array("dep_time" => $dep_time, "dep_estimated" => $post_data["flights"][0]["departure"]["actualTimeLocal"] ? str_replace(" ", "T",substr($post_data["flights"][0]["departure"]["actualTimeLocal"], 0,16)) : $dep_time, "dep_terminal" => $post_data["flights"][0]["departure"]["terminal"], "dep_name" => $post_data["flights"][0]["departure"]["airport"]["name"]);
                         }
                         if(!$flight_arrives){
                             $arr_time = str_replace(" ", "T",substr($post_data["flights"][0]["arrival"]["scheduledTimeLocal"], 0,16));
-                            $values[$ke]["flights"][$x]["arrival"] = (object) array("arr_time" => $arr_time, "arr_estimated" => $post_data["flights"][0]["arrival"]["actualTimeLocal"] ? str_replace(" ", "T",substr($post_data["flights"][0]["arrival"]["actualTimeLocal"], 0,16)) : $arr_time, "arr_terminal" => $post_data["flights"][0]["arrival"]["terminal"]);
+                            $values[$ke]["flights"][$x]["arrival"] = (object) array("arr_time" => $arr_time, "arr_estimated" => $post_data["flights"][0]["arrival"]["actualTimeLocal"] ? str_replace(" ", "T",substr($post_data["flights"][0]["arrival"]["actualTimeLocal"], 0,16)) : $arr_time, "arr_terminal" => $post_data["flights"][0]["arrival"]["terminal"], "arr_name" => $post_data["flights"][0]["arrival"]["airport"]["name"]);
                         }
 
                     }
@@ -119,7 +119,7 @@
             }
 
             }
-    
+        $responses = [];
         $data2 = [];
         foreach($values as $ke=>$va){
             $val = json_encode($va);
@@ -127,12 +127,11 @@
             $sql = $wpdb->prepare($sql,  $val);
             $ans = $wpdb->query($sql);
             $data2[$ke] = $ans;
-            if($ans){
-                $responses = update_value2(['itin_id' => $ke]);
-            }
+            echo("got to here number : " . $ke );
+            $responses[] = update_value2(['itin_id' => $ke]);
             
         }
 
-        //return [$id, $id2, $date ,$post_data["flights"], $values, $data2, $responses];
+        //return [$id, $date ,$post_data["flights"], $values, $data2, $responses];
         return($data2);
     }

@@ -70,12 +70,12 @@ function request_future_flight_data($data){
                     if(!$flight_departs){
                         $dep_time = str_replace(" ", "T",substr($post_data[0]["departure"]["scheduledTimeLocal"], 0,16));
                         echo($dep_time);
-                        $values[$ke]["flights"][$x]["departure"] = (object) array("dep_time" => $dep_time, "dep_estimated" => $post_data[0]["departure"]["actualTimeLocal"] ? str_replace(" ", "T",substr($post_data[0]["departure"]["actualTimeLocal"], 0,16)) : $dep_time, "dep_terminal" => $post_data[0]["departure"]["terminal"], "dep_gate" => $post_data[0]["departure"]["gate"]);
+                        $values[$ke]["flights"][$x]["departure"] = (object) array("dep_time" => $dep_time, "dep_estimated" => $post_data[0]["departure"]["actualTimeLocal"] ? str_replace(" ", "T",substr($post_data[0]["departure"]["actualTimeLocal"], 0,16)) : $dep_time, "dep_terminal" => $post_data[0]["departure"]["terminal"], "dep_gate" => $post_data[0]["departure"]["gate"], "dep_name" => $post_data[0]["departure"]["airport"]["name"]);
                     }
                     if(!$flight_arrives){
                         $arr_time = str_replace(" ", "T",substr($post_data[0]["arrival"]["scheduledTimeLocal"], 0,16));
                         
-                        $values[$ke]["flights"][$x]["arrival"] = (object) array("arr_time" => $arr_time, "arr_estimated" => $post_data[0]["arrival"]["actualTimeLocal"] ? str_replace(" ", "T",substr($post_data[0]["arrival"]["actualTimeLocal"], 0,16)) : $arr_time, "arr_terminal" => $post_data[0]["arrival"]["terminal"], "status" => $post_data[0]["status"]);
+                        $values[$ke]["flights"][$x]["arrival"] = (object) array("arr_time" => $arr_time, "arr_estimated" => $post_data[0]["arrival"]["actualTimeLocal"] ? str_replace(" ", "T",substr($post_data[0]["arrival"]["actualTimeLocal"], 0,16)) : $arr_time, "arr_terminal" => $post_data[0]["arrival"]["terminal"], "status" => $post_data[0]["status"], "arr_name" => $post_data[0]["arrival"]["airport"]["name"]);
                     }
                 }
             }
