@@ -79,9 +79,9 @@ DTSTART:" . getIcalDate($event->departure->dep_time, false) . "
 DTEND:" . getIcalDate($event->arrival->arr_time, false) . "
 DTSTAMP:" . date('Ymd' . '\THis', time()) . "Z
 UID:" . str_replace(" ", "_", $event->actualBookingRef . $event->bookref) . "
-SUMMARY:" . str_replace("Flight ",$event->bookref). "
+SUMMARY:" . "Flight ".$event->bookref. "
 STATUS:CONFIRMED
-DESCRIPTION:" . str_replace("Flight ",$event->bookref) . "
+DESCRIPTION:" . "Flight ". $event->bookref . "
 END:VEVENT
 ";
   }
