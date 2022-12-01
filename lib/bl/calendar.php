@@ -43,12 +43,21 @@ function get_ical_for_user(WP_REST_Request $request)
   // echo $lastItinsJson;
   //find all flight events 
   $flights = array_map(fn ($itin) => $itin->flights->flights, $lastItinsJson);
+  $eventDays = array_map(fn ($itin) => $itin->event_calendar->eventDays, $lastItinsJson);
 
   $flightsForTheUser = [];
   foreach ($flights as $flight) {
     foreach ($flight as $flightItem) {
       if (in_array($display_name, $flightItem->passengers)) {
         array_push($flightsForTheUser, $flightItem);
+      }
+    }
+  }
+  $eventsForTheUser = [];
+  foreach ($eventDays as $day) {
+    foreach ($day->events as $event) {
+      if (in_array($display_name, $event->attendees)) {
+        array_push($eventsForTheUser, $event);
       }
     }
   }
@@ -70,9 +79,21 @@ DTSTART:" . getIcalDate($event->departure->dep_time, false) . "
 DTEND:" . getIcalDate($event->arrival->arr_time, false) . "
 DTSTAMP:" . date('Ymd' . '\THis', time()) . "Z
 UID:" . str_replace(" ", "_", $event->actualBookingRef . $event->bookref) . "
-SUMMARY:" . $event->bookref. "
+SUMMARY:" . str_replace("Flight ",$event->bookref). "
 STATUS:CONFIRMED
 DESCRIPTION:" . str_replace("Flight ",$event->bookref) . "
+END:VEVENT
+";
+  }
+  foreach ($eventsForTheUser as $event) {
+    $ical .= "BEGIN:VEVENT
+DTSTART:" . getIcalDate($event->eventTime, false) . "
+DTEND:" . getIcalDate($event->eventTimeEnd, false) . "
+DTSTAMP:" . date('Ymd' . '\THis', time()) . "Z
+UID:" . str_replace(" ", "_", $event->eventName) . "
+SUMMARY:" . $event->eventName. "
+STATUS:CONFIRMED
+DESCRIPTION:" . $event->eventName . "
 END:VEVENT
 ";
   }
