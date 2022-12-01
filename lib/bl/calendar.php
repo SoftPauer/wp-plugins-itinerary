@@ -53,7 +53,7 @@ function get_ical_for_user(WP_REST_Request $request)
       }
     }
   }
-  $eventsForTheUser = [{eventTime:"1669895055965", eventTimeEnd:"1669895055998", eventName:"test"}];
+  $eventsForTheUser = [{"eventTime":"1669895055965", "eventTimeEnd":"1669895055998", "eventName":"test"}];
   foreach ($eventDays as $day) {
     foreach ($day->events as $event) {
       if (in_array($display_name, $event->attendees)) {
