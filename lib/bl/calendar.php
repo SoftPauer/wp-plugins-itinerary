@@ -33,17 +33,17 @@ function get_ical_for_user(WP_REST_Request $request)
 
   $raceMap = get_race_map();
   $lastRacesIds = array_map(
-    fn ($race) =>
+    fn($race) =>
     $race['race_id'],
     array_slice($raceMap, -3, 3, true)
   );
   $stringRaceIds = implode(',', $lastRacesIds);
   $lastItins = $wpdb->get_results("SELECT * FROM $table_name_itinerary_data WHERE id in ( $stringRaceIds )");
-  $lastItinsJson = array_map(fn ($itin) => json_decode($itin->json_data), $lastItins);
+  $lastItinsJson = array_map(fn($itin) => json_decode($itin->json_data), $lastItins);
   // echo $lastItinsJson;
   //find all flight events 
-  $flights = array_map(fn ($itin) => $itin->flights->flights, $lastItinsJson);
-  $eventDays = array_map(fn ($itin) => $itin->event_calendar->eventDays, $lastItinsJson);
+  $flights = array_map(fn($itin) => $itin->flights->flights, $lastItinsJson);
+  $eventDays = array_map(fn($itin) => $itin->event_calendar->eventDays, $lastItinsJson);
 
   $flightsForTheUser = [];
   foreach ($flights as $flight) {
@@ -53,16 +53,22 @@ function get_ical_for_user(WP_REST_Request $request)
       }
     }
   }
+
+
   $eventsForTheUser = [];
-  foreach ($eventDays as $day) {
+  foreach ($eventDays[0] as $day) {
+
     foreach ($day->events as $event) {
+
       if (in_array($display_name, $event->attendees)) {
-        array_push($eventsForTheUser, $event);
+        $userEvent = new stdClass;
+        $userEvent->date = $day->date;
+        $userEvent->event = $event;
+        array_push($eventsForTheUser, $userEvent);
       }
     }
   }
-  
-  
+
 
   $ical = "BEGIN:VCALENDAR
 PRODID:-//Google Inc//Google Calendar 70.9054//EN
@@ -79,21 +85,21 @@ DTSTART:" . getIcalDate($event->departure->dep_time, false) . "
 DTEND:" . getIcalDate($event->arrival->arr_time, false) . "
 DTSTAMP:" . date('Ymd' . '\THis', time()) . "Z
 UID:" . str_replace(" ", "_", $event->actualBookingRef . $event->bookref) . "
-SUMMARY:" . "Flight ".$event->bookref. "
+SUMMARY:" . "Flight " . $event->bookref . "
 STATUS:CONFIRMED
-DESCRIPTION:" . "Flight ". $event->bookref . "
+DESCRIPTION:" . "Flight " . $event->bookref . "
 END:VEVENT
 ";
   }
-  foreach ($eventsForTheUser as $event) {
+  foreach ($eventsForTheUser as $day) {
     $ical .= "BEGIN:VEVENT
-DTSTART:" . getIcalDate($event->eventTime, false) . "
-DTEND:" . getIcalDate($event->eventTimeEnd, false) . "
+DTSTART:" . getIcalDate(($day->date . "T" . $day->event->eventTime), false) . "
+DTEND:" . getIcalDate(($day->date . "T" . ($day->event->eventTimeEnd?$day->event->eventTimeEnd:$day->event->eventTime)), false) . "
 DTSTAMP:" . date('Ymd' . '\THis', time()) . "Z
-UID:" . str_replace(" ", "_", $event->eventName) . "
-SUMMARY:" . $event->eventName. "
+UID:" . str_replace(" ", "_", $day->event->eventName) . "
+SUMMARY:" . $day->event->eventName . "
 STATUS:CONFIRMED
-DESCRIPTION:" . $event->eventName . "
+DESCRIPTION:" . $day->event->eventName . "
 END:VEVENT
 ";
   }
@@ -102,5 +108,5 @@ END:VEVENT
   header('Content-type: text/calendar; charset=utf-8');
   header('Content-Disposition: inline; filename=calendar.ics');
   //  echo  json_encode(   $flights);
-  echo    $ical;
+  echo $ical;
 }
