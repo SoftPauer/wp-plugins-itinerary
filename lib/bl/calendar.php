@@ -53,7 +53,7 @@ function get_ical_for_user(WP_REST_Request $request)
       }
     }
   }
-  $eventsForTheUser = [];
+  $eventsForTheUser = [{eventTime:"1669895055965", eventTimeEnd:"1669895055998", eventName:"test"}];
   foreach ($eventDays as $day) {
     foreach ($day->events as $event) {
       if (in_array($display_name, $event->attendees)) {
@@ -72,15 +72,6 @@ METHOD:PUBLISH
 X-WR-CALNAME:Eventr Calendar
 X-WR-TIMEZONE:UTC
 X-WR-CALDESC:Eventr Calendar
-BEGIN:VEVENT
-DTSTART:20221127T131000Z
-DTEND:20221127T160000Z
-DTSTAMP:20221201T093930Z
-UID:ROTNQPBA2654
-SUMMARY: ".$eventsForTheUser[0]->events[0]->eventName."
-STATUS:CONFIRMED
-DESCRIPTION:
-END:VEVENT
 ";
   foreach ($flightsForTheUser as $event) {
     $ical .= "BEGIN:VEVENT
