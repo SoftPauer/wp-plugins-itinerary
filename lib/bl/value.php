@@ -182,7 +182,6 @@ function copy_all_values_from_selected_itinerary(WP_REST_Request $request){
       WHERE  itinerary = {$prevItin} AND section = {$section->id}",
       OBJECT
     );
-    error_log('previous values: '. json_encode($prevRes[0]->value));
 
     //insert prev values into new itin
     if($prevRes[0]->value){
@@ -201,7 +200,6 @@ function copy_all_values_from_selected_itinerary(WP_REST_Request $request){
     $sql = "INSERT INTO 
     {$table_name_costings} (itinerary_id,section_id,listkey,costing) 
      VALUES ($copyItin->id, $costing->section_id, '{$costing->listKey}','{$costing->costing}')";
-     error_log('sql: '. json_encode($sql));
     $sql = $wpdb->prepare($sql);
     $wpdb->query($sql);
   }
@@ -264,6 +262,5 @@ function get_itinerary_values($itinerary_id){
     WHERE itinerary = {$itinerary_id} ",
     OBJECT
   );
-  error_log(json_encode($result));
   return $results;
 }

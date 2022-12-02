@@ -86,8 +86,6 @@ function generate_reporting_table(WP_REST_Request $request)
             $passenger_value = $section_value->$parent_json_key;
             //passenger values in this case are stored in arrays
 
-            // error_log("passenger: " . print_r($passenger_value, true));
-            // error_log(print_r($section_value, true));
             foreach ($passenger_value as $passenger) {
               
               if (is_object($passenger)) {
@@ -134,7 +132,6 @@ function add_to_array(array &$tableDict, $passenger_data, $section_value, $root_
   }
   array_push($user_obj[$root_key], $section_value);
   // array_push($user_entry[$root_key], $section_value);
-  //error_log(json_encode($user_obj));
   $tableDict[$passenger_data] = $user_obj;
 }
 
@@ -184,7 +181,6 @@ function get_users_from_val($val, $user_fields, $section_id, $itinerary)
       }
 
       foreach ($data[$data_keys[0]] as $data_rows) {
-        error_log("data rows: " . print_r($data_rows[$user_field_json_key], true));
         if (is_array($data_rows[$user_field_json_key])) {
           $passenger_names = $data_rows[$user_field_json_key];
           foreach ($passenger_names as $passenger_name) {
@@ -203,7 +199,6 @@ function get_users_from_val($val, $user_fields, $section_id, $itinerary)
       }
     }
   }
-  error_log("use2rs: " . print_r($users, true));
 
   return $users;
 }
@@ -214,5 +209,4 @@ function update_reporting($val, $id, $section, $itinerary)
   $sql = "SELECT * FROM " . $table_name_fields . " WHERE type_properties LIKE '%showOnDashboard%' AND section = " . $section;
   $fields_with_reporting = $wpdb->get_results($sql);
   $users = get_users_from_val($val, $fields_with_reporting, $section, $itinerary);
-  error_log("users: " . print_r($users, true));
 }

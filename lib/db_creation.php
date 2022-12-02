@@ -12,22 +12,22 @@ $table_name_costings = $wpdb->prefix . 'itinerary_costings';
 
 function itinerary_install()
 {
-    global $wpdb, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values, $table_name_itinerary_data, $table_name_itinerary_channels, $table_name_reporting, $table_name_costings;
-    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+  global $wpdb, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values, $table_name_itinerary_data, $table_name_itinerary_channels, $table_name_reporting, $table_name_costings;
+  require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
-    $itinerary_db_version = '1.0';
-    $charset_collate = $wpdb->get_charset_collate();
+  $itinerary_db_version = '1.0';
+  $charset_collate = $wpdb->get_charset_collate();
 
-    $sql = "CREATE TABLE $table_name_itinerary (
+  $sql = "CREATE TABLE $table_name_itinerary (
         id mediumint(9) NOT NULL AUTO_INCREMENT,
         time_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
         time_updated datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
         name tinytext NOT NULL,
         PRIMARY KEY  (id)
     ) $charset_collate;";
-    dbDelta($sql);
+  dbDelta($sql);
 
-    $sql = "CREATE TABLE $table_name_sections (
+  $sql = "CREATE TABLE $table_name_sections (
           id mediumint(9) NOT NULL AUTO_INCREMENT,
           time_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
           time_updated datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
@@ -35,9 +35,9 @@ function itinerary_install()
           name tinytext NOT NULL,
           PRIMARY KEY  (id)
       ) $charset_collate;";
-    dbDelta($sql);
+  dbDelta($sql);
 
-    $sql = "CREATE TABLE $table_name_fields (
+  $sql = "CREATE TABLE $table_name_fields (
           id mediumint(9) NOT NULL AUTO_INCREMENT,
           section mediumint(9) NOT NULL,
           position mediumint(9) NOT NULL,
@@ -47,18 +47,18 @@ function itinerary_install()
           type_properties text,
           PRIMARY KEY  (id)
       ) $charset_collate;";
-    dbDelta($sql);
+  dbDelta($sql);
 
-    $sql = "CREATE TABLE $table_name_section_values (
+  $sql = "CREATE TABLE $table_name_section_values (
     id mediumint(9) NOT NULL AUTO_INCREMENT,
     section mediumint(9)  NOT NULL,
     itinerary mediumint(9) NOT NULL,
     value text,
     PRIMARY KEY  (id)
   ) $charset_collate;";
-    dbDelta($sql);
+  dbDelta($sql);
 
-    $sql = "CREATE TABLE $table_name_itinerary_data (
+  $sql = "CREATE TABLE $table_name_itinerary_data (
     id mediumint(9) NOT NULL AUTO_INCREMENT,
     itinerary_id mediumint(9) NOT NULL,
     time_updated datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
@@ -66,11 +66,11 @@ function itinerary_install()
     PRIMARY KEY  (id),
     FOREIGN KEY(itinerary_id) REFERENCES $table_name_itinerary(id)
   ) $charset_collate;";
-    dbDelta($sql);
+  dbDelta($sql);
 
-    add_option('itinerary_db_version', $itinerary_db_version);
+  add_option('itinerary_db_version', $itinerary_db_version);
 
-    $sql = "CREATE TABLE $table_name_itinerary_channels (
+  $sql = "CREATE TABLE $table_name_itinerary_channels (
     id mediumint(9) NOT NULL AUTO_INCREMENT,
     itinerary_id mediumint(9) NOT NULL,
     section_id mediumint(9) NOT NULL,
@@ -80,9 +80,9 @@ function itinerary_install()
     FOREIGN KEY (itinerary_id) REFERENCES $table_name_itinerary (id),
     FOREIGN KEY (section_id) REFERENCES $table_name_sections (id)
   ) $charset_collate;";
-    dbDelta($sql);
+  dbDelta($sql);
 
-    $sql = "CREATE TABLE $table_name_reporting(
+  $sql = "CREATE TABLE $table_name_reporting(
     id mediumint(9) NOT NULL AUTO_INCREMENT,
     itinerary_id mediumint(9) NOT NULL,
     passenger text NOT NULL,
@@ -90,9 +90,9 @@ function itinerary_install()
     PRIMARY KEY (id),
     FOREIGN KEY (itinerary_id) REFERENCES $table_name_itinerary (id)
   ) $charset_collate;";
-    dbDelta($sql);
+  dbDelta($sql);
 
-    $sql = "CREATE TABLE $table_name_costings (
+  $sql = "CREATE TABLE $table_name_costings (
     id mediumint(9) NOT NULL AUTO_INCREMENT,
     itinerary_id mediumint(9) NOT NULL,
     section_id mediumint(9) NOT NULL,
@@ -102,5 +102,9 @@ function itinerary_install()
     FOREIGN KEY (itinerary_id) REFERENCES $table_name_itinerary (id),
     FOREIGN KEY (section_id) REFERENCES $table_name_sections (id)
   ) $charset_collate;";
-    dbDelta($sql);
+  dbDelta($sql);
+
+
+  
+
 }

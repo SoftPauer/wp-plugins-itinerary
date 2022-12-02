@@ -348,4 +348,10 @@ add_action('rest_api_init', function () {
     'callback' => 'cron_wb',
   ));
 
+  register_rest_route('itinerary/v1', 'config', array(
+    'methods' => WP_REST_Server::READABLE,
+    'callback' => 'get_all_config',
+  ));
+  
+
 });
