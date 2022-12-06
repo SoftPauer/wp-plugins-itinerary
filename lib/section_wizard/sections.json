@@ -1,0 +1,27 @@
+{
+    "EventInformation":{
+        "Name":"Event Information",
+        "Description":"",
+        "folder":"eventInformation"
+    },
+    "Flights":{
+        "Name":"Flights",
+        "Description":"Configure flights here",
+        "folder":"flights"
+    },
+    "Accommodation":{
+        "Name":"Accommodation Information",
+        "Description":"",
+        "folder":"accommodation"
+    },
+    "ContactDetails":{
+        "Name":"Contact Details",
+        "Description":"",
+        "folder":"contactDetails"
+    },
+    "EventCalendar":{
+        "Name":"Event Calendar",
+        "Description":"",
+        "folder":"eventCalendar"
+    }
+}

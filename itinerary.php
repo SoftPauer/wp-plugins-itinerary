@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.2.56
+Version: 1.3.0
 
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
@@ -22,13 +22,29 @@ require_once __DIR__.'/lib/bl/flightWeebhookData.php';
 
 require_once __DIR__.'/lib/db_creation.php';
 
+
+$itinerary_db_version = '1.0';
+
 register_activation_hook(__FILE__, 'activation_function');
+
+
 
 function activation_function(){
   error_log("wp-plugins-itinerary  activation_function");
   require_once( dirname( __FILE__ ) . '/lib/db_creation.php' );
   itinerary_install();
 }
+
+function update_db_check() {
+  global $itinerary_db_version;
+  $current =get_site_option( 'itinerary_db_version' );
+  if ($current != $itinerary_db_version) {
+    error_log("wp-plugins-itinerary  current db version $current  target $itinerary_db_version " );
+
+    error_log("wp-plugins-itinerary  updating db");
+  }
+}
+add_action( 'plugins_loaded', 'update_db_check' );
 
 //adds extra stuff to user endpoint
 function acf_to_rest_api($response, $user, $request)

@@ -12,10 +12,9 @@ $table_name_costings = $wpdb->prefix . 'itinerary_costings';
 
 function itinerary_install()
 {
-  global $wpdb, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values, $table_name_itinerary_data, $table_name_itinerary_channels, $table_name_reporting, $table_name_costings;
+  global $wpdb, $itinerary_db_version,$table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values, $table_name_itinerary_data, $table_name_itinerary_channels, $table_name_reporting, $table_name_costings;
   require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
-  $itinerary_db_version = '1.0';
   $charset_collate = $wpdb->get_charset_collate();
 
   $sql = "CREATE TABLE $table_name_itinerary (
@@ -68,7 +67,6 @@ function itinerary_install()
   ) $charset_collate;";
   dbDelta($sql);
 
-  add_option('itinerary_db_version', $itinerary_db_version);
 
   $sql = "CREATE TABLE $table_name_itinerary_channels (
     id mediumint(9) NOT NULL AUTO_INCREMENT,
@@ -104,7 +102,7 @@ function itinerary_install()
   ) $charset_collate;";
   dbDelta($sql);
 
+  add_option('itinerary_db_version', $itinerary_db_version);
 
-  
 
 }

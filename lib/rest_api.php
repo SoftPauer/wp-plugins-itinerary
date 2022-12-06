@@ -348,9 +348,22 @@ add_action('rest_api_init', function () {
     'callback' => 'cron_wb',
   ));
 
+  //Config 
+
   register_rest_route('itinerary/v1', 'config', array(
     'methods' => WP_REST_Server::READABLE,
     'callback' => 'get_all_config',
+  ));
+
+  //Wizard
+  register_rest_route('itinerary/v1', 'wizard', array(
+    'methods' => WP_REST_Server::READABLE,
+    'callback' => 'get_wizard',
+  ));
+
+  register_rest_route('itinerary/v1', 'wizard', array(
+    'methods' => WP_REST_Server::EDITABLE,
+    'callback' => 'complete_wizard',
   ));
   
 
