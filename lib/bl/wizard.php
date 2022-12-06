@@ -13,8 +13,8 @@ function get_wizard()
     array_push($array_sections, [
       "sectionName" => $section["Name"],
       "description" => $section["Description"],
-      "personalScreenShot" => get_site_url() . "/wp-content/plugins/wp-plugins-itinerary/lib/section_wizard/" . $section["folder"] . "/personalScreenShot.png",
-      "teamScreenShot" => get_site_url() . "/wp-content/plugins/wp-plugins-itinerary/lib/section_wizard/" . $section["folder"] . "/teamScreenShot.png"
+      "personalScreenShot" => get_site_url() . "/wp-content/plugins/wp-plugins-itinerary/lib/section_wizard/" . $section["folder"] . "/personalScreenShot.jpg",
+      "teamScreenShot" => get_site_url() . "/wp-content/plugins/wp-plugins-itinerary/lib/section_wizard/" . $section["folder"] . "/teamScreenShot.jpg"
 
     ]);
   }
