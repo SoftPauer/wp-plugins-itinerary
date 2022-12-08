@@ -11,7 +11,7 @@ function get_race_map()
   $raceData = $wpdb->get_results("select t.* from wp_itinerary_data t where t.time_updated = (select max(t1.time_updated) from wp_itinerary_data t1 where t1.itinerary_id = t.itinerary_id);");
 
   foreach ($raceData as $race) {
-    $jsonData = json_decode( trim($race->json_data, '"'));
+    $jsonData = json_decode(trim($race->json_data, '"'));
     $start_time = strtotime($jsonData->general_info->startDate);
     $end_time = strtotime($jsonData->general_info->endDate);
     $id = $race->itinerary_id;
@@ -34,25 +34,26 @@ function get_race_map()
 }
 
 //does the same as updateApp but all on the backend 
-function update_value(WP_REST_Request $request){
-  global $wpdb,$table_name_itinerary_data;
-  $wpdb->show_errors(); 
+function update_value(WP_REST_Request $request)
+{
+  global $wpdb, $table_name_itinerary_data;
+  $wpdb->show_errors();
   $id = $request['itin_id'];
   $json = (object)array("v2" => []);
-  //$results = $wpdb->get_results("SELECT section, value FROM {$wpdb->prefix}itinerary_values where itinerary = {$id}", OBJECT);
+  //$results = $wpdb->get_results("SELECT section, value FROM {$wpdb->prefix}itinerary_values where itinerary = {$id}", OBJECT); //use json key - not name. 
   $sections = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}itinerary_sections", OBJECT);
-  foreach($sections as $x => $v){
+  foreach ($sections as $x => $v) {
     $name = strtolower(str_replace(" ", "_", $v->name));
     $result = $wpdb->get_results("SELECT value FROM {$wpdb->prefix}itinerary_values where section = {intval($v->id)} and itinerary = {$id}", OBJECT);
     $json->$name = json_decode($result[0]->value);
   }
   $users = [];
   $user_result = $wpdb->get_results("SELECT id, user_login, user_email  FROM {$wpdb->prefix}users", OBJECT);
-  foreach($user_result as $x=>$v){
+  foreach ($user_result as $x => $v) {
     $firstName = $wpdb->get_results("SELECT meta_value FROM {$wpdb->prefix}usermeta where user_id = {intval($v->id)} and meta_key = 'first_name'", OBJECT);
     $surname = $wpdb->get_results("SELECT meta_value FROM {$wpdb->prefix}usermeta where user_id = {intval($v->id)} and meta_key ='last_name'", OBJECT);
     $department = $wpdb->get_results("SELECT meta_value FROM {$wpdb->prefix}usermeta where user_id = {intval($v->id)} and meta_key = 'department'", OBJECT);
-    $users[] = (object)array("id" => $v->id, "firstName" =>$firstName[0]->meta_value, "surname" => $surname[0]->meta_value, "department" => $department[0]->meta_value, "email" =>$v->user_email, "userName"=>$v->user_login);
+    $users[] = (object)array("id" => $v->id, "firstName" => $firstName[0]->meta_value, "surname" => $surname[0]->meta_value, "department" => $department[0]->meta_value, "email" => $v->user_email, "userName" => $v->user_login);
   }
   $json->users = $users;
   $format = '%Y-%m-%dT%H:%M:%S.%VZ';
@@ -61,15 +62,53 @@ function update_value(WP_REST_Request $request){
   $encoded = json_encode(json_encode($json));
   $strf = substr(str_replace("T", " ", $strf), 0, 19);
   $outcome = $wpdb->get_results(" INSERT INTO {$wpdb->prefix}itinerary_data (itinerary_id, time_updated, json_data) VALUES ($id, '$strf', $encoded) ");
-  return($outcome);
+  return ($outcome);
 }
+
+//this is the version using the json keys, make it the main version when nissan is over 
+function update_value_test(WP_REST_Request $request)
+{
+  global $wpdb, $table_name_itinerary_data;
+  $wpdb->show_errors();
+  $id = $request['itin_id'];
+  $json = (object)array("v2" => []);
+  //$results = $wpdb->get_results("SELECT section, value FROM {$wpdb->prefix}itinerary_values where itinerary = {$id}", OBJECT); //use json key - not name. 
+  $sections = $wpdb->get_results("SELECT id, name, properties FROM {$wpdb->prefix}itinerary_sections", OBJECT);
+  foreach ($sections as $x => $v) {
+    //$name = strtolower(str_replace(" ", "_", $v->name));
+    $jsonName = json_decode($v->properties)->jsonName;
+    $result = $wpdb->get_results("SELECT value FROM {$wpdb->prefix}itinerary_values where section = {intval($v->id)} and itinerary = {$id}", OBJECT);
+    $json->$jsonName = json_decode($result[0]->value);
+  }
+  $users = [];
+  $user_result = $wpdb->get_results("SELECT id, user_login, user_email  FROM {$wpdb->prefix}users", OBJECT);
+  foreach ($user_result as $x => $v) {
+    $firstName = $wpdb->get_results("SELECT meta_value FROM {$wpdb->prefix}usermeta where user_id = {intval($v->id)} and meta_key = 'first_name'", OBJECT);
+    $surname = $wpdb->get_results("SELECT meta_value FROM {$wpdb->prefix}usermeta where user_id = {intval($v->id)} and meta_key ='last_name'", OBJECT);
+    $department = $wpdb->get_results("SELECT meta_value FROM {$wpdb->prefix}usermeta where user_id = {intval($v->id)} and meta_key = 'department'", OBJECT);
+    $users[] = (object)array("id" => $v->id, "firstName" => $firstName[0]->meta_value, "surname" => $surname[0]->meta_value, "department" => $department[0]->meta_value, "email" => $v->user_email, "userName" => $v->user_login);
+  }
+  $json->users = $users;
+  $format = '%Y-%m-%dT%H:%M:%S.%VZ';
+  $strf = strftime($format);
+  $json->updatedAt = $strf;
+  $encoded = json_encode(json_encode($json));
+  $strf = substr(str_replace("T", " ", $strf), 0, 19);
+  $outcome = $wpdb->get_results(" INSERT INTO {$wpdb->prefix}itinerary_data (itinerary_id, time_updated, json_data) VALUES ($id, '$strf', $encoded) ");
+  return ($outcome);
+  //return([$id, $strf, $json, $sections, $jsonName]);
+}
+
+
+
+
 
 function get_itin_data(WP_REST_Request $request)
 {
   global $wpdb, $table_name_itinerary_data;
   $id = $request['itin_id'];
   $result = $wpdb->get_results("SELECT * FROM $table_name_itinerary_data WHERE id = $id");
-  return (json_decode( trim($result[0]->json_data,'"')));
+  return (json_decode(trim($result[0]->json_data, '"')));
 }
 
 
@@ -82,7 +121,7 @@ function update_entry_in_db(WP_REST_Request $request)
   global $wpdb, $table_name_itinerary_data;
   $params = $request->get_json_params();
   $itinerary_id = $params['itinId'];
-  $json_data = json_encode( $params['json_data']);
+  $json_data = json_encode($params['json_data']);
   $time_updated = $params['time_updated'];
   $results = $wpdb->get_results(" INSERT INTO $table_name_itinerary_data (itinerary_id, time_updated, json_data) VALUES ($itinerary_id, $time_updated, '$json_data') ");
   return rest_ensure_response($results);
@@ -160,22 +199,23 @@ function delete_value($data)
   return $wpdb->query($sql);
 }
 
-function copy_all_values_from_selected_itinerary(WP_REST_Request $request){
-  global $wpdb, $table_name_itinerary, $table_name_section_values,$table_name_sections,$table_name_costings;
+function copy_all_values_from_selected_itinerary(WP_REST_Request $request)
+{
+  global $wpdb, $table_name_itinerary, $table_name_section_values, $table_name_sections, $table_name_costings;
 
-  
+
   // Get new itinerary
   $sql = "SELECT * FROM {$table_name_itinerary} where id = (select max(id) from wp_itineraries);";
   $copyItin = $wpdb->get_row($sql);
-  
+
 
   //get itinerary to copy
   $prevItin = $request['itin_id'];
   $sections = $wpdb->get_results("SELECT * FROM {$table_name_sections}", OBJECT);
-  
 
-  foreach($sections as $section){
-    
+
+  foreach ($sections as $section) {
+
     // get previous values
     $prevRes = $wpdb->get_results(
       "SELECT * FROM {$table_name_section_values} 
@@ -184,19 +224,18 @@ function copy_all_values_from_selected_itinerary(WP_REST_Request $request){
     );
 
     //insert prev values into new itin
-    if($prevRes[0]->value){
+    if ($prevRes[0]->value) {
       $sql = "INSERT INTO 
     {$table_name_section_values} (section,itinerary,value) 
      VALUES ({$section->id}, $copyItin->id,'{$prevRes[0]->value}')";
-    $sql = $wpdb->prepare($sql);
-    $wpdb->query($sql);
+      $sql = $wpdb->prepare($sql);
+      $wpdb->query($sql);
     }
-    
   }
 
   $costings = $wpdb->get_results("SELECT * FROM {$table_name_costings} WHERE itinerary_id = {$prevItin} ", OBJECT);
 
-  foreach($costings as $costing){
+  foreach ($costings as $costing) {
     $sql = "INSERT INTO 
     {$table_name_costings} (itinerary_id,section_id,listkey,costing) 
      VALUES ($copyItin->id, $costing->section_id, '{$costing->listKey}','{$costing->costing}')";
@@ -255,7 +294,8 @@ function get_section_value($section_id, $itinerary_id)
   return $results;
 }
 
-function get_itinerary_values($itinerary_id){
+function get_itinerary_values($itinerary_id)
+{
   global $wpdb, $table_name_section_values;
   $results = $wpdb->get_results(
     "SELECT * FROM {$table_name_section_values} 

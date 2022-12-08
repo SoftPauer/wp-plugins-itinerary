@@ -23,8 +23,14 @@ add_action('rest_api_init', function () {
         }
       ),
     )
-  ));  
-  
+  ));
+
+  //users
+  register_rest_route('itinerary/v1', 'user/users', array(
+    'methods' => WP_REST_Server::READABLE,
+    'callback' => 'get_all_users',
+  ));
+
   //flights
   register_rest_route('itinerary/v1', 'flights/updateFlightData', array(
     'methods' => WP_REST_Server::READABLE,
@@ -43,8 +49,8 @@ add_action('rest_api_init', function () {
     'methods' => WP_REST_Server::CREATABLE,
     'callback' => 'updating_listKey',
   ));
-  
-   register_rest_route('itinerary/v1', 'costings/(?P<itinerary_id>\d+)', array(
+
+  register_rest_route('itinerary/v1', 'costings/(?P<itinerary_id>\d+)', array(
     'methods' => WP_REST_Server::READABLE,
     'callback' => 'get_all_costings',
     'args' => array(
@@ -80,7 +86,7 @@ add_action('rest_api_init', function () {
     'methods' => WP_REST_Server::CREATABLE,
     'callback' => 'create_new_section',
   ));
-  
+
   register_rest_route('itinerary/v1', 'sections/delete/(?P<section_id>\d+)', array(
     'methods' => WP_REST_Server::DELETABLE,
     'callback' => 'delete_section',
@@ -195,6 +201,18 @@ add_action('rest_api_init', function () {
   register_rest_route('itinerary/v1', 'itineraries/updateValues', array(
     'methods' => WP_REST_Server::EDITABLE,
     'callback' => 'update_value',
+    'args' => array(
+      'itinId' => array(
+        'validate_callback' => function ($param, $request, $key) {
+          return is_numeric($param);
+        }
+      ),
+    )
+  ));
+
+  register_rest_route('itinerary/v1', 'itineraries/updateValuesTest', array(
+    'methods' => WP_REST_Server::EDITABLE,
+    'callback' => 'update_value_test',
     'args' => array(
       'itinId' => array(
         'validate_callback' => function ($param, $request, $key) {
@@ -326,13 +344,13 @@ add_action('rest_api_init', function () {
     'callback' => 'request_future_flight_data_wb',
   ));
 
-  
+
   register_rest_route('itinerary/v1', 'flights/cron', array(
     'methods' => WP_REST_Server::READABLE,
     'callback' => 'check_next_cron_job',
   ));
 
-  
+
   register_rest_route('itinerary/v1', 'flights/cron', array(
     'methods' => WP_REST_Server::EDITABLE,
     'callback' => 'push_flight_cron_job',
@@ -342,7 +360,7 @@ add_action('rest_api_init', function () {
     'methods' => WP_REST_Server::DELETABLE,
     'callback' => 'delete_flight_cron_job',
   ));
-  
+
   register_rest_route('itinerary/v1', 'flights/cron-wb', array(
     'methods' => WP_REST_Server::READABLE,
     'callback' => 'cron_wb',
@@ -365,6 +383,4 @@ add_action('rest_api_init', function () {
     'methods' => WP_REST_Server::EDITABLE,
     'callback' => 'complete_wizard',
   ));
-  
-
 });

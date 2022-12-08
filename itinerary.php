@@ -21,6 +21,7 @@ require_once __DIR__ . '/lib/bl/flightWeebhook.php';
 require_once __DIR__ . '/lib/bl/flightWeebhookData.php';
 require_once __DIR__ . '/lib/bl/config.php';
 require_once __DIR__ . '/lib/bl/wizard.php';
+require_once __DIR__ . '/lib/bl/user.php';
 
 require_once __DIR__ . '/lib/db_creation.php';
 
