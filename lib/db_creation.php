@@ -102,6 +102,15 @@ function itinerary_install()
   ) $charset_collate;";
   dbDelta($sql);
 
+  $sql = "CREATE TABLE $table_name_invitation_tokens (
+    id mediumint(9) NOT NULL AUTO_INCREMENT,
+    userId mediumint(9) NOT NULL ,
+    invitation_token text NOT NULL, 
+    PRIMARY KEY (id),
+    FOREIGN KEY (userId) REFERENCES {$wpdb->prefix}users (ID),
+  ) $charset_collate;";
+  dbDelta($sql);
+
   add_option('itinerary_db_version', $itinerary_db_version);
 
 
