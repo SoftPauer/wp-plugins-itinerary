@@ -17,3 +17,11 @@ function get_all_users()
     }
     return (object)array("users" => $users);
 }
+
+function get_user_by_token($data)
+{
+    global $wpdb;
+    $token = $data["access_token"];
+    $token_result = $wpdb->get_results("SELECT user_id FROM {$wpdb->prefix}oauth_access_tokens WHERE access_token = 'token'");
+    error_log(json_encode($token_result));
+}
