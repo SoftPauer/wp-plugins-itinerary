@@ -41,9 +41,9 @@ function update_value2($request)
     $user_result = $wpdb->get_results("SELECT id, user_login, user_email  FROM {$wpdb->prefix}users", OBJECT);
     foreach ($user_result as $v) {
       $meta = get_user_meta($v->id);
-      $firstName = $meta->first_name[0];
-      $surname = $meta->last_name[0];
-      $department = $meta->department[0];
+      $firstName = $meta["first_name"][0];
+      $surname = $meta["last_name"][0];
+      $department = $meta["department"][0];
       $users[] = (object)array("id" => $v->id, "firstName" => $firstName, "surname" => $surname, "department" => $department, "email" => $v->user_email, "userName" => $v->user_login);
     }
     $json->users = $users;
