@@ -42,7 +42,6 @@ function create_users_by_email(WP_REST_Request $request)
                 $userLogin = $user["user_login"];
             }
             $password = password_generate(10);
-            error_log("user " . json_encode($userLogin));
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $wpdb->insert(
                 $table_name_users,
@@ -59,7 +58,8 @@ function create_users_by_email(WP_REST_Request $request)
                     '%s',
                 )
             );
-            send_mail($user, "subscriber");
+            $data = (object) array("email" => $user["email"], "type" => "subscriber");
+            send_mail($data);
         } else {
             return "'{$user["email"]}' already exists";
         }
