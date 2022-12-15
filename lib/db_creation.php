@@ -1,5 +1,5 @@
 <?php
-global  $wpdb, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values, $table_name_itinerary_data, $table_name_costings, $table_name_itinerary_channels, $table_name_reporting;
+global $wpdb, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_invite_tokens, $table_name_section_values, $table_name_itinerary_data, $table_name_costings, $table_name_itinerary_channels, $table_name_reporting;
 
 $table_name_itinerary = $wpdb->prefix . 'itineraries';
 $table_name_sections = $wpdb->prefix . 'itinerary_sections';
@@ -9,10 +9,12 @@ $table_name_itinerary_data = $wpdb->prefix . 'itinerary_data';
 $table_name_itinerary_channels = $wpdb->prefix . 'itinerary_rocket_channels';
 $table_name_reporting = $wpdb->prefix . 'itinerary_reporting';
 $table_name_costings = $wpdb->prefix . 'itinerary_costings';
+$table_name_invite_tokens = $wpdb->prefix . 'invite_tokens';
+$table_name_users = $wpdb->prefix . 'users';
 
 function itinerary_install()
 {
-  global $wpdb, $itinerary_db_version,$table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values, $table_name_itinerary_data, $table_name_itinerary_channels, $table_name_reporting, $table_name_costings;
+  global $wpdb, $itinerary_db_version, $table_name_users, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values, $table_name_itinerary_data, $table_name_itinerary_channels, $table_name_reporting, $table_name_costings, $table_name_invite_tokens;
   require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
   $charset_collate = $wpdb->get_charset_collate();
@@ -102,12 +104,13 @@ function itinerary_install()
   ) $charset_collate;";
   dbDelta($sql);
 
-  $sql = "CREATE TABLE $table_name_invitation_tokens (
+  $sql = "CREATE TABLE $table_name_invite_tokens (
     id mediumint(9) NOT NULL AUTO_INCREMENT,
-    userId mediumint(9) NOT NULL ,
+    subscriber_id bigint(20) unsigned NOT NULL ,
     invitation_token text NOT NULL, 
+    accepted text NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (userId) REFERENCES {$wpdb->prefix}users (ID),
+    FOREIGN KEY (subscriber_id) REFERENCES wp_users(ID)
   ) $charset_collate;";
   dbDelta($sql);
 

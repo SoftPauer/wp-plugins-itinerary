@@ -3,8 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.3.54
-
+Version: 1.3.56
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
 require_once __DIR__ . '/lib/rest_api.php';
@@ -22,7 +21,7 @@ require_once __DIR__ . '/lib/bl/flightWeebhookData.php';
 require_once __DIR__ . '/lib/bl/config.php';
 require_once __DIR__ . '/lib/bl/wizard.php';
 require_once __DIR__ . '/lib/bl/user.php';
-
+require_once __DIR__ . '/lib/bl/mail.php';
 require_once __DIR__ . '/lib/db_creation.php';
 
 
@@ -59,7 +58,8 @@ add_action('plugins_loaded', 'update_db_check');
 //adds extra stuff to user endpoint
 function acf_to_rest_api($response, $user, $request)
 {
-  if (!function_exists('get_fields')) return $response;
+  if (!function_exists('get_fields'))
+    return $response;
 
   if (isset($user)) {
     $meta = get_user_meta($user->id);
