@@ -4,12 +4,16 @@ function send_mail($data)
 {
     global $wpdb, $table_name_users, $table_name_invite_tokens;
 
-    $email = $data->email;
+    $email = $data['email'];
+    $type = $data['type'];
+
     $users_result = $wpdb->get_results("SELECT ID FROM $table_name_users WHERE user_email = '{$email}'");
     $myuuid = guidv4();
+
+    error_log($myuuid);
     $subject = "";
     $message = "";
-    switch ($data->type) {
+    switch ($type) {
         case "manager":
             list($message, $subject) = manager_invite_email($myuuid);
             break;
@@ -19,7 +23,7 @@ function send_mail($data)
         default:
             list($message, $subject) = null;
     }
-    if ($message != null) {
+    if ($message != null && $subject != null) {
         //process.env.REACT_APP_STAFF_MOBILE_HOST +
         foreach ($users_result as $id) {
             $wpdb->insert(

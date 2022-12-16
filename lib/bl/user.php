@@ -31,7 +31,7 @@ function create_users_by_email(WP_REST_Request $request)
 {
     global $wpdb, $table_name_users;
     $users = $request["users"];
-
+    error_log("user " . json_encode($users));
     foreach ($users as $user) {
         $userExists = $wpdb->get_results("SELECT user_email FROM $table_name_users WHERE user_email = '{$user["email"]}'");
         if (count($userExists) === 0) {
@@ -58,7 +58,7 @@ function create_users_by_email(WP_REST_Request $request)
                     '%s',
                 )
             );
-            $data = (object) array("email" => $user["email"], "type" => "subscriber");
+            $data = array("email" => $user["email"], "type" => "subscriber");
             send_mail($data);
         } else {
             return "'{$user["email"]}' already exists";
