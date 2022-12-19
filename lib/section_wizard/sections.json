@@ -1,27 +1,23 @@
 {
-    "EventInformation":{
-        "Name":"Event Information",
-        "Description":"",
-        "folder":"eventInformation"
-    },
     "Flights":{
         "Name":"Flights",
-        "Description":"Configure flights here",
+        "Description":"Your team members will be able to see their flight details, airport information and booking references.",
         "folder":"flights"
     },
     "Accommodation":{
         "Name":"Accommodation Information",
-        "Description":"",
+        "Description":"Your team members will be able to see key information about their hotel stay, including check-ins and room types.",
         "folder":"accommodation"
     },
-    "ContactDetails":{
-        "Name":"Contact Details",
-        "Description":"",
-        "folder":"contactDetails"
+    "HireCars":{
+        "Name":"Hire Cars",
+        "Description":"You can display all the information needed to collect and run a hire car, with pre-allocated drivers and passengers.",
+        "folder":"hireCars"
     },
-    "EventCalendar":{
-        "Name":"Event Calendar",
-        "Description":"",
-        "folder":"eventCalendar"
+    "Activities":{
+        "Name":"Activities",
+        "Description":"You can display all the information needed to collect and run a hire car, with pre-allocated drivers and passengers.",
+        "folder":"activities"
     }
+    
 }

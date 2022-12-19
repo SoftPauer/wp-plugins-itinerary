@@ -14,7 +14,7 @@ $table_name_users = $wpdb->prefix . 'users';
 
 function itinerary_install()
 {
-  global $wpdb, $itinerary_db_version, $table_name_users, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values, $table_name_itinerary_data, $table_name_itinerary_channels, $table_name_reporting, $table_name_costings, $table_name_invite_tokens;
+  global $wpdb, $table_name_itinerary, $table_name_sections, $table_name_fields, $table_name_section_values, $table_name_itinerary_data, $table_name_itinerary_channels, $table_name_reporting, $table_name_costings, $table_name_invite_tokens;
   require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
   $charset_collate = $wpdb->get_charset_collate();
@@ -114,7 +114,5 @@ function itinerary_install()
   ) $charset_collate;";
   dbDelta($sql);
 
-  add_option('itinerary_db_version', $itinerary_db_version);
-
-
+  add_option('itinerary_db_version', "1.0");
 }

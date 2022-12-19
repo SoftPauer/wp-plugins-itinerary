@@ -5,37 +5,25 @@
 // %f (float)
 //  Itineraries
 add_action('rest_api_init', function () {
-  register_rest_route(
-    'itinerary/v1',
-    'itineraries',
-    array(
-      'methods' => WP_REST_Server::READABLE,
-      'callback' => 'get_all_itineraries',
+  register_rest_route('itinerary/v1', 'itineraries', array(
+    'methods' => WP_REST_Server::READABLE,
+    'callback' => 'get_all_itineraries',
+  ));
+  register_rest_route('itinerary/v1', 'itineraries/create', array(
+    'methods' => WP_REST_Server::CREATABLE,
+    'callback' => 'REST_create_new_itinerary',
+  ));
+  register_rest_route('itinerary/v1', 'itineraries/delete/(?P<itinerary_id>\d+)', array(
+    'methods' => WP_REST_Server::DELETABLE,
+    'callback' => 'delete_itinerary',
+    'args' => array(
+      'itinerary_id' => array(
+        'validate_callback' => function ($param, $request, $key) {
+          return is_numeric($param);
+        }
+      ),
     )
-  );
-  register_rest_route(
-    'itinerary/v1',
-    'itineraries/create',
-    array(
-      'methods' => WP_REST_Server::CREATABLE,
-      'callback' => 'create_new_itinerary',
-    )
-  );
-  register_rest_route(
-    'itinerary/v1',
-    'itineraries/delete/(?P<itinerary_id>\d+)',
-    array(
-      'methods' => WP_REST_Server::DELETABLE,
-      'callback' => 'delete_itinerary',
-      'args' => array(
-        'itinerary_id' => array(
-          'validate_callback' => function ($param, $request, $key) {
-            return is_numeric($param);
-          }
-        ),
-      )
-    )
-  );
+  ));
 
   //users
   register_rest_route(

@@ -3,7 +3,7 @@
 Plugin Name: Itinerary plugin
 Description: Plugin to control itinerary 
 Author: Andrius Murauskas
-Version: 1.3.58
+Version: 1.4.0
 GitHub Plugin URI: https://github.com/SoftPauer/wp-plugins-itinerary
 */
 require_once __DIR__ . '/lib/rest_api.php';
@@ -22,13 +22,18 @@ require_once __DIR__ . '/lib/bl/config.php';
 require_once __DIR__ . '/lib/bl/wizard.php';
 require_once __DIR__ . '/lib/bl/user.php';
 require_once __DIR__ . '/lib/bl/mail.php';
+require_once __DIR__ . '/lib/services/itinerary.php';
+require_once __DIR__ . '/lib/services/section.php';
+require_once __DIR__ . '/lib/services/value.php';
+
+
+require_once __DIR__ . '/lib/db_updates.php';
 require_once __DIR__ . '/lib/db_creation.php';
 
 
-$itinerary_db_version = '1.0';
+$itinerary_db_version = '1.2';
 
 register_activation_hook(__FILE__, 'activation_function');
-
 
 
 if (!defined('ITINABSPATH')) {
@@ -49,8 +54,8 @@ function update_db_check()
   $current = get_site_option('itinerary_db_version');
   if ($current != $itinerary_db_version) {
     error_log("wp-plugins-itinerary  current db version $current  target $itinerary_db_version ");
-
     error_log("wp-plugins-itinerary  updating db");
+    update_db();
   }
 }
 add_action('plugins_loaded', 'update_db_check');

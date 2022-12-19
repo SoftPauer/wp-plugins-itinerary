@@ -1,29 +1,15 @@
 <?php
-
 /**
  * Create itinerary 
  */
-function create_new_itinerary(WP_REST_Request $request)
+function REST_create_new_itinerary(WP_REST_Request $request)
 {
-  global $wpdb, $table_name_itinerary;
   $body = json_decode($request->get_body());
   //Validate body 
   if (!property_exists($body, "name")) {
     return new WP_Error('400', esc_html__('Missing body parameter name', 'text_domain'), array('status' => 400));
   }
-  return $wpdb->insert(
-    $table_name_itinerary,
-    array(
-      'time_created' => current_time('mysql'),
-      'time_updated' => current_time('mysql'),
-      'name' => $body->name,
-    ),
-    array(
-      '%s',
-      '%s',
-      '%s',
-    )
-  );
+  return create_itinerary($body->name);
 }
 
 /**
