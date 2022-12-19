@@ -7,10 +7,9 @@ function send_mail($data)
     $email = $data['email'];
     $type = $data['type'];
 
-    $users_result = $wpdb->get_results("SELECT ID FROM $table_name_users WHERE user_email = '{$email}'");
+    $users_result = get_user_by("email", $email);
     $myuuid = guidv4();
 
-    error_log($myuuid);
     $subject = "";
     $message = "";
     switch ($type) {
@@ -23,26 +22,22 @@ function send_mail($data)
         default:
             list($message, $subject) = null;
     }
-    if ($message != null && $subject != null) {
-        //process.env.REACT_APP_STAFF_MOBILE_HOST +
-        foreach ($users_result as $id) {
-            $wpdb->insert(
-                $table_name_invite_tokens,
-                array(
-                    'subscriber_id' => $id->ID,
-                    'invitation_token' => $myuuid,
-                    'time_created' => current_time('mysql'),
-                    'accepted' => "pending",
-                ),
-                array(
-                    '%d',
-                    '%s',
-                    '%s',
-                    '%s',
-                )
-            );
-        }
-
+    if ($message != null && $subject != null && $users_result !== false) {
+        $wpdb->insert(
+            $table_name_invite_tokens,
+            array(
+                'subscriber_id' => $users_result->ID,
+                'invitation_token' => $myuuid,
+                'time_created' => current_time('mysql'),
+                'accepted' => "pending",
+            ),
+            array(
+                '%d',
+                '%s',
+                '%s',
+                '%s',
+            )
+        );
         //what do i need, "to" "subject"
         if ($email && $subject && $message) {
             $headers = array('Content-Type: text/html; charset=UTF-8');
@@ -58,8 +53,6 @@ function send_mail($data)
 
 }
 ;
-
-
 
 add_filter('cron_schedules', 'add_cron_interval');
 function add_cron_interval($schedules)
@@ -104,6 +97,8 @@ function guidv4($data = null)
 function subscriber_invite_email($token)
 {
     //TODO subscriber email template
+    $staffHost = "https://" . getenv("STAFF_HOST");
+
     $subject = "Eventr Invite Email";
     $message = "
          <html>
@@ -116,7 +111,7 @@ function subscriber_invite_email($token)
                 <div  className={styles.e1728_19171}></div>
                 <div  className={styles.e1728_19172}></div>
                 <div  className={styles.e1728_19173></div>
-                <span  className={styles.e1728_19174>Hi David,<br> 
+                <span  className={styles.e1728_19174>Hi User,<br> 
                         Congrats on becoming a member of the Eventr family! <br>
                         We cant wait to start helping you manage your teams, but first you need to set up your admin account.<br> 
                         Click the button below continue your journey.
@@ -134,7 +129,7 @@ function subscriber_invite_email($token)
                     <div  className={styles.e1728_19182}></div>
                     <div  className={styles.e1728_19183}></div>
                 </div>
-                <a href='http://localhost:3000/emaillogin/?access_token=" . $token . "'>HERE</a>
+                <a href='$staffHost/emaillogin/?access_token=" . $token . "'>HERE</a>
             </div>
         </body>
         </html>

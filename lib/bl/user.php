@@ -20,44 +20,35 @@ function get_all_users()
 
 function get_user_by_token($data)
 {
-    global $wpdb, $table_name_invite_tokens, $table_name_users;
+    global $wpdb, $table_name_invite_tokens;
     $token = $data["access_token"];
     $token_result = $wpdb->get_results("SELECT subscriber_id FROM $table_name_invite_tokens WHERE invitation_token = '{$token}'");
-    $user_result = $wpdb->get_results("SELECT * FROM $table_name_users WHERE id = '{$token_result[0]->subscriber_id}'");
-    return $user_result[0];
+    $user_result = get_user_by('id', $token_result[0]->subscriber_id);
+    return $user_result;
 }
 
 function create_users_by_email(WP_REST_Request $request)
 {
-    global $wpdb, $table_name_users;
+    global $wpdb;
     $users = $request["users"];
-    error_log("user " . json_encode($users));
     foreach ($users as $user) {
-        $userExists = $wpdb->get_results("SELECT user_email FROM $table_name_users WHERE user_email = '{$user["email"]}'");
-        if (count($userExists) === 0) {
+        $userExists = get_user_by('email', $user["email"]);
+        if ($userExists == false) {
             $userLogin = "";
-            if ($user["user_login"] == null) {
-                $userLogin = substr($user["email"], 0, strpos($user["email"], '@'));
-            } else {
+            if (in_array("user_login", $user)) {
                 $userLogin = $user["user_login"];
+            } else {
+                $userLogin = substr($user["email"], 0, strpos($user["email"], '@'));
             }
-            $password = password_generate(10);
-            $hash = password_hash($password, PASSWORD_DEFAULT);
-            $wpdb->insert(
-                $table_name_users,
-                array(
-                    'user_login' => $userLogin,
-                    'user_pass' => $hash,
-                    'user_email' => $user["email"],
-                    'user_registered' => current_time('mysql'),
-                ),
-                array(
-                    '%s',
-                    '%s',
-                    '%s',
-                    '%s',
-                )
+            $userdata = array(
+                'user_login' => $userLogin,
+                'user_email' => $user["email"],
+                'user_pass' => password_generate(10),
             );
+            $userId= wp_insert_user($userdata);
+            if(gettype($userId)=="object"){
+                return $userId->get_error_message();
+            }
             $data = array("email" => $user["email"], "type" => "subscriber");
             send_mail($data);
         } else {

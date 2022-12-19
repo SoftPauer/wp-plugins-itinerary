@@ -57,7 +57,7 @@ function create_new_section(WP_REST_Request $request)
  */
 function delete_section($data)
 {
-  global $wpdb, $table_name_sections, $table_name_section_values, $table_name_fields;
+  global $wpdb, $table_name_sections, $table_name_section_values, $table_name_fields,$table_name_costings;
   $wpdb->delete(
     $table_name_fields,
     ['section' => $data['section_id']],
