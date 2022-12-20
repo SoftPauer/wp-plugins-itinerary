@@ -43,14 +43,17 @@ function send_mail($data)
             $headers = array('Content-Type: text/html; charset=UTF-8');
             $attachments = [];
             $sent = wp_mail($email, $subject, $message, $headers, $attachments);
-            return $sent;
+            if ($sent) {
+                return ActionResponse::createSuccess("Mail sent successfully ", $email);
+            } else {
+                return ActionResponse::createError("Mail send failed", "send_mail", $email);
+            }
         } else {
-            return "For mail to be sent the following fields are required : to , subject, message";
+            return ActionResponse::createError("For mail to be sent the following fields are required : to , subject, message", "send_mail", $email);
         }
     } else {
-        return "Message type wasn't selected properly";
+        return ActionResponse::createError("Message type wasn't selected properly", "send_mail", $data['email']);
     }
-
 }
 ;
 

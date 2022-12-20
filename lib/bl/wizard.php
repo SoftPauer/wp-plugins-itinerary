@@ -36,15 +36,14 @@ function complete_wizard(WP_REST_Request $request)
 
   $itinCreation = create_itinerary($eventInfo["title"]);
   if ($itinCreation) {
-    array_push($array_result, (object) array("status" => "success", "action" => "Itinerary creation"));
+    array_push($array_result, ActionResponse::createSuccess("Itinerary creation"));
   } else {
-    array_push($array_result, (object) array("status" => "failed", "action" => "Itinerary creation"));
+    array_push($array_result, ActionResponse::createError("Itinerary creation failed ","Itinerary creation"));
   }
 
   $res = array();
   foreach ($sections as $section) {
     try {
-      $res["section"] = $section;
       error_log("Setting up " . $section);
       $sql = file_get_contents(ITINABSPATH . '/lib/section_wizard/' . $json_sections[$section]["folder"] . '/db.sql');
       if ($sql == false) {
@@ -52,24 +51,20 @@ function complete_wizard(WP_REST_Request $request)
         throw new Exception("No db.sql file for section:  " . $section, 1);
       } else {
         $sql_array = explode(";", $sql);
-        $status = "success";
         foreach ($sql_array as $key => $sqls) {
           $sql = trim($sqls);
           if ($sql != "") {
-            if ($wpdb->query($sqls)) {
-              $res["status" . $key] = "success";
-            } else {
-              $status = "failed";
-              $res["status" . $key] = "failed";
+            if ($wpdb->query($sqls) == false) {
+              $res = ActionResponse::createError("Failed sql execution",$section);
+              continue;
             }
           }
         }
-        $res["status"] = $status;
+        $res = ActionResponse::createSuccess($section);
       }
     } catch (\Throwable $e) {
 
-      $res["status"] = "failed";
-      $res["failureReason"] = $e->getMessage();
+      $res = ActionResponse::createError($e->getMessage());
     }
     array_push($array_result, $res);
   }
@@ -97,10 +92,10 @@ function complete_wizard(WP_REST_Request $request)
 
   try {
     create_update_value($value);
-    array_push($array_result, (object) array("status" => "success", "action" => "Update values"));
+    array_push($array_result, ActionResponse::createSuccess("Update values"));
   } catch (\Throwable $th) {
     error_log($th->getMessage()());
-    array_push($array_result, (object) array("status" => "failed", "action" => "Update values"));
+    array_push($array_result,  ActionResponse::createError($th->getMessage()(),"Update values") );
   }
 
   update_app($itin->id);

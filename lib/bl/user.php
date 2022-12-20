@@ -29,7 +29,7 @@ function get_user_by_token($data)
 
 function create_users_by_email(WP_REST_Request $request)
 {
-    global $wpdb;
+    $resp = [];
     $users = $request["users"];
     foreach ($users as $user) {
         $userExists = get_user_by('email', $user["email"]);
@@ -45,17 +45,18 @@ function create_users_by_email(WP_REST_Request $request)
                 'user_email' => $user["email"],
                 'user_pass' => password_generate(10),
             );
-            $userId= wp_insert_user($userdata);
-            if(gettype($userId)=="object"){
-                return $userId->get_error_message();
+            $userId = wp_insert_user($userdata);
+            if (gettype($userId) == "object") {
+                array_push($resp, ActionResponse::createError($userId->get_error_message(), "create_users_by_email", $user["email"]));
+                continue;
             }
             $data = array("email" => $user["email"], "type" => "subscriber");
-            send_mail($data);
+            return send_mail($data);
         } else {
-            return "'{$user["email"]}' already exists";
+            array_push($resp, ActionResponse::createError("Email already exists", "create_users_by_email", $user["email"]));
         }
-
     }
+    return rest_ensure_response($resp);
 }
 
 function password_generate($chars)
