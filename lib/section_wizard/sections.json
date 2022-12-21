@@ -1,23 +1,75 @@
 {
-    "Flights":{
-        "Name":"Flights",
-        "Description":"Your team members will be able to see their flight details, airport information and booking references.",
-        "folder":"flights"
+    "Flights": {
+        "name": "Flights",
+        "description": "Your team members will be able to see their flight details, airport information and booking references.",
+        "folder": "flights",
+        "cards": [
+            {
+                "text": "Add your flight number and departure/arrival details."
+            },
+            {
+                "text": "Allocate seats to your team members, with full flexibility over booking type."
+            },
+            {
+                "text": "Premium users can access auto-filled flight data which automatically updates your flight information, just from the flight number!"
+            },
+            {
+                "text": "Premium users can enable costings throughout their itinerary set-up.",
+                "premium": true
+            }
+        ]
     },
-    "Accommodation":{
-        "Name":"Accommodation Information",
-        "Description":"Your team members will be able to see key information about their hotel stay, including check-ins and room types.",
-        "folder":"accommodation"
+    "Accommodation": {
+        "name": "Accommodation",
+        "description": "Your team members will be able to see key information about their hotel stay, including check-ins and room types.",
+        "folder": "accommodation",
+        "cards": [
+            {
+                "text": "Add your accommodation details, the location and contact information."
+            },
+            {
+                "text": "Allocate room bookings to your team members, with full flexibility over room types, booking types, and check in/out information."
+            },
+            {
+                "text": "Premium users can enable costings throughout their itinerary set-up.",
+                "premium": true
+            }
+        ]
     },
-    "HireCars":{
-        "Name":"Hire Cars",
-        "Description":"You can display all the information needed to collect and run a hire car, with pre-allocated drivers and passengers.",
-        "folder":"hireCars"
+    "HireCars": {
+        "name": "Hire Cars",
+        "description": "You can display all the information needed to collect and run a hire car, with pre-allocated drivers and passengers.",
+        "folder": "hireCars",
+        "cards": [
+            {
+                "text": "Add your hire car bookings and all the key information."
+            },
+            {
+                "text": "Allocate drivers and passengers so your team know exactly where they are supposed to be."
+            },
+            {
+                "text": "Set custom aliases to your hire car bookings to easily keep track."
+            },
+            {
+                "text": "Premium users can enable costings throughout their itinerary set-up.",
+                "premium": true
+            }
+        ]
     },
-    "Activities":{
-        "Name":"Activities",
-        "Description":"You can display all the information needed to collect and run a hire car, with pre-allocated drivers and passengers.",
-        "folder":"activities"
+    "Activities": {
+        "name": "Activities",
+        "description": "You can display all the information needed to collect and run a hire car, with pre-allocated drivers and passengers.",
+        "folder": "activities",
+        "cards": [
+            {
+                "text": "Add your own custom activities to your itinerary."
+            },
+            {
+                "text": "Manage your slots quickly and easily from the event day."
+            },
+            {
+                "text": "Add any additional instructions to keep your team informed."
+            }
+        ]
     }
-    
 }

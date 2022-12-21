@@ -571,7 +571,11 @@ add_action('rest_api_init', function () {
     array(
       'methods' => WP_REST_Server::EDITABLE,
       'callback' => 'create_users_by_email',
-    )
+      'permission_callback' => function () {
+        return current_user_can('eventr_manager');
+      }
+    ),
+    
   );
 
   //Mail

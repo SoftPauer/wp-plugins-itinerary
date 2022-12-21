@@ -12,8 +12,10 @@ function get_wizard()
   foreach ($json_sections as $key => $section) {
     array_push($array_sections, [
       "key" => $key,
-      "sectionName" => $section["Name"],
-      "description" => $section["Description"],
+      "sectionName" => $section["name"],
+      "description" => $section["description"],
+      "cards" => $section["cards"],
+      "backendScreenShot" => get_site_url() . "/wp-content/plugins/wp-plugins-itinerary/lib/section_wizard/" . $section["folder"] . "/backend.png",
       "personalScreenShot" => get_site_url() . "/wp-content/plugins/wp-plugins-itinerary/lib/section_wizard/" . $section["folder"] . "/personalScreenShot.jpg",
       "teamScreenShot" => get_site_url() . "/wp-content/plugins/wp-plugins-itinerary/lib/section_wizard/" . $section["folder"] . "/teamScreenShot.jpg"
     ]);
@@ -38,7 +40,7 @@ function complete_wizard(WP_REST_Request $request)
   if ($itinCreation) {
     array_push($array_result, ActionResponse::createSuccess("Itinerary creation"));
   } else {
-    array_push($array_result, ActionResponse::createError("Itinerary creation failed ","Itinerary creation"));
+    array_push($array_result, ActionResponse::createError("Itinerary creation failed ", "Itinerary creation"));
   }
 
   $res = array();
@@ -55,7 +57,7 @@ function complete_wizard(WP_REST_Request $request)
           $sql = trim($sqls);
           if ($sql != "") {
             if ($wpdb->query($sqls) == false) {
-              $res = ActionResponse::createError("Failed sql execution",$section);
+              $res = ActionResponse::createError("Failed sql execution", $section);
               continue;
             }
           }
@@ -95,7 +97,7 @@ function complete_wizard(WP_REST_Request $request)
     array_push($array_result, ActionResponse::createSuccess("Update values"));
   } catch (\Throwable $th) {
     error_log($th->getMessage()());
-    array_push($array_result,  ActionResponse::createError($th->getMessage()(),"Update values") );
+    array_push($array_result, ActionResponse::createError($th->getMessage()(), "Update values"));
   }
 
   update_app($itin->id);

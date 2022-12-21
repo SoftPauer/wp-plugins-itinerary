@@ -106,9 +106,10 @@ function itinerary_install()
 
   $sql = "CREATE TABLE $table_name_invite_tokens (
     id mediumint(9) NOT NULL AUTO_INCREMENT,
-    subscriber_id bigint(20) unsigned NOT NULL ,
+    subscriber_id bigint(20) unsigned NOT NULL,
     invitation_token text NOT NULL, 
     accepted text NOT NULL,
+    time_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (subscriber_id) REFERENCES wp_users(ID)
   ) $charset_collate;";

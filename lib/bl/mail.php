@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../common.php';
 
 function send_mail($data)
 {
@@ -101,41 +102,363 @@ function subscriber_invite_email($token)
 {
     //TODO subscriber email template
     $staffHost = "https://" . getenv("STAFF_HOST");
+  $currentUser = wp_get_current_user();
+  $invitingUserFirstName = $currentUser->user_firstname;
+  $invitingUserSecondName = $currentUser->user_lastname;
+
 
     $subject = "Eventr Invite Email";
     $message = "
-         <html>
-        <head>
-        <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
-            <title></title>
-        </head>
-        <body>
-            <div class=e1728_19170>
-                <div  className={styles.e1728_19171}></div>
-                <div  className={styles.e1728_19172}></div>
-                <div  className={styles.e1728_19173></div>
-                <span  className={styles.e1728_19174>Hi User,<br> 
-                        Congrats on becoming a member of the Eventr family! <br>
-                        We cant wait to start helping you manage your teams, but first you need to set up your admin account.<br> 
-                        Click the button below continue your journey.
-                </span>
-                <div  calssName={styles.e1728_19175}></div>
-                <div  className={styles.e1728_19176}></div>
-                <div className={styles.e1728_19177}>
-                        <span  className={styles.e1728_19178}>Welcome to Eventr Team!</span>
-                        <span  className={styles.e1728_19179}>You re one step closer to streamlining your events, for good.</span>
-                </div>
-                <div className={styles.e1728_19180}>
-                    <span  className={styles.ei1728_19180_680_2414}>Create an account</span>
-                </div>
-                <div className={styles.e1728_19181}>
-                    <div  className={styles.e1728_19182}></div>
-                    <div  className={styles.e1728_19183}></div>
-                </div>
-                <a href='$staffHost/emaillogin/?access_token=" . $token . "'>HERE</a>
-            </div>
-        </body>
-        </html>
+    <body>
+    <table
+      style='
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        table-layout: fixed;
+      '
+    >
+      <tbody style='text-align: center'>
+        <tr style='display: flex; justify-content: center'>
+          <td style='display: flex; justify-content: center; width: 100%'>
+            <img
+              src='https://eventr.bwtsoftpauer.com/email-images/Header.png'
+              alt='You have been invited to Eventr teams!'
+              style='width: 100%'
+            />
+          </td>
+        </tr>
+        <tr style='display: flex; justify-content: center'>
+          <td style='display: flex; justify-content: center; width: 100%'>
+            <table style='text-align: center; width: 100%'>
+              <tr>
+                <td>
+                  <p style='font-size: 1.2rem'>Hi,</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <p style='font-size: 1.2rem'>
+                    You've been invited to
+                    <b> an event </b> by
+                    <b> $invitingUserFirstName $invitingUserSecondName.</b>
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <p style='font-size: 1.2rem'>Here's your unique login link:</p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <p style='font-size: 1.2rem'>
+                    <a href='$staffHost/emaillogin/?access_token=" . $token . "'><b>HERE </b></a> 
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr style='display: flex; width: 100%'>
+          <td style='display: flex; width: 100%'>
+            <table
+              style='
+                text-align: center;
+                background-color: #f0f5fe;
+                border-radius: 20px;
+                padding: 10px;
+                width: 100%;
+              '
+            >
+              <tr>
+                <td><h2 style='font-size: 2.5rem'>How to get started</h2></td>
+              </tr>
+              <tr>
+                <td>
+                  <p style='font-size: 1.2rem; padding-bottom: 30px'>
+                    We can’t wait to start helping you manage your events, but
+                    first, here are a few helpful tips so you can get started
+                    using Eventr Team.
+                  </p>
+                </td>
+              </tr>
+              <tr style='display:block; width: 100%'>
+                <td
+                  style='
+                  display: inline-block;
+                  width: 30%;
+                  min-width: 300px;
+                  margin: 50px 5% 50px 5%;
+                  '
+                >
+                  <div
+                    style='
+                      height: 300px;
+                      width: 100%;
+                      display: flex;
+                      align-items: center;
+                      background-image: url(https://eventr.bwtsoftpauer.com/email-images/activate.png);
+                      background-repeat: no-repeat;
+                      background-size: contain;
+                      background-position: center;
+                    '
+                  ></div>
+                </td>
+                <td style='display: inline-block;
+                width: 30%;
+                min-width: 300px;'>
+                  <table
+                    style='
+                      display: flex;
+                      justify-content: left;
+                      vertical-align: top;
+                      height: 100%;
+                      width: 100%;
+                      min-width: 300px;
+                      max-width: 500px;
+                    '
+                  >
+                    <tr style='width: 100%'>
+                      <td
+                        style='
+                          font-style: normal;
+                          font-weight: 800;
+                          font-size: 60px;
+                          vertical-align: top;
+                          padding: 0 20px;
+                        '
+                        rowspan='3 '
+                      >
+                        1
+                      </td>
+                      <td style='display: flex; width: 100%; text-align: left'>
+                        <h2 style='font-size: 2rem; margin: 0'>
+                          Activate Your Account
+                        </h2>
+                      </td>
+                    </tr>
+                    <tr style='width: 100%'>
+                      <td>
+                        <p
+                          style='
+                            text-align: left;
+                            margin: none;
+                            font-size: 1.2rem;
+                          '
+                        >
+                          The first step is to activate your account using your
+                          unique login code. This will give you access to your
+                          team and events.
+                        </p>
+                      </td>
+                    </tr>
+                    <tr style='width: 100%'>
+                      <td style='display: flex; width: 100%'>
+                        <a
+                          href='asdf'
+                          style='
+                            background-color: #18b1ab;
+                            color: white;
+                            border-radius: 15px;
+                            padding: 10px;
+                            min-width: 200px;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                          '
+                        >
+                          <h3 style='font-size: 1.5rem; margin: 0'>
+                            Activate your account
+                          </h3>
+                        </a>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr style='padding: 10px 0 10px 0'>
+                <td
+                  style='
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    width: 100%;
+                    overflow-wrap: normal;
+                    overflow: hidden;
+                    flex-wrap: wrap;
+                  '
+                >
+                  <div
+                    style='
+                      height: 300px;
+                      width: 30%;
+                      min-width: 300px;
+                      margin: 50px 5% 50px 5%;
+                      display: flex;
+                      align-items: center;
+                      background-image: url(https://eventr.bwtsoftpauer.com/email-images/details.png);
+                      background-repeat: no-repeat;
+                      background-size: contain;
+                      background-position: center;
+                    '
+                  ></div>
+                  <table
+                    style='
+                      display: flex;
+                      justify-content: left;
+                      vertical-align: top;
+                      height: 100%;
+                      width: 100%;
+                      min-width: 300px;
+                      max-width: 500px;
+                    '
+                  >
+                    <tr>
+                      <td
+                        rowspan='2'
+                        style='
+                          font-style: normal;
+                          font-weight: 800;
+                          font-size: 60px;
+                          vertical-align: top;
+                          padding: 0 20px;
+                        '
+                      >
+                        2
+                      </td>
+                      <td
+                        style='
+                          display: flex;
+                          width: 100%;
+                          text-align: left;
+                          margin-top: none;
+                        '
+                      >
+                        <h2 style='font-size: 2rem; margin: 0'>
+                          Update Your Details
+                        </h2>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <p
+                          style='
+                            text-align: left;
+                            margin: none;
+                            font-size: 1.2rem;
+                          '
+                        >
+                          The second step is to update your details. Choose your
+                          own username and password for added personalisation and
+                          security.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style='
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    width: 100%;
+                    overflow-wrap: normal;
+                    overflow: hidden;
+                    flex-wrap: wrap;
+                  '
+                >
+                  <div
+                    style='
+                      height: 300px;
+                      width: 30%;
+                      min-width: 300px;
+                      margin: 50px 5% 50px 5%;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      background-image: url(https://eventr.bwtsoftpauer.com/email-images/phone.png);
+                      background-repeat: no-repeat;
+                      background-size: contain;
+                      background-position: center;
+                    '
+                  ></div>
+                  <table
+                    style='
+                      display: flex;
+                      justify-content: left;
+                      vertical-align: top;
+                      height: 100%;
+                      width: 100%;
+                      min-width: 300px;
+                      max-width: 500px;
+                    '
+                  >
+                    <tr>
+                      <td
+                        rowspan='3'
+                        style='
+                          font-style: normal;
+                          font-weight: 800;
+                          font-size: 60px;
+                          vertical-align: top;
+                          padding: 0 20px;
+                        '
+                      >
+                        3
+                      </td>
+                      <td colspan='2' style='text-align: left'>
+                        <h2 style='font-size: 2rem; margin: 0'>
+                          Download the Eventr Teams App
+                        </h2>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colspan='2'>
+                        <p style='text-align: left; font-size: 1.2rem'>
+                          The third step is to download the Eventr Teams app. You
+                          can find us on the App Store or Google Play.
+                        </p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style='width: 50%'>App store image</td>
+                      <td style='width: 50%'>Play store image</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr style='display: flex; justify-content: center'>
+          <td style='width: 100%'>
+            <p style='font-size: 1.2rem'>
+              That’s all for now, we’re here if you get stuck or have any
+              questions.
+            </p>
+          </td>
+        </tr>
+        <tr style='display: flex; justify-content: center'>
+          <td style='width: 100%'>
+            <p style='font-size: 1.2rem'>The Eventr team.</p>
+          </td>
+        </tr>
+        <tr style='display: flex; justify-content: center'>
+          <td style='display: flex; justify-content: center; width: 100%'>
+            <img
+              src='https://eventr.bwtsoftpauer.com/email-images/Footer.png'
+              alt='Powered By Soft Pauer. Company number: 09227101. Registered in England and Wales.'
+              style='width: 100%'
+            />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+  
     ";
     return array($message, $subject);
 }

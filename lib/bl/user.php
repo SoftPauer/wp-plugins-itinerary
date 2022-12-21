@@ -51,7 +51,7 @@ function create_users_by_email(WP_REST_Request $request)
                 continue;
             }
             $data = array("email" => $user["email"], "type" => "subscriber");
-            return send_mail($data);
+            array_push($resp,send_mail($data));
         } else {
             array_push($resp, ActionResponse::createError("Email already exists", "create_users_by_email", $user["email"]));
         }
