@@ -31,6 +31,7 @@ function create_users_by_email(WP_REST_Request $request)
 {
     $resp = [];
     $users = $request["users"];
+    $eventTitle = $request["eventTitle"];
     foreach ($users as $user) {
         $userExists = get_user_by('email', $user["email"]);
         if ($userExists == false) {
@@ -50,8 +51,8 @@ function create_users_by_email(WP_REST_Request $request)
                 array_push($resp, ActionResponse::createError($userId->get_error_message(), "create_users_by_email", $user["email"]));
                 continue;
             }
-            $data = array("email" => $user["email"], "type" => "subscriber");
-            array_push($resp,send_mail($data));
+            $data = array("email" => $user["email"], "type" => "subscriber", "eventTitle" => $eventTitle);
+            array_push($resp, send_mail($data));
         } else {
             array_push($resp, ActionResponse::createError("Email already exists", "create_users_by_email", $user["email"]));
         }
