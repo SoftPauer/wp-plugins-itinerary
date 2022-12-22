@@ -3,10 +3,11 @@ require_once __DIR__ . '/../common.php';
 
 function send_mail($data)
 {
-    global $wpdb, $table_name_users, $table_name_invite_tokens;
+    global $wpdb, $table_name_invite_tokens;
 
     $email = $data['email'];
     $type = $data['type'];
+    $eventTitle = $data['eventTitle'];
 
     $users_result = get_user_by("email", $email);
     $myuuid = guidv4();
@@ -18,7 +19,7 @@ function send_mail($data)
             list($message, $subject) = manager_invite_email($myuuid);
             break;
         case "subscriber":
-            list($message, $subject) = subscriber_invite_email($myuuid);
+            list($message, $subject) = subscriber_invite_email($myuuid,$eventTitle );
             break;
         default:
             list($message, $subject) = null;
@@ -98,13 +99,16 @@ function guidv4($data = null)
     return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
 }
 
-function subscriber_invite_email($token)
+function subscriber_invite_email($token,$eventTitle)
 {
     //TODO subscriber email template
     $staffHost = "https://" . getenv("STAFF_HOST");
   $currentUser = wp_get_current_user();
   $invitingUserFirstName = $currentUser->user_firstname;
   $invitingUserSecondName = $currentUser->user_lastname;
+  if(empty($eventTitle)){
+    $eventTitle = "an Event";
+  }
 
 
     $subject = "Eventr Invite Email";
@@ -140,20 +144,8 @@ function subscriber_invite_email($token)
                 <td>
                   <p style='font-size: 1.2rem'>
                     You've been invited to
-                    <b> an event </b> by
+                    <b> $eventTitle </b> by
                     <b> $invitingUserFirstName $invitingUserSecondName.</b>
-                  </p>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <p style='font-size: 1.2rem'>Here's your unique login link:</p>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <p style='font-size: 1.2rem'>
-                    <a href='$staffHost/emaillogin/?access_token=" . $token . "'><b>HERE </b></a> 
                   </p>
                 </td>
               </tr>
@@ -247,8 +239,7 @@ function subscriber_invite_email($token)
                             font-size: 1.2rem;
                           '
                         >
-                          The first step is to activate your account using your
-                          unique login code. This will give you access to your
+                          The first step is to activate your account. This will give you access to your
                           team and events.
                         </p>
                       </td>
@@ -256,7 +247,7 @@ function subscriber_invite_email($token)
                     <tr style='width: 100%'>
                       <td style='display: flex; width: 100%'>
                         <a
-                          href='asdf'
+                          href='$staffHost/emaillogin/?access_token=" . $token . "'
                           style='
                             background-color: #18b1ab;
                             color: white;
