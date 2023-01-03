@@ -155,13 +155,6 @@ function subscriber_invite_email($token, $eventTitle)
                 <p style='font-size: 1.5rem'>Here's your unique login code:</p>
               </td>
             </tr>
-            <tr>
-              <td>
-                <p style='font-size: 1.5rem'>
-                  <b> {login code} ajdfghlkajdfvjbaduir </b>
-                </p>
-              </td>
-            </tr>
           </table>
         </td>
       </tr>
