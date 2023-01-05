@@ -2,12 +2,6 @@ INSERT INTO `wp_itinerary_sections` (`id`, `time_created`, `time_updated`, `prop
 (8, '2021-10-28 10:16:13', '2021-10-28 10:16:13', '{\"jsonName\":\"eventCalendar\"}', 'Activities');
 
 INSERT INTO `wp_itinerary_fields` (`id`, `section`, `position`, `field_type`, `field_name`, `parent`, `type_properties`) VALUES
-(62, 8, 0, 'list', 'times', NULL, '{\"key_fields\":[]}'),
-(63, 8, 0, 'list', 'Race Times', 62, '{\"json_key\":\"raceTimes\",\"key_fields\":[\"65\"]}'),
-(64, 8, 1, 'text', 'GarageNumbers', 62, '{\"json_key\":\"garageNumbers\"}'),
-(65, 8, 0, 'text', 'Event Name', 63, '{\"json_key\":\"eventName\"}'),
-(66, 8, 1, 'text', 'Event Day', 63, '{\"json_key\":\"eventDay\"}'),
-(67, 8, 2, 'text', 'Event Time', 63, '{\"json_key\":\"eventTime\"}'),
 (203, 8, 1, 'text', 'Event Banner', NULL, '{\"json_key\":\"eventBanner\"}'),
 (204, 8, 2, 'list', 'Event Day', NULL, '{\"json_key\":\"eventDays\",\"key_fields\":[\"205\"]}'),
 (205, 8, 0, 'text', 'Day', 204, '{\"json_key\":\"day\"}'),

@@ -20,6 +20,5 @@ INSERT INTO `wp_itinerary_fields` (`id`, `section`, `position`, `field_type`, `f
 (40, 3, 1, 'date', 'Check Out', 36, '{\"json_key\":\"checkOut\"}'),
 (77, 3, 2, 'text', 'Comments', 36, '{\"json_key\":\"comments\"}'),
 (107, 3, 2, 'text', 'Second Guest', 36, '{\"json_key\":\"second_guest\",\"data_source\":\"users\"}'),
-(108, 3, 3, 'text', 'Hire Car', 36, '{\"json_key\":\"hireCars\"}'),
 (110, 3, 6, 'costingTable', 'Costing table', 25, '{\"json_key\":\"costingTable\",\"data_source\":\"element\",\"data_source_properties\":{\"source\":\"37\"}}');
 
